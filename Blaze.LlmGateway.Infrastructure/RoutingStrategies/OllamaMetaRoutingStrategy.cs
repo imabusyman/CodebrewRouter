@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Blaze.LlmGateway.Core;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
+
+namespace Blaze.LlmGateway.Infrastructure.RoutingStrategies;
+
+/// <summary>
+/// Meta-routing strategy that delegates routing decisions to the Ollama "router" model.
+/// Sends the incoming prompt to the router model asking it to classify which provider should handle it.
+/// Falls back to <see cref="KeywordRoutingStrategy"/> on any failure.
+/// </summary>
+public class OllamaMetaRoutingStrategy(
+    IChatClient routerClient,
+    IRoutingStrategy fallbackStrategy,
+    ILogger<OllamaMetaRoutingStrategy> logger) : IRoutingStrategy
+{
+    private static readonly string[] ValidDestinations = Enum.GetNames<RouteDestination>();
+
+    private static readonly string SystemPrompt = $"""
+        You are a request router. Based on the user's message, decide which AI provider should handle it.
+        Respond with ONLY one of these exact words (no punctuation, no explanation):
+        {string.Join(", ", Enum.GetNames<RouteDestination>())}
+
+        Routing guidelines:
+        - AzureFoundry: enterprise/business tasks, Office 365, Azure-specific questions
+        - Ollama: local/private tasks, coding assistance, general chat
+        - OllamaBackup: if primary Ollama is unavailable or for less critical tasks
+        - GithubCopilot: code generation, debugging, GitHub-related tasks
+        - Gemini: multimodal tasks, Google services, search-oriented questions
+        - OpenRouter: creative writing, open-source model tasks, Qwen/general AI queries
+        """;
+
+    public async Task<RouteDestination> ResolveAsync(IEnumerable<ChatMessage> messages, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var lastUserMessage = messages.LastOrDefault(m => m.Role == ChatRole.User)?.Text ?? "";
+            if (string.IsNullOrWhiteSpace(lastUserMessage))
+                return await fallbackStrategy.ResolveAsync(messages, cancellationToken);
+
+            var routingMessages = new[]
+            {
+                new ChatMessage(ChatRole.System, SystemPrompt),
+                new ChatMessage(ChatRole.User, lastUserMessage)
+            };
+
+            var routingOptions = new ChatOptions { MaxOutputTokens = 10, Temperature = 0f };
+            var response = await routerClient.GetResponseAsync(routingMessages, routingOptions, cancellationToken);
+            var responseText = response.Text?.Trim() ?? "";
+
+            if (Enum.TryParse<RouteDestination>(responseText, ignoreCase: true, out var destination))
+            {
+                logger.LogInformation("Meta-router selected destination: {Destination}", destination);
+                return destination;
+            }
+
+            // Try to find a match within the response text
+            var match = ValidDestinations.FirstOrDefault(d => responseText.Contains(d, StringComparison.OrdinalIgnoreCase));
+            if (match != null && Enum.TryParse<RouteDestination>(match, out var matched))
+            {
+                logger.LogInformation("Meta-router (partial match) selected destination: {Destination}", matched);
+                return matched;
+            }
+
+            logger.LogWarning("Meta-router returned unrecognized destination: '{Response}'. Falling back.", responseText);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Meta-router call failed. Falling back to keyword strategy.");
+        }
+
+        return await fallbackStrategy.ResolveAsync(messages, cancellationToken);
+    }
+}

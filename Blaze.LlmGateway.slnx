@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="Blaze.LlmGateway.Api/Blaze.LlmGateway.Api.csproj" />
+  <Project Path="Blaze.LlmGateway.AppHost/Blaze.LlmGateway.AppHost.csproj" />
+  <Project Path="Blaze.LlmGateway.Benchmarks/Blaze.LlmGateway.Benchmarks.csproj" />
+  <Project Path="Blaze.LlmGateway.ConsoleClient/Blaze.LlmGateway.ConsoleClient.csproj" />
+  <Project Path="Blaze.LlmGateway.Core/Blaze.LlmGateway.Core.csproj" />
+  <Project Path="Blaze.LlmGateway.Infrastructure/Blaze.LlmGateway.Infrastructure.csproj" />
+  <Project Path="Blaze.LlmGateway.ServiceDefaults/Blaze.LlmGateway.ServiceDefaults.csproj" />
+  <Project Path="Blaze.LlmGateway.Tests/Blaze.LlmGateway.Tests.csproj" />
+</Solution>

@@ -1,0 +1,21 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.3.0-preview.1.26156.8">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Blaze.LlmGateway.Api\Blaze.LlmGateway.Api.csproj" />
+    <ProjectReference Include="..\Blaze.LlmGateway.ConsoleClient\Blaze.LlmGateway.ConsoleClient.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Azure.AIFoundry" Version="13.1.0-preview.1.25616.3" />
+    <PackageReference Include="Aspire.Hosting.GitHub.Models" Version="13.1.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>c332e6d9-60a4-4174-a2b5-b601f9dc0d06</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
