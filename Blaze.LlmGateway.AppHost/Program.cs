@@ -6,6 +6,7 @@
 //   dotnet user-secrets set "Parameters:github-copilot-api-key"   "<token>" --project Blaze.LlmGateway.AppHost
 //   dotnet user-secrets set "Parameters:gemini-api-key"           "<key>"   --project Blaze.LlmGateway.AppHost
 //   dotnet user-secrets set "Parameters:openrouter-api-key"       "<key>"   --project Blaze.LlmGateway.AppHost
+//   dotnet user-secrets set "Parameters:syncfusion-license-key"   "<key>"   --project Blaze.LlmGateway.AppHost
 //
 // GitHub Models PAT (models:read scope) — stored automatically as "gh-gpt4o-mini-gh-apikey":
 //   dotnet user-secrets set "Parameters:github-models-api-key"    "<PAT>"   --project Blaze.LlmGateway.AppHost
@@ -25,6 +26,7 @@ var githubCopilotApiKey   = builder.AddParameter("github-copilot-api-key", secre
 var geminiApiKey          = builder.AddParameter("gemini-api-key",         secret: true);
 var openRouterApiKey      = builder.AddParameter("openrouter-api-key",     secret: true);
 var githubModelsApiKey    = builder.AddParameter("github-models-api-key",  secret: true);
+var syncfusionLicenseKey  = builder.AddParameter("syncfusion-license-key", secret: true);
 
 // ── Azure Foundry Local (runs Foundry Local as an Aspire-managed resource) ──
 var aiFoundry = builder.AddAzureAIFoundry("ai-foundry").RunAsFoundryLocal();
@@ -53,7 +55,9 @@ var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
     .WithEnvironment("LlmGateway__Providers__OpenRouter__ApiKey",     openRouterApiKey)
     .WithEnvironment("LlmGateway__Providers__GithubModels__ApiKey",   githubModelsApiKey);
 
-builder.AddProject<Projects.Blaze_LlmGateway_ConsoleClient>("console-client")
-    .WithReference(api);
+// ── Web project ──
+builder.AddProject<Projects.Blaze_LlmGateway_Web>("web")
+    .WithReference(api)
+    .WithEnvironment("Syncfusion__LicenseKey", syncfusionLicenseKey);
 
 builder.Build().Run();

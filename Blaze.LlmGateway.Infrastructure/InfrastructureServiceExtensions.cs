@@ -8,6 +8,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OllamaSharp;
 using OpenAI;
 using System.ClientModel;
 
@@ -32,7 +33,7 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("Ollama", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.Ollama;
-            return new OllamaChatClient(new Uri(opts.BaseUrl), opts.Model)
+            return ((IChatClient)new OllamaApiClient(new Uri(opts.BaseUrl), opts.Model))
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 
@@ -40,7 +41,7 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("OllamaBackup", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaBackup;
-            return new OllamaChatClient(new Uri(opts.BaseUrl), opts.Model)
+            return ((IChatClient)new OllamaApiClient(new Uri(opts.BaseUrl), opts.Model))
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 
@@ -100,7 +101,7 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("OllamaLocal", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaLocal;
-            return new OllamaChatClient(new Uri(opts.BaseUrl), opts.Model)
+            return ((IChatClient)new OllamaApiClient(new Uri(opts.BaseUrl), opts.Model))
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 

@@ -28,6 +28,20 @@ dotnet run --project Blaze.LlmGateway.AppHost
 dotnet run --project Blaze.LlmGateway.Benchmarks --configuration Release
 ```
 
+## Local Development Secrets
+
+All provider credentials are injected via Aspire parameters. Set them once on the AppHost project:
+
+```bash
+dotnet user-secrets set "Parameters:azure-foundry-endpoint"  "<https://your-resource.openai.azure.com/>" --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:azure-foundry-api-key"   "<key>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:github-copilot-api-key"  "<token>" --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:gemini-api-key"          "<key>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:openrouter-api-key"      "<key>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:github-models-api-key"   "<PAT>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:syncfusion-license-key"  "<key>"   --project Blaze.LlmGateway.AppHost
+```
+
 ## Architecture
 
 ### Project Responsibilities
@@ -37,7 +51,8 @@ dotnet run --project Blaze.LlmGateway.Benchmarks --configuration Release
 | `Core` | Domain types only — `RouteDestination` enum, `LlmGatewayOptions` config classes. Zero external deps. |
 | `Infrastructure` | Routing middleware, MCP integration, routing strategies. All MEAI pipeline components live here. |
 | `Api` | `Program.cs` wires DI, registers providers via extension methods, exposes the SSE endpoint. |
-| `AppHost` | .NET Aspire orchestration — provisions Ollama container, GitHub Models, Azure Foundry Local. |
+| `Web` | Blazor Server frontend using Syncfusion components. References the API via Aspire service discovery. |
+| `AppHost` | .NET Aspire orchestration — provisions Ollama container, GitHub Models, Azure Foundry Local, and wires secrets as environment variables. |
 | `ServiceDefaults` | Shared Aspire conventions — OpenTelemetry, HTTP resilience, service discovery. |
 | `Tests` | xUnit + Moq unit tests. 95% coverage target. |
 | `Benchmarks` | BenchmarkDotNet for provider latency and routing overhead. |
@@ -45,11 +60,12 @@ dotnet run --project Blaze.LlmGateway.Benchmarks --configuration Release
 ### MEAI Middleware Pipeline (outermost → innermost)
 
 ```
-LlmRoutingChatClient          ← resolves target provider via IRoutingStrategy
-  └── McpToolDelegatingClient ← injects MCP tools into ChatOptions
-        └── FunctionInvokingChatClient (.UseFunctionInvocation())
-              └── [Keyed IChatClient]   ← actual provider
+McpToolDelegatingClient       ← injects MCP tools into ChatOptions (unkeyed IChatClient)
+  └── LlmRoutingChatClient    ← resolves target provider via IRoutingStrategy
+        └── [Keyed IChatClient].UseFunctionInvocation()  ← per-provider, actual model call
 ```
+
+`FunctionInvokingChatClient` is registered individually on each keyed provider via `.AsBuilder().UseFunctionInvocation().Build()`, not as a shared pipeline layer. The unkeyed `IChatClient` registered in `AddLlmInfrastructure` is the `McpToolDelegatingClient` wrapping `LlmRoutingChatClient`.
 
 New middleware must inherit from `DelegatingChatClient` — never implement `IChatClient` directly.
 
@@ -72,7 +88,7 @@ SDK mappings (must be followed exactly):
 
 1. **MEAI is the law.** Never use raw `HttpClient` for LLM calls. Always use `IChatClient`, `ChatMessage`, `ChatOptions`, `ChatRole` from `Microsoft.Extensions.AI`.
 2. **MCP tool execution** is handled entirely by MEAI's `FunctionInvokingChatClient`. Never write custom tool-calling loops.
-3. **Streaming by default.** The `/v1/chat/completions` endpoint must use `CompleteStreamingAsync` and SSE.
+3. **Streaming by default.** The `/v1/chat/completions` endpoint must use `GetStreamingResponseAsync` (the current MEAI API) and SSE. The old `CompleteAsync`/`CompleteStreamingAsync` names no longer exist.
 4. **Keyed DI** for all provider resolution. Use `IServiceProvider.GetKeyedService<IChatClient>("ProviderName")` inside router middleware.
 5. **Keep `Program.cs` clean.** Extract DI setup into extension methods.
 6. **Code style:** Primary constructors, collection expressions (`[]`), nullable reference types enabled, `CancellationToken` propagated throughout.
@@ -84,3 +100,4 @@ SDK mappings (must be followed exactly):
 - `LlmRoutingChatClient` and `McpToolDelegatingClient` — should inherit `DelegatingChatClient` (currently implement `IChatClient` directly).
 - No circuit breaker — most pressing resilience gap.
 - Streaming failover — mid-stream failure handling not yet implemented.
+- `Blaze.LlmGateway.Web` — Blazor frontend scaffolded but not yet connected to the API (no HTTP client or chat UI wired up).
