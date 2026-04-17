@@ -1,0 +1,48 @@
+kind: workflow
+trigger:
+  kind: OnConversationStart
+  id: trigger_wf
+  actions:
+    - kind: SetVariable
+      id: action-1763742724000
+      variable: Local.LatestMessage
+      value: =UserMessage(System.LastMessageText)
+    - kind: InvokeAzureAgent
+      id: action-1763736666888
+      agent:
+        name: HiringManager
+      input:
+        messages: =System.LastMessage
+      output:
+        autoSend: true
+        messages: Local.LatestMessage
+    - kind: Question
+      variable: Local.Input
+      id: action-1763737142539
+      entity: StringPrebuiltEntity
+      skipQuestionMode: SkipOnFirstExecutionIfVariableHasValue
+      prompt: Boss, can you confirm this ?
+    - kind: ConditionGroup
+      conditions:
+        - condition: =Local.Input="Yes"
+          actions:
+            - kind: InvokeAzureAgent
+              id: action-1763744279421
+              agent:
+                name: ApplyAgent
+              input:
+                messages: =Local.LatestMessage
+              output:
+                autoSend: true
+                messages: Local.LatestMessage
+            - kind: EndConversation
+              id: action-1763740066007
+          id: if-action-1763736954795-0
+      id: action-1763736954795
+      elseActions:
+        - kind: GotoAction
+          actionId: action-1763736666888
+          id: action-1763737425562
+id: ""
+name: HRDotNETDemo
+description: ""

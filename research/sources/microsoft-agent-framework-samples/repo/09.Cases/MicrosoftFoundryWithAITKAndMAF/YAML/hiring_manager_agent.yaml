@@ -1,0 +1,18 @@
+metadata: {}
+object: agent.version
+id: ApplyAgent:1
+name: ApplyAgent
+version: "1"
+description: ""
+created_at: 1763744202
+definition:
+  kind: prompt
+  model: gpt-4.1-mini
+  instructions: You are a Python applicant, answering questions  from input posed by the Hiring Manager. You should provide an answer each time the Hiring Manager asks you a question and return it in JSON format as {"Answer":"...."}
+  temperature: 0.7
+  top_p: 1
+  tools: []
+  text:
+    format:
+      type: text
+    verbosity: null
