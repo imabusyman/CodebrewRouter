@@ -36,61 +36,88 @@ dotnet run --project Blaze.LlmGateway.Benchmarks --configuration Release
 
 ## High-level architecture
 
-Blaze.LlmGateway is a .NET 10 LLM routing proxy built around `Microsoft.Extensions.AI` (MEAI). The API project exposes an OpenAI-compatible `POST /v1/chat/completions` endpoint and streams Server-Sent Events via `IChatClient.GetStreamingResponseAsync(...)`.
-
-**Project responsibilities:**
+Blaze.LlmGateway is a .NET 10 LLM routing proxy built around `Microsoft.Extensions.AI` (MEAI). `Blaze.LlmGateway.Api` exposes an OpenAI-compatible `POST /v1/chat/completions` endpoint that converts the request body into `ChatMessage` instances, streams responses with `IChatClient.GetStreamingResponseAsync(...)`, and always terminates the SSE stream with `data: [DONE]`.
 
 | Project | Role |
 |---|---|
-| `Core` | Domain types only — `RouteDestination` enum, `LlmGatewayOptions` config. Zero external deps. |
-| `Infrastructure` | Provider registrations, routing middleware (`LlmRoutingChatClient`), MCP integration, routing strategies. All MEAI pipeline components live here. |
-| `Api` | `Program.cs` wires DI via extension methods, registers the MCP hosted service, and hosts the SSE streaming endpoint. |
-| `AppHost` | Aspire orchestrator — provisions Ollama container and GitHub Models, injects secrets as `LlmGateway__Providers__...` env vars. |
-| `ServiceDefaults` | Shared Aspire conventions — OpenTelemetry, HTTP resilience, service discovery. |
-| `Tests` | xUnit + Moq. 95% coverage target. |
-| `Benchmarks` | BenchmarkDotNet for provider latency and routing overhead. |
+| `Blaze.LlmGateway.Core` | Domain types and configuration objects, especially `RouteDestination` and `LlmGatewayOptions`. |
+| `Blaze.LlmGateway.Infrastructure` | Provider registrations, routing middleware, MCP integration, and routing strategies. |
+| `Blaze.LlmGateway.Api` | Minimal API host that wires `LlmGatewayOptions`, MCP server config, provider registration, and the streaming endpoint. |
+| `Blaze.LlmGateway.AppHost` | Aspire orchestrator that provisions Foundry Local, GitHub Models, and a local Ollama container, then injects configuration into the API and Web projects. |
+| `Blaze.LlmGateway.ServiceDefaults` | Shared Aspire defaults for telemetry, resilience, health checks, and service discovery. |
+| `Blaze.LlmGateway.Web` | Blazor Server UI using Syncfusion; currently scaffolded and referenced by AppHost, but not connected to the API yet. |
+| `Blaze.LlmGateway.Tests` | xUnit + Moq coverage for routing, strategy behavior, and API integration points. |
+| `Blaze.LlmGateway.Benchmarks` | BenchmarkDotNet harness for latency and routing-overhead measurements. |
 
-**MEAI middleware pipeline (outermost → innermost):**
+### Request pipeline
+
+The unkeyed `IChatClient` is assembled in `Blaze.LlmGateway.Infrastructure\InfrastructureServiceExtensions.cs` as:
 
 ```text
-McpToolDelegatingClient          ← unkeyed IChatClient; injects MCP tools into ChatOptions
-  └── LlmRoutingChatClient       ← resolves RouteDestination via IRoutingStrategy
-        └── [Keyed IChatClient].UseFunctionInvocation()   ← per-provider, actual model call
+McpToolDelegatingClient
+  -> LlmRoutingChatClient
+       -> keyed provider client wrapped with .AsBuilder().UseFunctionInvocation().Build()
 ```
 
-`AddLlmInfrastructure()` assembles this pipeline. `AddLlmProviders()` registers the 9 keyed provider clients. Both live in `InfrastructureServiceExtensions`.
+- `AddLlmProviders()` registers 9 keyed provider clients.
+- `AddLlmInfrastructure()` registers `KeywordRoutingStrategy`, wraps it with `OllamaMetaRoutingStrategy`, then builds the unkeyed `IChatClient` used by the API.
+- MCP tool injection happens before routing reaches the selected provider.
+- MEAI function invocation is attached per provider, not once at the outer pipeline.
 
-**Two-stage routing:**
+### Routing model
 
-1. `OllamaMetaRoutingStrategy` sends the last user message to the keyed `"Ollama"` client with `MaxOutputTokens = 10, Temperature = 0` and parses the response as a `RouteDestination` enum name (exact match first, then substring scan).
-2. On any failure or unrecognized response, falls back to `KeywordRoutingStrategy`, which defaults to `AzureFoundry`.
+Routing is two-stage:
 
-**Configuration:** `LlmGatewayOptions` is bound from the `"LlmGateway"` config section (`LlmGatewayOptions.SectionName`). All provider settings (API keys, endpoints, model names) live under `LlmGateway:Providers:<ProviderName>`. `RoutingOptions.RouterModel` (default: `"router"`) and `RoutingOptions.FallbackDestination` are also configurable.
+1. `OllamaMetaRoutingStrategy` sends the last user message to the keyed `"Ollama"` client with `MaxOutputTokens = 10` and `Temperature = 0`.
+2. It expects a `RouteDestination` enum name, tries exact parsing first, then substring matching.
+3. Any failure or unrecognized response falls back to `KeywordRoutingStrategy`.
+4. `KeywordRoutingStrategy` defaults to `AzureFoundry` when no provider-specific hint is found.
 
-**MCP:** `McpConnectionManager` is registered as both an `IHostedService` and a directly resolved singleton (via `sp.GetServices<IHostedService>().OfType<McpConnectionManager>().First()`). The `microsoft-learn` MCP server is wired in `Program.cs` via `npx -y @microsoft/mcp-server-microsoft-learn` (Stdio transport).
+The routing prompt currently biases providers this way:
+- `AzureFoundry` — enterprise/business, Office 365, Azure-specific work
+- `Ollama` — local/private tasks, coding help, general chat
+- `OllamaBackup` — lower-priority or backup Ollama traffic
+- `GithubCopilot` — code generation, debugging, GitHub-related tasks
+- `Gemini` — multimodal, Google-service, and search-oriented tasks
+- `OpenRouter` — creative writing, open-source model tasks, Qwen/general AI queries
+
+### Provider and environment wiring
+
+- Provider settings bind from the `LlmGateway` configuration section.
+- AppHost injects provider settings as `LlmGateway__Providers__...` environment variables.
+- Secrets are stored on `Blaze.LlmGateway.AppHost`, not the API project.
+- `AppHost` provisions:
+  - Azure AI Foundry Local via `AddAzureAIFoundry(...).RunAsFoundryLocal()`
+  - GitHub Models via `AddGitHubModel(...)`
+  - a local Ollama container via `AddContainer("ollama-local", "ollama/ollama")`
+
+### MCP integration
+
+- `Program.cs` registers MCP servers as `IEnumerable<McpConnectionConfig>`.
+- `McpConnectionManager` is registered both as a hosted service and as a singleton accessor resolved from `IHostedService`.
+- The default configured MCP server is `microsoft-learn`, started through `npx -y @microsoft/mcp-server-microsoft-learn`.
+- `McpToolDelegatingClient` appends cached tools to `ChatOptions.Tools` before forwarding requests downstream.
 
 ## Key conventions
 
-- Use `Microsoft.Extensions.AI` abstractions for all LLM work — `IChatClient`, `ChatMessage`, `ChatOptions`, `ChatRole`. No raw `HttpClient` to LLM APIs.
-- New pipeline middleware must inherit from `DelegatingChatClient`. **Note:** `LlmRoutingChatClient` and `McpToolDelegatingClient` currently implement `IChatClient` directly — this is a known gap; refactor when touching those files.
-- Resolve providers via keyed DI: `serviceProvider.GetKeyedService<IChatClient>(destination.ToString())`. Provider keys must exactly match `RouteDestination` enum names.
-- Keep `Program.cs` clean — all DI logic belongs in extension methods in `Infrastructure`.
-- Each keyed provider is individually wrapped with `.AsBuilder().UseFunctionInvocation().Build()`. Function invocation is per-provider, not a shared pipeline layer.
-- Provider SDK mappings (must be followed exactly):
-  - `AzureFoundry` / `FoundryLocal` → `AzureOpenAIClient` → `.GetChatClient(model).AsIChatClient()`. `AzureFoundry` uses `DefaultAzureCredential` when `ApiKey` is absent; `FoundryLocal` uses `"notneeded"` as the API key.
-  - `Ollama` / `OllamaBackup` / `OllamaLocal` → `OllamaApiClient` (cast to `IChatClient`) → `.AsBuilder().UseFunctionInvocation().Build()`
-  - `GithubCopilot` / `GithubModels` / `OpenRouter` → `OpenAIClient` with custom `Endpoint` → `.GetChatClient(model).AsIChatClient()`
-  - `Gemini` → `Google.GenAI.Client` → `.AsIChatClient(model)`
-- The streaming endpoint must emit SSE chunks and a final `data: [DONE]\n\n` line. Use `GetStreamingResponseAsync` (current MEAI API — `CompleteAsync`/`CompleteStreamingAsync` no longer exist).
-- All secrets are set on `Blaze.LlmGateway.AppHost` via `dotnet user-secrets`, not the API project. Keys: `Parameters:azure-foundry-endpoint`, `Parameters:azure-foundry-api-key`, `Parameters:github-copilot-api-key`, `Parameters:gemini-api-key`, `Parameters:openrouter-api-key`, `Parameters:github-models-api-key`, `Parameters:syncfusion-license-key`.
-- Use `Blaze.LlmGateway.ServiceDefaults` shared extensions for host setup (OpenTelemetry, resilience, health checks) instead of duplicating.
-- Code style: primary constructors, collection expressions (`[]`), nullable reference types enabled, `CancellationToken` propagated throughout.
+- Use `Microsoft.Extensions.AI` primitives for all model interactions: `IChatClient`, `ChatMessage`, `ChatOptions`, and `ChatRole`.
+- Resolve providers by keyed DI using the `RouteDestination` enum name string. If you add a destination, keep enum values, DI keys, and router output text aligned.
+- Keep provider registration and pipeline construction in `InfrastructureServiceExtensions`; `Program.cs` should stay minimal.
+- Every keyed provider client is wrapped with `.AsBuilder().UseFunctionInvocation().Build()` individually.
+- Follow the existing provider SDK mapping:
+  - `AzureFoundry` and `FoundryLocal` use `AzureOpenAIClient`
+  - `Ollama`, `OllamaBackup`, and `OllamaLocal` use `OllamaApiClient`
+  - `GithubCopilot`, `GithubModels`, and `OpenRouter` use `OpenAIClient` with custom endpoints
+  - `Gemini` uses `Google.GenAI.Client`
+- The streaming endpoint is SSE-only and must keep the OpenAI-compatible chunk shape plus the final `data: [DONE]` terminator.
+- Current MEAI usage is `GetResponseAsync(...)` and `GetStreamingResponseAsync(...)`; avoid older `CompleteAsync` / `CompleteStreamingAsync` APIs that appear in older docs.
+- Tests in this repo mock `IChatClient.GetResponseAsync(...)` and use `FullyQualifiedName~...` filters for targeted execution.
+- Code style already leans on primary constructors, collection expressions (`[]`), nullable reference types, and end-to-end `CancellationToken` propagation.
 
 ## Known implementation gaps
 
-- `LlmRoutingChatClient` and `McpToolDelegatingClient` implement `IChatClient` directly instead of inheriting `DelegatingChatClient` — refactor when touching these files.
-- `McpConnectionManager.StartAsync()` is a placeholder — MCP tool connections not fully wired.
-- `McpToolDelegatingClient.AppendMcpTools` needs full mapping to `HostedMcpServerTool` instances.
-- No circuit breaker — most pressing resilience gap.
-- Streaming failover — mid-stream failure handling not implemented.
-- `Blaze.LlmGateway.Web` — Blazor frontend scaffolded but not yet connected to the API.
+- `LlmRoutingChatClient` still implements `IChatClient` directly instead of inheriting `DelegatingChatClient`.
+- `McpConnectionManager.StartAsync()` is still a placeholder and MCP connectivity is only partially wired.
+- `McpToolDelegatingClient.AppendMcpTools(...)` appends cached tools directly and does not yet map to richer hosted MCP tool abstractions.
+- `Blaze.LlmGateway.Web` is scaffolded but not yet connected to the API.
+- Circuit breaking and mid-stream failover are not implemented yet.
