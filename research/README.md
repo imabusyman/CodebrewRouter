@@ -1,6 +1,6 @@
 # Research archive
 
-The `research\` folder contains self-contained research reports and their mirrored source material.
+The `research\` folder contains self-contained research reports and, when needed, mirrored source material.
 
 ## Layout
 
@@ -12,7 +12,6 @@ The `research\` folder contains self-contained research reports and their mirror
 - `https-github-com-n8n-io-self-hosted-ai-starter-kit.md`
 - `sources\`
   - `github-copilot-sdk\repo\...`
-  - `github-awesome-copilot\repo\...`
   - `berriai-litellm\repo\...`
   - `microsoft-agent-framework\repo\...`
   - `microsoft-agent-framework-samples\repo\...`
@@ -20,6 +19,7 @@ The `research\` folder contains self-contained research reports and their mirror
 
 ## Conventions
 
-1. Research reports should cite local paths under `research\sources\...` instead of prior Copilot session folders or live external URLs.
-2. Sources are grouped by source repository slug.
-3. New mirrored evidence should be copied, not moved, so the original repo content stays untouched.
+1. Prefer citing local paths under `research\sources\...` for archived deep-dive reports.
+2. Reference-only reports are also acceptable when the upstream project will be consumed directly (for example, via plugin installation) and a local mirror would add maintenance cost without improving use.
+3. Sources are grouped by source repository slug when mirrored.
+4. New mirrored evidence should be copied, not moved, so the original repo content stays untouched.
