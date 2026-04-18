@@ -734,3 +734,428 @@ Component-level UI design is deferred to a separate Web-UI design note. The back
 - `/v1/embeddings` — PRD non-goal today; flipped via a future ADR if required.
 
 ---
+
+## 8. Cross-cutting concerns
+
+### 8.1 Security and auth
+
+Full auth middleware design is scheduled as a follow-on ADR (see §12). Phase 1 contract:
+
+**Identity establishment.** `AuthMiddleware` runs before any pipeline middleware. It inspects `Authorization: Bearer <key>` (primary) or `X-LlmGateway-Client` (advanced), resolves it against `LlmGateway:Clients[]` config, and populates an `IClientIdentityAccessor` scoped service with the matching `ClientIdentity` record:
+
+```csharp
+public interface IClientIdentityAccessor
+{
+    ClientIdentity Current { get; }
+}
+```
+
+**`ClientIdentity` fields** (consumed by the cloud-escalation layer from [ADR-0008](../adr/0008-cloud-escalation-policy.md)):
+
+- `ClientId`, `DisplayName`
+- `AllowedProviderIds: string[]`, optional `AllowedModelIds: string[]`
+- `CloudPolicy: Denied | AllowListed | Unrestricted`
+- `Quota: ClientQuota?` (per-minute/per-day token + request budgets, consumed by rate-limiting layer §8.3)
+- `IsAdmin: bool` (admin API access)
+
+**API key storage.** Keys are hashed (SHA-256 + per-client salt) before config-time persistence. Config entries store the hash; raw keys are only seen on request. Rotation via config reload.
+
+**JWT (Phase 5 follow-on).** Structure planned: Entra-issued JWTs with `aud=blaze-llmgateway`, `scope=chat` or `scope=admin`. Design deferred to the Auth follow-on ADR.
+
+**Non-LLM endpoints.** `/health`, `/alive` (from ServiceDefaults) remain unauthenticated. Every `/v1/*`, `/admin/*`, `/agents/*` endpoint requires auth — enforced at endpoint-routing level, not inside each handler.
+
+### 8.2 Observability
+
+**OpenTelemetry span schema.** Every chat completion emits one root span plus child spans per pipeline stage.
+
+Root span — name: `llm.chat.completion`. Attributes:
+
+| Attribute | Example | Source |
+|---|---|---|
+| `llm.request.id` | `req_01HZ...` (ULID) | Generated at endpoint entry |
+| `llm.session.id` | `sess_01HZ...` | From `X-LlmGateway-Session-Id` header |
+| `llm.client.id` | `copilot-cli-internal` | From `ClientIdentity` |
+| `llm.provider.id` | `ollama-lan` | From final routed descriptor |
+| `llm.model.id` | `ollama-lan/llama3.2` | From routed `ModelProfile.Id` |
+| `llm.strategy` | `OllamaMetaRoutingStrategy` | Strategy that picked the model |
+| `llm.fallback.count` | `0`..`N` | Number of chain hops |
+| `llm.stream` | `true`/`false` | Request flag |
+| `llm.input.tokens` | `245` | From provider response |
+| `llm.output.tokens` | `187` | From provider response |
+| `llm.latency.ms` | `1432` | End-to-end server time |
+| `llm.escalation.allowed` | `true`/`false` | Cloud-escalation outcome |
+| `llm.ttfb.ms` | `180` | Time-to-first-byte (streaming only) |
+
+Child span names:
+
+- `llm.routing.resolve` — with attribute `llm.routing.strategy`.
+- `llm.circuitbreaker.check` — with attributes `llm.provider.state`, `llm.provider.consecutive_failures`.
+- `llm.mcp.append_tools` — with attribute `llm.mcp.tool_count`.
+- `llm.provider.call` — the MEAI `IChatClient` call itself; set attribute `llm.provider.sdk` (`OllamaApiClient`, `OpenAIClient`, etc.).
+
+Agent-plane spans (Phase 3):
+
+- `llm.agent.run` root. Children: `llm.agent.tool_call` per invocation, `llm.agent.step` per reasoning step.
+
+**Metrics** (OTel, emitted via ServiceDefaults; names follow the OTel semantic conventions spirit):
+
+| Metric | Unit | Dimensions |
+|---|---|---|
+| `blaze.gateway.requests` | count | `client.id`, `provider.id`, `model.id`, `status` |
+| `blaze.gateway.latency` | histogram (ms) | same |
+| `blaze.gateway.ttfb` | histogram (ms) | same |
+| `blaze.gateway.tokens.input` | count | `client.id`, `provider.id`, `model.id` |
+| `blaze.gateway.tokens.output` | count | same |
+| `blaze.gateway.fallbacks` | count | `from.provider.id`, `to.provider.id` |
+| `blaze.gateway.escalations.denied` | count | `client.id`, `provider.id` |
+| `blaze.gateway.circuitbreaker.state` | gauge | `provider.id`, `state` |
+| `blaze.gateway.mcp.tool.invocations` | count | `server.id`, `tool`, `status` |
+
+**Structured logs.** Every log line carries `RequestId`, `SessionId`, `ClientId` in addition to its message fields. `FR-01-9` satisfied by the `llm.chat.completion` span + `blaze.gateway.requests` metric combo, plus an `Information` log per routing decision.
+
+**Dashboard.** ServiceDefaults already wires the Aspire dashboard (FR-05-5). Phase 5 adds a dedicated provider-health page in the Web UI consuming `/admin/providers`.
+
+### 8.3 Rate limiting and quotas
+
+Per-client token-budget and request-rate limits (PRD FR-07). New pipeline middleware:
+
+```csharp
+public sealed class RateLimitingDelegatingChatClient(
+    IChatClient inner,
+    IClientIdentityAccessor clientIdentity,
+    IRateLimitStore store,
+    ILogger<RateLimitingDelegatingChatClient> logger) : DelegatingChatClient(inner)
+{
+    public override Task<ChatResponse> GetResponseAsync(...)
+    {
+        var quota = clientIdentity.Current.Quota;
+        if (quota is null) return base.GetResponseAsync(...);
+
+        if (!await store.TryReserveAsync(clientIdentity.Current.ClientId, estimatedTokens: EstimateTokens(messages), ct))
+            throw new RateLimitExceededException(retryAfter: store.GetRetryAfter(clientIdentity.Current.ClientId));
+
+        var response = await base.GetResponseAsync(...);
+        await store.RecordAsync(clientIdentity.Current.ClientId, response.Usage, ct);
+        return response;
+    }
+}
+```
+
+`IRateLimitStore` implementations: `InMemoryRateLimitStore` (Phase 1 single-host), `RedisRateLimitStore` (Phase 5 multi-host).
+
+### 8.4 Caching
+
+Deferred to a follow-on ADR (§12). Design sketch:
+
+- `ResponseCacheDelegatingChatClient` — layers in the pipeline above routing.
+- **Exact-match** cache — key = `SHA256(model_id + normalized_messages + tool_set)`.
+- **Semantic** cache — key-prefix + embedding similarity against recent entries; requires an embedding provider and a vector index. Implementation out of Phase-1 scope.
+- Bypass via `X-LlmGateway-NoCache: true` (FR-06-4).
+
+### 8.5 Error contract
+
+Unified across all northbound surfaces. Shape per [ADR-0003](../adr/0003-northbound-api-surface.md):
+
+```json
+{ "error": { "message": "...", "type": "rate_limit_error", "param": null, "code": "rate_limit_exceeded" } }
+```
+
+`ExceptionToChatCompletionError` middleware (in `Blaze.LlmGateway.Integrations/OpenAI/`) maps known exceptions to the table in ADR-0003 §"Error handling". Any unmapped exception becomes `500 api_error internal_error` with a redacted message in production (original logged for operators).
+
+### 8.6 Configuration validation on startup
+
+All configuration binding happens through options validators that fail fast:
+
+```csharp
+// Blaze.LlmGateway.Api/Program.cs composition root
+builder.Services.AddOptions<LlmGatewayOptions>()
+    .Bind(builder.Configuration.GetSection(LlmGatewayOptions.SectionName))
+    .ValidateOnStart()
+    .Validate<IValidateOptions<LlmGatewayOptions>>();
+```
+
+Validator checks (non-exhaustive): every `Providers[].Id` unique and lowercased; every `Models[].Id` starts with its provider's Id; `Routing.RouterModelId` and `FallbackModelId` resolve; each `Clients[].ApiKeys[]` is non-empty; every `Agents[].ModelId` (Phase 3) resolves.
+
+---
+
+## 9. Deployment topology
+
+### 9.1 LAN reference topology
+
+```
+                    ┌─────────────────────────┐
+                    │    Clients on LAN       │
+                    │  (Copilot CLI, Claude   │
+                    │   Code, Blazor Web UI,  │
+                    │   internal apps)        │
+                    └────────────┬────────────┘
+                                 │  HTTPS/HTTP
+                                 ▼
+      ┌──────────────────────────────────────────────────┐
+      │  Blaze.LlmGateway.Api (single container)         │
+      │  ┌─────────────────────────────────────────┐     │
+      │  │ Integration plane (OpenAI + Admin API)  │     │
+      │  │ Agent plane (Phase 3)                   │     │
+      │  │ Tool plane (MCP)                        │     │
+      │  │ Inference plane (routing + providers)   │     │
+      │  └─────────────────────────────────────────┘     │
+      │  Persistence: SQLite at /data/sessions.db        │
+      └────┬────────────┬────────────┬───────────────────┘
+           │            │            │
+           ▼            ▼            ▼
+  ┌──────────────┐ ┌─────────────┐ ┌───────────────────┐
+  │ Ollama LAN   │ │ Foundry     │ │ Optional local    │
+  │ 192.168.x.x  │ │ Local       │ │ LM Studio /       │
+  │ (router +    │ │ (Phi-4, etc)│ │ llama.cpp         │
+  │  llama3.2)   │ │             │ │                   │
+  └──────────────┘ └─────────────┘ └───────────────────┘
+           │
+           └── optional egress (allow-listed) ──► cloud providers
+                                                 (Azure Foundry,
+                                                  GitHub Models,
+                                                  Gemini, OpenRouter,
+                                                  GitHub Copilot)
+```
+
+### 9.2 Aspire orchestration updates
+
+[Blaze.LlmGateway.AppHost/Program.cs](../../Blaze.LlmGateway.AppHost/Program.cs) changes for the target topology:
+
+1. **Persistence volume.** Aspire volume mount for `sessions.db`:
+   ```csharp
+   var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
+       .WithVolume("blaze-sessions", "/data");
+   ```
+   Add `LlmGateway__Persistence__ConnectionString=Data Source=/data/sessions.db` via `WithEnvironment`.
+
+2. **Optional local runtimes.** LM Studio / llama.cpp as opt-in containers:
+   ```csharp
+   var lmStudio = builder.AddContainer("lmstudio", "lmstudio/server:latest")
+       .WithEndpoint(port: 1234, targetPort: 1234, name: "api", scheme: "http")
+       .WithVolume("lmstudio-models", "/models");
+   ```
+   Exposed to the API via reference and `LlmGateway__Providers__N__Endpoint` env var.
+
+3. **Provider descriptor secrets.** Refactor the current `LlmGateway__Providers__AzureFoundry__ApiKey` env vars to the indexed form `LlmGateway__Providers__<N>__ApiKey` — or better, bind a `LlmGateway__ProviderSecrets__{providerId}__ApiKey` overlay that the validator merges into the array. The secret shape is orthogonal to the descriptor shape and can evolve independently.
+
+4. **Agents and MCP config.** New `LlmGateway:Agents` (Phase 3) and `LlmGateway:Mcp:Servers` arrays bound from `appsettings.json` (non-secret) plus user-secrets for any API-key-gated MCP servers.
+
+### 9.3 Container and cloud targets
+
+| Target | Fit | Notes |
+|---|---|---|
+| **Local dev via Aspire** | Default | `dotnet run --project Blaze.LlmGateway.AppHost` |
+| **Single-host LAN deployment** | Phase 1 primary target | `docker run` / `docker compose`; SQLite on a mounted volume |
+| **Azure Container Apps** | Phase 5 cloud option | Matches Aspire deployment; Postgres via `ISessionStore` swap |
+| **AKS / Kubernetes** | Phase 5+ | Same image; sidecars for Ollama/Foundry Local run as separate pods |
+
+Final target selection is deferred to the Deployment follow-on ADR (§12).
+
+### 9.4 Secret management
+
+No change from current:
+
+- **Dev.** `dotnet user-secrets` on the AppHost project. Aspire injects parameters as env vars ([CLAUDE.md §"Local Development Secrets"](../../CLAUDE.md)).
+- **Prod.** Azure Key Vault references mapped onto the same parameter names; or environment variables in non-Azure environments.
+- **Rotation.** Provider API keys rotate via config reload (no restart once `IOptionsMonitor` hot-reload lands in Phase 3). Client API keys rotate the same way.
+
+---
+
+## 10. Test strategy
+
+### 10.1 Unit tests (target 95% line coverage — PRD NFR-05)
+
+Expansion plan per plane. Table aligns with the existing [Blaze.LlmGateway.Tests](../../Blaze.LlmGateway.Tests) conventions (xUnit + Moq).
+
+| Suite | Covers | Phase |
+|---|---|---|
+| `ProviderRegistryTests` | Descriptor binding, factory switch on `ProviderKind`, catalog validation | 1 |
+| `LlmRoutingChatClientTests` (updated) | Streaming + non-streaming path, capability resolution, explicit override | 1 |
+| `CompositeRoutingStrategyTests` | Strategy chain walking, fall-through | 1 |
+| `CircuitBreakerDelegatingChatClientTests` | All state transitions (Closed↔Open↔HalfOpen), failure classification, fallback-chain walk, `AllProvidersFailedException` on exhaustion | 1 |
+| `CloudEscalationDelegatingChatClientTests` | Denied/AllowListed/Unrestricted policies, skip vs. fail distinction | 1 |
+| `McpToolDelegatingClientTests` | `HostedMcpServerTool` emission, filter honoring, empty-tool-set pass-through | 1 |
+| `McpConnectionManagerTests` | Register/deregister, reconnect backoff, state transitions | 1 |
+| `ChatCompletionsHandlerTests` | DTO binding, streaming SSE frame shape (`data: {...}\n\n`), `finish_reason` emission, error contract | 1 |
+| `SessionStoreTests` | Append/get messages, tool-invocation round-trip, TTL cleanup, migration apply | 1 |
+| `AgentFrameworkAdapterTests` | Run event translation, history rehydration, session persistence round-trip | 3 |
+| `FoundryHostedAgentAdapterTests` | Event translation, Foundry-as-source-of-truth semantics | 3 |
+
+**Architecture assertions.** New `ArchitectureTests.cs` using NetArchTest asserting:
+
+- `Blaze.LlmGateway.Core` has no non-framework references.
+- `Blaze.LlmGateway.Infrastructure` does not reference `Agents` or `Integrations`.
+- `Blaze.LlmGateway.Agents` does not reference `Integrations`.
+- No `IChatClient` implementation outside `Blaze.LlmGateway.Infrastructure` except `DelegatingChatClient` descendants. ([CLAUDE.md](../../CLAUDE.md) architectural rule: "New middleware must inherit from `DelegatingChatClient`".)
+
+### 10.2 Integration tests
+
+New `Blaze.LlmGateway.IntegrationTests` project using `WebApplicationFactory<Program>`:
+
+- **SSE contract.** Start the host with a fake `IChatClient`; POST to `/v1/chat/completions` with `stream=true`; assert each frame is `data: {...}\n\n` and the last two are content-with-`finish_reason` and `data: [DONE]\n\n`.
+- **Tool round-trip.** Register a stub MCP server exposing one tool; send a prompt that triggers tool calling; assert the session record captures request + response + latency.
+- **Session round-trip.** Create a session, post three turns, restart the test host, re-post a turn with the same session id; assert the new turn sees all prior history.
+- **Cloud escalation denial.** Configure a `Denied`-policy client; assert routing returns 403 when the meta-router picks a `Cloud` provider *and* all fallback-chain hops are also `Cloud`.
+- **Circuit-breaker open/close.** Fake provider fails N times → breaker opens → next request skips it → after cooldown, half-open probe closes breaker on success.
+
+### 10.3 Benchmarks (fills out the empty `Blaze.LlmGateway.Benchmarks` project — PRD FR-05-6)
+
+BenchmarkDotNet suite targeting:
+
+| Benchmark | Target | Guard |
+|---|---|---|
+| `RoutingOverhead.CompositeStrategy` | < 1 ms P99 (NFR-01) | Fail if P99 > 1.5 ms |
+| `RoutingOverhead.CircuitBreakerCheck` | < 100 µs P99 | — |
+| `ProviderCall.<Provider>.P50` | baseline | Regression alarm if > 2× baseline |
+| `SessionStore.AppendMessage` | < 5 ms P99 on SQLite | Fail if > 20 ms |
+| `McpToolAppend.N=10` | < 100 µs P99 | — |
+
+Benchmarks run in CI on a dedicated runner (not on shared agents — noise ruins latency measurements).
+
+### 10.4 Manual validation scripts
+
+Under `samples/compatibility-tests/`:
+
+- `copilot-cli-smoke.sh` — Copilot CLI BYOM happy path.
+- `claude-code-smoke.sh` — Claude Code with custom `baseURL`.
+- `openai-sdk-python.py` — stock `openai` SDK streaming + tool call.
+- `load-test.sh` — k6 script running N concurrent streaming requests, asserts no goroutine/thread leaks.
+
+These don't run in CI by default (require external providers), but are documented in `docs/clients/` and referenced by ADR-0007.
+
+---
+
+## 11. Phasing and migration roadmap
+
+Maps the five phases from [plan/llm-agent-platform-plan.md](../../plan/llm-agent-platform-plan.md) onto design sections with the Phase-1 cut line explicit.
+
+### Phase 1 — Gateway hardening (this design's primary deliverable)
+
+**Inference plane (§4):**
+- Introduce `ProviderDescriptor` / `ModelProfile` / `CapabilityMetadata` (§4.1, ADR-0002).
+- Implement `ProviderRegistry` and `ProviderClientFactory` (§4.2).
+- Refactor `LlmRoutingChatClient` to `DelegatingChatClient`, composable strategy chain (§4.3).
+- Circuit breaker + fallback chains + pre-stream failover (§4.4).
+- Keep old `RouteDestination` enum as `[Obsolete]` string-alias bridge; remove in Phase-2-closing release.
+
+**Tool plane (§5):**
+- `IMcpConnectionManager` refactor with reconnect and state machine (§5.1).
+- `HostedMcpServerTool` mapping (§5.2).
+- Per-client / per-model tool filter (§5.3).
+- Admin endpoints for MCP lifecycle (§5.4).
+
+**Integration plane (§7):**
+- Typed OpenAI Chat Completions endpoint with SSE spec compliance (ADR-0003).
+- Error-contract middleware (§8.5).
+- Admin endpoints for providers + routing + MCP + sessions (§7.3).
+
+**Agent plane precursor:**
+- `Blaze.LlmGateway.Persistence` project with `ISessionStore` + SQLite migrations (ADR-0004).
+- Session correlation in Chat Completions when `X-LlmGateway-Session-Id` is present (record only; rehydrate is Phase 3).
+- Empty `IAgentAdapter` / `AgentDescriptor` contracts so Phase-3 consumers don't retrofit shapes.
+
+**Cross-cutting:**
+- Minimum-viable auth middleware with config-driven API keys → `ClientIdentity` (§8.1). Full Auth ADR still deferred.
+- `CloudEscalationDelegatingChatClient` enforces default-deny (ADR-0008).
+- OTel span schema rolled out across all pipeline layers (§8.2).
+
+**Client ecosystem:**
+- Copilot CLI BYOM docs + smoke test.
+- Copilot SDK sample project (ADR-0007).
+
+**Test and observability:**
+- New integration-test project.
+- Benchmarks project filled out; routing-overhead guard enforces NFR-01.
+- NetArchTest architecture fixture enforces [ADR-0001](../adr/0001-primary-host-boundary.md) boundaries.
+
+### Phase 2 — Provider/model catalog expansion
+
+- LM Studio + llama.cpp catalog entries validated end-to-end (ADR-0005).
+- Gemma-4 family models as capability-tagged profiles.
+- Capability-based routing strategy ships (§4.3 item 2).
+- Remove `[Obsolete]` `RouteDestination` enum.
+- `IOptionsMonitor` hot-reload wiring.
+
+### Phase 3 — Agent integration layer
+
+- `Blaze.LlmGateway.Agents` project lands.
+- `AgentFrameworkAdapter` + `FoundryHostedAgentAdapter` implement `IAgentAdapter` (ADR-0006).
+- `/agents/*` northbound endpoints (still no Responses API yet).
+- Session rehydration (not just recording) in Chat Completions.
+- Workflow orchestration MVP: Sequential + Concurrent + Handoff.
+
+### Phase 4 — Client ecosystem polish
+
+- Blazor Web UI wired to Chat Completions + admin endpoints.
+- Responses API consideration — follow-on ADR if promoted.
+- A2A evaluation — follow-on ADR if promoted.
+- MCP packaging for Copilot evaluation — follow-on ADR.
+
+### Phase 5 — Security, policy, operational readiness
+
+- Full Auth ADR lands (JWT + Entra + rotation).
+- Rate-limiting Redis store.
+- Caching ADR + `ResponseCacheDelegatingChatClient`.
+- Multi-tenancy ADR (PRD OQ-1).
+- Deployment target ADR (PRD OQ-3) + production CD pipeline.
+- Postgres / Cosmos DB session-store swap for multi-host deployments.
+
+---
+
+## 12. Deferred decisions / follow-on ADRs
+
+These are **not resolved** by this document. They are listed with recommended sequencing so they can be opened at the right phase.
+
+| # | Topic | Sources | Proposed phase |
+|---|---|---|---|
+| D1 | **Auth middleware detail** — JWT, Entra, API-key rotation, admin-scope model | PRD FR-04, §8.1 | Phase 1 minimum-viable, full ADR by end of Phase 1 |
+| D2 | **Multi-tenancy posture** — per-tenant provider pools, quotas, isolation | PRD OQ-1 | Phase 5 |
+| D3 | **Caching strategy** — core vs. pluggable, exact-match vs. semantic, backend | PRD OQ-2, FR-06, §8.4 | Phase 5 |
+| D4 | **Deployment target** — ACA vs. AKS vs. self-hosted | PRD OQ-3, §9.3 | End of Phase 1 |
+| D5 | **Admin API co-host vs. separate service** | PRD OQ-7 | Phase 4 (only if security posture demands separation) |
+| D6 | **Client SDK vs. OpenAI-compat only** | PRD OQ-9 | Phase 4 |
+| D7 | **Meta-router model deployment** — sidecar vs. separate service vs. cloud | PRD OQ-10 | Phase 2 |
+| D8 | **Copilot plugin/MCP packaging** | planning draft Q3, ADR-0007 | Phase 4+ |
+| D9 | **Responses API adoption** | ADR-0003, planning draft | Phase 4 |
+| D10 | **A2A northbound surface** | ADR-0006 scope note | Phase 4+ |
+| D11 | **MCP server export** (Blaze as MCP server) | §7.5 | Phase 4+ |
+| D12 | **Streaming failover mid-stream splicing** | PRD OQ-8 | If/when a consumer demands it; today: terminal-error-frame semantics (§4.4) |
+| D13 | **Cost-tracking source of truth** | PRD OQ-6 | Phase 5 |
+| D14 | **Web UI component design** | PRD FR-09 | Phase 4, separate design note |
+| D15 | **Observability schema freeze** | NFR-04, §8.2 | Phase 2 (after field use proves the attribute set) |
+
+Each follow-on ADR will be authored when its phase opens, using the [template](../adr/0000-adr-template.md).
+
+---
+
+## 13. ADR index
+
+Ordered by number. Each file lives in [../adr/](../adr).
+
+| # | Title | Status | One-line |
+|---|---|---|---|
+| [0001](../adr/0001-primary-host-boundary.md) | Primary host boundary | Proposed | Co-host gateway core + agent runtime in the Api project; enforce layering via project boundaries + NetArchTest. |
+| [0002](../adr/0002-provider-identity-model.md) | Provider identity model | Proposed | Replace `RouteDestination` enum with config-driven `ProviderDescriptor` + `ModelProfile` + `CapabilityMetadata`. |
+| [0003](../adr/0003-northbound-api-surface.md) | Northbound API surface | Proposed | Phase 1 ships typed OpenAI Chat Completions only; Responses/A2A deferred. |
+| [0004](../adr/0004-session-state-persistence.md) | Session state persistence | Proposed | SQLite + EF Core `ISessionStore` abstraction with swap path to Postgres/Cosmos. |
+| [0005](../adr/0005-local-runtime-compatibility.md) | Local runtime compatibility | Proposed | LM Studio + llama.cpp as `OpenAICompatible` catalog entries, no specialized adapter. |
+| [0006](../adr/0006-azure-foundry-agents-integration.md) | Azure Foundry agents | Proposed | `IAgentAdapter` pattern fronts both local Agent Framework and Foundry hosted agents. |
+| [0007](../adr/0007-copilot-ecosystem-strategy.md) | Copilot ecosystem strategy | Proposed | BYOM docs + one SDK sample in Phase 1; plugin/MCP packaging deferred. |
+| [0008](../adr/0008-cloud-escalation-policy.md) | Cloud escalation policy | Proposed | Default-deny cloud; per-client allow-list enforced by a pipeline layer. |
+
+---
+
+## Document conventions
+
+- **C# style:** primary constructors, collection expressions (`[]`), nullable reference types enabled, `CancellationToken` propagated. Matches [CLAUDE.md](../../CLAUDE.md).
+- **Build:** `dotnet build --no-incremental -warnaserror` remains the gate. All code referenced in this document must pass.
+- **Middleware rule:** every new pipeline layer inherits `DelegatingChatClient`. No raw `IChatClient` implementations outside the provider registry.
+- **MEAI-is-the-law:** no raw `HttpClient` to LLM providers. Always `IChatClient` + `ChatMessage` + `ChatOptions`.
+- **Links:** relative paths to repo files so the document renders correctly in IDEs and in GitHub previews.
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-04-17 | Initial draft. All sections and ADRs 0001–0008 authored. Status: Proposed. |
+
