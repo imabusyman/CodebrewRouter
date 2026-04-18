@@ -1,0 +1,2498 @@
+[
+  {
+    "name": "abliteration.md",
+    "path": "docs/my-website/docs/providers/abliteration.md",
+    "sha": "a0fc7f393103b099e1da9a2b7417b3ae89457859",
+    "size": 2614,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/abliteration.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/abliteration.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a0fc7f393103b099e1da9a2b7417b3ae89457859",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/abliteration.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/abliteration.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a0fc7f393103b099e1da9a2b7417b3ae89457859",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/abliteration.md"
+    }
+  },
+  {
+    "name": "ai21.md",
+    "path": "docs/my-website/docs/providers/ai21.md",
+    "sha": "90e69bd29f8bac66bb5e22003ab398fbe0c98560",
+    "size": 5519,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ai21.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ai21.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/90e69bd29f8bac66bb5e22003ab398fbe0c98560",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ai21.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ai21.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/90e69bd29f8bac66bb5e22003ab398fbe0c98560",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ai21.md"
+    }
+  },
+  {
+    "name": "aiml.md",
+    "path": "docs/my-website/docs/providers/aiml.md",
+    "sha": "9d763daf7d797afbc192455cae9f9fa8d6ae8418",
+    "size": 4947,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aiml.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aiml.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9d763daf7d797afbc192455cae9f9fa8d6ae8418",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aiml.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aiml.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9d763daf7d797afbc192455cae9f9fa8d6ae8418",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aiml.md"
+    }
+  },
+  {
+    "name": "aleph_alpha.md",
+    "path": "docs/my-website/docs/providers/aleph_alpha.md",
+    "sha": "4cdb521f3b3c2f43f7fb9d451615fc0a2ed0af9b",
+    "size": 1355,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aleph_alpha.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aleph_alpha.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4cdb521f3b3c2f43f7fb9d451615fc0a2ed0af9b",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aleph_alpha.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aleph_alpha.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4cdb521f3b3c2f43f7fb9d451615fc0a2ed0af9b",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aleph_alpha.md"
+    }
+  },
+  {
+    "name": "amazon_nova.md",
+    "path": "docs/my-website/docs/providers/amazon_nova.md",
+    "sha": "509127036df51f0cd8eb22d785b89f6e5559753e",
+    "size": 6792,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/amazon_nova.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/amazon_nova.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/509127036df51f0cd8eb22d785b89f6e5559753e",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/amazon_nova.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/amazon_nova.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/509127036df51f0cd8eb22d785b89f6e5559753e",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/amazon_nova.md"
+    }
+  },
+  {
+    "name": "anthropic.md",
+    "path": "docs/my-website/docs/providers/anthropic.md",
+    "sha": "50b964bd9361cbd9c2090937379721fa5d0dad86",
+    "size": 57434,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/50b964bd9361cbd9c2090937379721fa5d0dad86",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/50b964bd9361cbd9c2090937379721fa5d0dad86",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic.md"
+    }
+  },
+  {
+    "name": "anthropic_effort.md",
+    "path": "docs/my-website/docs/providers/anthropic_effort.md",
+    "sha": "5872826241bc3761e1df60a82add029e4e0c7195",
+    "size": 11908,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_effort.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_effort.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5872826241bc3761e1df60a82add029e4e0c7195",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_effort.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_effort.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5872826241bc3761e1df60a82add029e4e0c7195",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_effort.md"
+    }
+  },
+  {
+    "name": "anthropic_programmatic_tool_calling.md",
+    "path": "docs/my-website/docs/providers/anthropic_programmatic_tool_calling.md",
+    "sha": "574dd7b0935e97dc40400c1c8706e8ac3f3cd86f",
+    "size": 14292,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_programmatic_tool_calling.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_programmatic_tool_calling.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/574dd7b0935e97dc40400c1c8706e8ac3f3cd86f",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_programmatic_tool_calling.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_programmatic_tool_calling.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/574dd7b0935e97dc40400c1c8706e8ac3f3cd86f",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_programmatic_tool_calling.md"
+    }
+  },
+  {
+    "name": "anthropic_tool_input_examples.md",
+    "path": "docs/my-website/docs/providers/anthropic_tool_input_examples.md",
+    "sha": "39f4d8555f487008935a4d66256e4300083372b1",
+    "size": 13556,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_tool_input_examples.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_tool_input_examples.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/39f4d8555f487008935a4d66256e4300083372b1",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_tool_input_examples.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_tool_input_examples.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/39f4d8555f487008935a4d66256e4300083372b1",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_tool_input_examples.md"
+    }
+  },
+  {
+    "name": "anthropic_tool_search.md",
+    "path": "docs/my-website/docs/providers/anthropic_tool_search.md",
+    "sha": "203a2947ebcd7b6e6cfb590efda004135d4dc292",
+    "size": 14775,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_tool_search.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_tool_search.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/203a2947ebcd7b6e6cfb590efda004135d4dc292",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_tool_search.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anthropic_tool_search.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/203a2947ebcd7b6e6cfb590efda004135d4dc292",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anthropic_tool_search.md"
+    }
+  },
+  {
+    "name": "anyscale.md",
+    "path": "docs/my-website/docs/providers/anyscale.md",
+    "sha": "92b5005ad66e2cd1edf2538e4700be7f36773fcd",
+    "size": 1816,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anyscale.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anyscale.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/92b5005ad66e2cd1edf2538e4700be7f36773fcd",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anyscale.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/anyscale.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/92b5005ad66e2cd1edf2538e4700be7f36773fcd",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/anyscale.md"
+    }
+  },
+  {
+    "name": "apertis.md",
+    "path": "docs/my-website/docs/providers/apertis.md",
+    "sha": "967de8147e211d8694ce5cbfd36bd4c79107c643",
+    "size": 3825,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/apertis.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/apertis.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/967de8147e211d8694ce5cbfd36bd4c79107c643",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/apertis.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/apertis.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/967de8147e211d8694ce5cbfd36bd4c79107c643",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/apertis.md"
+    }
+  },
+  {
+    "name": "aws_polly.md",
+    "path": "docs/my-website/docs/providers/aws_polly.md",
+    "sha": "21b0fa679bf1fc190f3a78ff88dcf437f5a037ae",
+    "size": 8993,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aws_polly.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aws_polly.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/21b0fa679bf1fc190f3a78ff88dcf437f5a037ae",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aws_polly.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aws_polly.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/21b0fa679bf1fc190f3a78ff88dcf437f5a037ae",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aws_polly.md"
+    }
+  },
+  {
+    "name": "aws_sagemaker.md",
+    "path": "docs/my-website/docs/providers/aws_sagemaker.md",
+    "sha": "a2440c73d7d989375ee6f304b3dd9f7fb59f9ee2",
+    "size": 16672,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aws_sagemaker.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aws_sagemaker.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a2440c73d7d989375ee6f304b3dd9f7fb59f9ee2",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aws_sagemaker.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/aws_sagemaker.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a2440c73d7d989375ee6f304b3dd9f7fb59f9ee2",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/aws_sagemaker.md"
+    }
+  },
+  {
+    "name": "azure",
+    "path": "docs/my-website/docs/providers/azure",
+    "sha": "660a57854e4255448338c651e1f0ef3365f7972b",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/660a57854e4255448338c651e1f0ef3365f7972b",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/660a57854e4255448338c651e1f0ef3365f7972b",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure"
+    }
+  },
+  {
+    "name": "azure_ai.md",
+    "path": "docs/my-website/docs/providers/azure_ai.md",
+    "sha": "c39967dba374694022fa79d71d2bf88b243c2507",
+    "size": 11518,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c39967dba374694022fa79d71d2bf88b243c2507",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c39967dba374694022fa79d71d2bf88b243c2507",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai.md"
+    }
+  },
+  {
+    "name": "azure_ai",
+    "path": "docs/my-website/docs/providers/azure_ai",
+    "sha": "d264330d557df7c9abe98ed3e2ca83780afd3305",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/d264330d557df7c9abe98ed3e2ca83780afd3305",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/d264330d557df7c9abe98ed3e2ca83780afd3305",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai"
+    }
+  },
+  {
+    "name": "azure_ai_agents.md",
+    "path": "docs/my-website/docs/providers/azure_ai_agents.md",
+    "sha": "23ee5a39521ce2f279798484a3056bf620640fba",
+    "size": 17146,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_agents.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_agents.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/23ee5a39521ce2f279798484a3056bf620640fba",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_agents.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_agents.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/23ee5a39521ce2f279798484a3056bf620640fba",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_agents.md"
+    }
+  },
+  {
+    "name": "azure_ai_img.md",
+    "path": "docs/my-website/docs/providers/azure_ai_img.md",
+    "sha": "513bbe858d0c7dda82bc3ad538f7ce045800cae7",
+    "size": 11526,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_img.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_img.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/513bbe858d0c7dda82bc3ad538f7ce045800cae7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_img.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_img.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/513bbe858d0c7dda82bc3ad538f7ce045800cae7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_img.md"
+    }
+  },
+  {
+    "name": "azure_ai_img_edit.md",
+    "path": "docs/my-website/docs/providers/azure_ai_img_edit.md",
+    "sha": "0d5408f0af42e1657a9022d756c3b1521bf40d17",
+    "size": 8437,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_img_edit.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_img_edit.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0d5408f0af42e1657a9022d756c3b1521bf40d17",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_img_edit.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_img_edit.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0d5408f0af42e1657a9022d756c3b1521bf40d17",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_img_edit.md"
+    }
+  },
+  {
+    "name": "azure_ai_speech.md",
+    "path": "docs/my-website/docs/providers/azure_ai_speech.md",
+    "sha": "22db98cfac540fcff40f745ee7188bd6198334aa",
+    "size": 14988,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_speech.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_speech.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/22db98cfac540fcff40f745ee7188bd6198334aa",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_speech.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_speech.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/22db98cfac540fcff40f745ee7188bd6198334aa",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_speech.md"
+    }
+  },
+  {
+    "name": "azure_ai_vector_stores.md",
+    "path": "docs/my-website/docs/providers/azure_ai_vector_stores.md",
+    "sha": "b9dfa3bdc9c76eac21ed22f118f4217b5de0478c",
+    "size": 6690,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_vector_stores.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_vector_stores.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b9dfa3bdc9c76eac21ed22f118f4217b5de0478c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_vector_stores.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ai_vector_stores.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b9dfa3bdc9c76eac21ed22f118f4217b5de0478c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ai_vector_stores.md"
+    }
+  },
+  {
+    "name": "azure_document_intelligence.md",
+    "path": "docs/my-website/docs/providers/azure_document_intelligence.md",
+    "sha": "edc3c616fa732faeeee100dcc3cbfd881be0143e",
+    "size": 11266,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_document_intelligence.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_document_intelligence.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/edc3c616fa732faeeee100dcc3cbfd881be0143e",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_document_intelligence.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_document_intelligence.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/edc3c616fa732faeeee100dcc3cbfd881be0143e",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_document_intelligence.md"
+    }
+  },
+  {
+    "name": "azure_ocr.md",
+    "path": "docs/my-website/docs/providers/azure_ocr.md",
+    "sha": "5d79cc05338f548999a2f71c528c6b081253c11b",
+    "size": 3779,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ocr.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ocr.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5d79cc05338f548999a2f71c528c6b081253c11b",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ocr.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/azure_ocr.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5d79cc05338f548999a2f71c528c6b081253c11b",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/azure_ocr.md"
+    }
+  },
+  {
+    "name": "baseten.md",
+    "path": "docs/my-website/docs/providers/baseten.md",
+    "sha": "4e42cdf0447e679c42ba4c5be02136c29dfe27c7",
+    "size": 2432,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/baseten.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/baseten.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4e42cdf0447e679c42ba4c5be02136c29dfe27c7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/baseten.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/baseten.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4e42cdf0447e679c42ba4c5be02136c29dfe27c7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/baseten.md"
+    }
+  },
+  {
+    "name": "bedrock.md",
+    "path": "docs/my-website/docs/providers/bedrock.md",
+    "sha": "750b91f8cad53185e2a047317fb3bee6d3523d09",
+    "size": 72902,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/750b91f8cad53185e2a047317fb3bee6d3523d09",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/750b91f8cad53185e2a047317fb3bee6d3523d09",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock.md"
+    }
+  },
+  {
+    "name": "bedrock_agentcore.md",
+    "path": "docs/my-website/docs/providers/bedrock_agentcore.md",
+    "sha": "7802624fccd6f3f8a60971b0960ed3e010287382",
+    "size": 7250,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_agentcore.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_agentcore.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7802624fccd6f3f8a60971b0960ed3e010287382",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_agentcore.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_agentcore.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7802624fccd6f3f8a60971b0960ed3e010287382",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_agentcore.md"
+    }
+  },
+  {
+    "name": "bedrock_agents.md",
+    "path": "docs/my-website/docs/providers/bedrock_agents.md",
+    "sha": "4d027cbb3d8a21c2a434ceb2ec68f4cfac04d7da",
+    "size": 6226,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_agents.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_agents.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4d027cbb3d8a21c2a434ceb2ec68f4cfac04d7da",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_agents.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_agents.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4d027cbb3d8a21c2a434ceb2ec68f4cfac04d7da",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_agents.md"
+    }
+  },
+  {
+    "name": "bedrock_batches.md",
+    "path": "docs/my-website/docs/providers/bedrock_batches.md",
+    "sha": "19446fda8372b5d31b72d4b8d736f17b36f437cf",
+    "size": 9618,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_batches.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_batches.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/19446fda8372b5d31b72d4b8d736f17b36f437cf",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_batches.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_batches.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/19446fda8372b5d31b72d4b8d736f17b36f437cf",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_batches.md"
+    }
+  },
+  {
+    "name": "bedrock_embedding.md",
+    "path": "docs/my-website/docs/providers/bedrock_embedding.md",
+    "sha": "3c618fe0641723af5d00ef211087d1520fcfb4e9",
+    "size": 15882,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_embedding.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_embedding.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3c618fe0641723af5d00ef211087d1520fcfb4e9",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_embedding.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_embedding.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3c618fe0641723af5d00ef211087d1520fcfb4e9",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_embedding.md"
+    }
+  },
+  {
+    "name": "bedrock_image_gen.md",
+    "path": "docs/my-website/docs/providers/bedrock_image_gen.md",
+    "sha": "e6e8429817dc9bd2d397b12a66684838c21d468b",
+    "size": 5559,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_image_gen.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_image_gen.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e6e8429817dc9bd2d397b12a66684838c21d468b",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_image_gen.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_image_gen.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e6e8429817dc9bd2d397b12a66684838c21d468b",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_image_gen.md"
+    }
+  },
+  {
+    "name": "bedrock_imported.md",
+    "path": "docs/my-website/docs/providers/bedrock_imported.md",
+    "sha": "709736e610973b3af787e117ce086d682da0ce5d",
+    "size": 16885,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_imported.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_imported.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/709736e610973b3af787e117ce086d682da0ce5d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_imported.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_imported.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/709736e610973b3af787e117ce086d682da0ce5d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_imported.md"
+    }
+  },
+  {
+    "name": "bedrock_mantle.md",
+    "path": "docs/my-website/docs/providers/bedrock_mantle.md",
+    "sha": "185d9a6e215d7e326fb6339de0cbc0571c99bad0",
+    "size": 3894,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_mantle.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_mantle.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/185d9a6e215d7e326fb6339de0cbc0571c99bad0",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_mantle.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_mantle.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/185d9a6e215d7e326fb6339de0cbc0571c99bad0",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_mantle.md"
+    }
+  },
+  {
+    "name": "bedrock_realtime_with_audio.md",
+    "path": "docs/my-website/docs/providers/bedrock_realtime_with_audio.md",
+    "sha": "d725f6ecd12f227ee662a16e7ba115924dd130b7",
+    "size": 10458,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_realtime_with_audio.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_realtime_with_audio.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d725f6ecd12f227ee662a16e7ba115924dd130b7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_realtime_with_audio.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_realtime_with_audio.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d725f6ecd12f227ee662a16e7ba115924dd130b7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_realtime_with_audio.md"
+    }
+  },
+  {
+    "name": "bedrock_rerank.md",
+    "path": "docs/my-website/docs/providers/bedrock_rerank.md",
+    "sha": "86745eb512557c86b670440ce48fd2257cb37ba9",
+    "size": 2365,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_rerank.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_rerank.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/86745eb512557c86b670440ce48fd2257cb37ba9",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_rerank.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_rerank.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/86745eb512557c86b670440ce48fd2257cb37ba9",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_rerank.md"
+    }
+  },
+  {
+    "name": "bedrock_vector_store.md",
+    "path": "docs/my-website/docs/providers/bedrock_vector_store.md",
+    "sha": "5fae0c76c11a9d395a3ab070d78db8a21460325d",
+    "size": 7538,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_vector_store.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_vector_store.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5fae0c76c11a9d395a3ab070d78db8a21460325d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_vector_store.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_vector_store.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5fae0c76c11a9d395a3ab070d78db8a21460325d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_vector_store.md"
+    }
+  },
+  {
+    "name": "bedrock_writer.md",
+    "path": "docs/my-website/docs/providers/bedrock_writer.md",
+    "sha": "00d77a37f44ed625a349033255f855ec06ec60cd",
+    "size": 7805,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_writer.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_writer.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/00d77a37f44ed625a349033255f855ec06ec60cd",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_writer.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bedrock_writer.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/00d77a37f44ed625a349033255f855ec06ec60cd",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bedrock_writer.md"
+    }
+  },
+  {
+    "name": "black_forest_labs.md",
+    "path": "docs/my-website/docs/providers/black_forest_labs.md",
+    "sha": "7074fa1f13969bcbfecd29f2c9bdd6679af445ef",
+    "size": 8169,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/black_forest_labs.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/black_forest_labs.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7074fa1f13969bcbfecd29f2c9bdd6679af445ef",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/black_forest_labs.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/black_forest_labs.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7074fa1f13969bcbfecd29f2c9bdd6679af445ef",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/black_forest_labs.md"
+    }
+  },
+  {
+    "name": "black_forest_labs_img_edit.md",
+    "path": "docs/my-website/docs/providers/black_forest_labs_img_edit.md",
+    "sha": "592ad0f9ef9c37d5ab803d320bc9495148b44b42",
+    "size": 8837,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/black_forest_labs_img_edit.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/black_forest_labs_img_edit.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/592ad0f9ef9c37d5ab803d320bc9495148b44b42",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/black_forest_labs_img_edit.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/black_forest_labs_img_edit.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/592ad0f9ef9c37d5ab803d320bc9495148b44b42",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/black_forest_labs_img_edit.md"
+    }
+  },
+  {
+    "name": "bytez.md",
+    "path": "docs/my-website/docs/providers/bytez.md",
+    "sha": "3e2222fe68476c3df16bb36d0130de51fa3db206",
+    "size": 3903,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bytez.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bytez.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3e2222fe68476c3df16bb36d0130de51fa3db206",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bytez.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/bytez.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3e2222fe68476c3df16bb36d0130de51fa3db206",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/bytez.md"
+    }
+  },
+  {
+    "name": "cerebras.md",
+    "path": "docs/my-website/docs/providers/cerebras.md",
+    "sha": "33bef5e107911507d10fd854a86610cf531cecdc",
+    "size": 3166,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cerebras.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cerebras.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/33bef5e107911507d10fd854a86610cf531cecdc",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cerebras.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cerebras.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/33bef5e107911507d10fd854a86610cf531cecdc",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cerebras.md"
+    }
+  },
+  {
+    "name": "chatgpt.md",
+    "path": "docs/my-website/docs/providers/chatgpt.md",
+    "sha": "222881953dc59648ced950a38c7cea8e1546b32c",
+    "size": 3210,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/chatgpt.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/chatgpt.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/222881953dc59648ced950a38c7cea8e1546b32c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/chatgpt.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/chatgpt.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/222881953dc59648ced950a38c7cea8e1546b32c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/chatgpt.md"
+    }
+  },
+  {
+    "name": "chutes.md",
+    "path": "docs/my-website/docs/providers/chutes.md",
+    "sha": "e2b81837c3468e372a083ea80c6b74d586418543",
+    "size": 5282,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/chutes.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/chutes.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e2b81837c3468e372a083ea80c6b74d586418543",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/chutes.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/chutes.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e2b81837c3468e372a083ea80c6b74d586418543",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/chutes.md"
+    }
+  },
+  {
+    "name": "clarifai.md",
+    "path": "docs/my-website/docs/providers/clarifai.md",
+    "sha": "d1f592fe39452b22a6ba2e0381ae8899ecea80bc",
+    "size": 8222,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/clarifai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/clarifai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d1f592fe39452b22a6ba2e0381ae8899ecea80bc",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/clarifai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/clarifai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d1f592fe39452b22a6ba2e0381ae8899ecea80bc",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/clarifai.md"
+    }
+  },
+  {
+    "name": "cloudflare_workers.md",
+    "path": "docs/my-website/docs/providers/cloudflare_workers.md",
+    "sha": "34c201cbfa6a9c4ec027e3bbab34ddbad4711150",
+    "size": 1698,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cloudflare_workers.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cloudflare_workers.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/34c201cbfa6a9c4ec027e3bbab34ddbad4711150",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cloudflare_workers.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cloudflare_workers.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/34c201cbfa6a9c4ec027e3bbab34ddbad4711150",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cloudflare_workers.md"
+    }
+  },
+  {
+    "name": "codestral.md",
+    "path": "docs/my-website/docs/providers/codestral.md",
+    "sha": "d0b968a1257f05c896a7221695671d2280e79a25",
+    "size": 6075,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/codestral.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/codestral.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d0b968a1257f05c896a7221695671d2280e79a25",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/codestral.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/codestral.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d0b968a1257f05c896a7221695671d2280e79a25",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/codestral.md"
+    }
+  },
+  {
+    "name": "cohere.md",
+    "path": "docs/my-website/docs/providers/cohere.md",
+    "sha": "1c3181d1884a80ca70b551dfc003ccd2a4075d7d",
+    "size": 9267,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cohere.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cohere.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1c3181d1884a80ca70b551dfc003ccd2a4075d7d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cohere.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cohere.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1c3181d1884a80ca70b551dfc003ccd2a4075d7d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cohere.md"
+    }
+  },
+  {
+    "name": "cometapi.md",
+    "path": "docs/my-website/docs/providers/cometapi.md",
+    "sha": "a7f6e65519df59e76417b0005d20a3bec00e8298",
+    "size": 4093,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cometapi.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cometapi.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a7f6e65519df59e76417b0005d20a3bec00e8298",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cometapi.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/cometapi.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a7f6e65519df59e76417b0005d20a3bec00e8298",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/cometapi.md"
+    }
+  },
+  {
+    "name": "compactifai.md",
+    "path": "docs/my-website/docs/providers/compactifai.md",
+    "sha": "1aa81463071a1fc3b008af139c4f60f27b6f748a",
+    "size": 5616,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/compactifai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/compactifai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1aa81463071a1fc3b008af139c4f60f27b6f748a",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/compactifai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/compactifai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1aa81463071a1fc3b008af139c4f60f27b6f748a",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/compactifai.md"
+    }
+  },
+  {
+    "name": "custom_llm_server.md",
+    "path": "docs/my-website/docs/providers/custom_llm_server.md",
+    "sha": "4fcbf8942ce9403a9d5e7257f7692fd370ca75df",
+    "size": 16817,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/custom_llm_server.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/custom_llm_server.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4fcbf8942ce9403a9d5e7257f7692fd370ca75df",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/custom_llm_server.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/custom_llm_server.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4fcbf8942ce9403a9d5e7257f7692fd370ca75df",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/custom_llm_server.md"
+    }
+  },
+  {
+    "name": "dashscope.md",
+    "path": "docs/my-website/docs/providers/dashscope.md",
+    "sha": "3df0fbab1ba040dcc372da4821df701e5ae659a5",
+    "size": 3112,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/dashscope.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/dashscope.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3df0fbab1ba040dcc372da4821df701e5ae659a5",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/dashscope.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/dashscope.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3df0fbab1ba040dcc372da4821df701e5ae659a5",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/dashscope.md"
+    }
+  },
+  {
+    "name": "databricks.md",
+    "path": "docs/my-website/docs/providers/databricks.md",
+    "sha": "aaccb93073806c563ae584741e792d794bdc7e2d",
+    "size": 14511,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/databricks.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/databricks.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/aaccb93073806c563ae584741e792d794bdc7e2d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/databricks.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/databricks.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/aaccb93073806c563ae584741e792d794bdc7e2d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/databricks.md"
+    }
+  },
+  {
+    "name": "datarobot.md",
+    "path": "docs/my-website/docs/providers/datarobot.md",
+    "sha": "3f4a0f71ac4301ff472bfa7c2b2933e4d7d7d8a5",
+    "size": 1431,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/datarobot.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/datarobot.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3f4a0f71ac4301ff472bfa7c2b2933e4d7d7d8a5",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/datarobot.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/datarobot.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3f4a0f71ac4301ff472bfa7c2b2933e4d7d7d8a5",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/datarobot.md"
+    }
+  },
+  {
+    "name": "deepgram.md",
+    "path": "docs/my-website/docs/providers/deepgram.md",
+    "sha": "596f44b214cbcaa6af45aeb0ad162b1f52a3159f",
+    "size": 1752,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/deepgram.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepgram.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/596f44b214cbcaa6af45aeb0ad162b1f52a3159f",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepgram.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/deepgram.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/596f44b214cbcaa6af45aeb0ad162b1f52a3159f",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepgram.md"
+    }
+  },
+  {
+    "name": "deepinfra.md",
+    "path": "docs/my-website/docs/providers/deepinfra.md",
+    "sha": "ddf6122cac88e29637b1d894ab6e23e39bcdb61a",
+    "size": 5340,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/deepinfra.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepinfra.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/ddf6122cac88e29637b1d894ab6e23e39bcdb61a",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepinfra.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/deepinfra.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/ddf6122cac88e29637b1d894ab6e23e39bcdb61a",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepinfra.md"
+    }
+  },
+  {
+    "name": "deepseek.md",
+    "path": "docs/my-website/docs/providers/deepseek.md",
+    "sha": "1214431386d87914fa237ca185b16e61ef98bf86",
+    "size": 4353,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/deepseek.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepseek.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1214431386d87914fa237ca185b16e61ef98bf86",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepseek.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/deepseek.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1214431386d87914fa237ca185b16e61ef98bf86",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/deepseek.md"
+    }
+  },
+  {
+    "name": "docker_model_runner.md",
+    "path": "docs/my-website/docs/providers/docker_model_runner.md",
+    "sha": "fcd4c74f8f496900f6a4e7051cf37c872b0475d4",
+    "size": 7968,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/docker_model_runner.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/docker_model_runner.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/fcd4c74f8f496900f6a4e7051cf37c872b0475d4",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/docker_model_runner.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/docker_model_runner.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/fcd4c74f8f496900f6a4e7051cf37c872b0475d4",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/docker_model_runner.md"
+    }
+  },
+  {
+    "name": "elevenlabs.md",
+    "path": "docs/my-website/docs/providers/elevenlabs.md",
+    "sha": "b4ed3d3346b190c4f9c9bd50ceb684affcd4e09c",
+    "size": 14163,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/elevenlabs.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/elevenlabs.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b4ed3d3346b190c4f9c9bd50ceb684affcd4e09c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/elevenlabs.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/elevenlabs.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b4ed3d3346b190c4f9c9bd50ceb684affcd4e09c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/elevenlabs.md"
+    }
+  },
+  {
+    "name": "empower.md",
+    "path": "docs/my-website/docs/providers/empower.md",
+    "sha": "59df44cc9930be27e6253d3b566225e3633f7e24",
+    "size": 2722,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/empower.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/empower.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/59df44cc9930be27e6253d3b566225e3633f7e24",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/empower.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/empower.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/59df44cc9930be27e6253d3b566225e3633f7e24",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/empower.md"
+    }
+  },
+  {
+    "name": "fal_ai.md",
+    "path": "docs/my-website/docs/providers/fal_ai.md",
+    "sha": "da0fd19123b8952548016b927dfe8a8ea811f4b6",
+    "size": 9217,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/fal_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/fal_ai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/da0fd19123b8952548016b927dfe8a8ea811f4b6",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/fal_ai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/fal_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/da0fd19123b8952548016b927dfe8a8ea811f4b6",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/fal_ai.md"
+    }
+  },
+  {
+    "name": "featherless_ai.md",
+    "path": "docs/my-website/docs/providers/featherless_ai.md",
+    "sha": "5b9312e435da2cb3305c7396487843e025ed9a08",
+    "size": 2582,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/featherless_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/featherless_ai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5b9312e435da2cb3305c7396487843e025ed9a08",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/featherless_ai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/featherless_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5b9312e435da2cb3305c7396487843e025ed9a08",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/featherless_ai.md"
+    }
+  },
+  {
+    "name": "fireworks_ai.md",
+    "path": "docs/my-website/docs/providers/fireworks_ai.md",
+    "sha": "4589066031aab630898477437a6d3508e616995a",
+    "size": 14231,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/fireworks_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/fireworks_ai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4589066031aab630898477437a6d3508e616995a",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/fireworks_ai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/fireworks_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4589066031aab630898477437a6d3508e616995a",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/fireworks_ai.md"
+    }
+  },
+  {
+    "name": "friendliai.md",
+    "path": "docs/my-website/docs/providers/friendliai.md",
+    "sha": "6d4015f9ab5576c4dafe2788b3090e95b862f9c7",
+    "size": 2137,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/friendliai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/friendliai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6d4015f9ab5576c4dafe2788b3090e95b862f9c7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/friendliai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/friendliai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6d4015f9ab5576c4dafe2788b3090e95b862f9c7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/friendliai.md"
+    }
+  },
+  {
+    "name": "galadriel.md",
+    "path": "docs/my-website/docs/providers/galadriel.md",
+    "sha": "73f1ec8e76571d18f690450606a13f496c43a6ce",
+    "size": 2107,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/galadriel.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/galadriel.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/73f1ec8e76571d18f690450606a13f496c43a6ce",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/galadriel.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/galadriel.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/73f1ec8e76571d18f690450606a13f496c43a6ce",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/galadriel.md"
+    }
+  },
+  {
+    "name": "gemini.md",
+    "path": "docs/my-website/docs/providers/gemini.md",
+    "sha": "a60dc3323d11d60bb59ffb6251031dd4655989c3",
+    "size": 70635,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gemini.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a60dc3323d11d60bb59ffb6251031dd4655989c3",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gemini.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a60dc3323d11d60bb59ffb6251031dd4655989c3",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini.md"
+    }
+  },
+  {
+    "name": "gemini",
+    "path": "docs/my-website/docs/providers/gemini",
+    "sha": "afff167962f0902478392fed0d6d0dd6e15f13c6",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gemini?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/afff167962f0902478392fed0d6d0dd6e15f13c6",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gemini?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/afff167962f0902478392fed0d6d0dd6e15f13c6",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini"
+    }
+  },
+  {
+    "name": "gemini_file_search.md",
+    "path": "docs/my-website/docs/providers/gemini_file_search.md",
+    "sha": "947715218a3c58460d6455c3d11040452207838c",
+    "size": 10174,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gemini_file_search.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini_file_search.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/947715218a3c58460d6455c3d11040452207838c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini_file_search.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gemini_file_search.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/947715218a3c58460d6455c3d11040452207838c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gemini_file_search.md"
+    }
+  },
+  {
+    "name": "gigachat.md",
+    "path": "docs/my-website/docs/providers/gigachat.md",
+    "sha": "13eec298c25ddba138041cf26c83927526684ff7",
+    "size": 6842,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gigachat.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gigachat.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/13eec298c25ddba138041cf26c83927526684ff7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gigachat.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gigachat.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/13eec298c25ddba138041cf26c83927526684ff7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gigachat.md"
+    }
+  },
+  {
+    "name": "github.md",
+    "path": "docs/my-website/docs/providers/github.md",
+    "sha": "51220166140dfa447b5a79050473721a6404d35c",
+    "size": 7513,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/github.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/github.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/51220166140dfa447b5a79050473721a6404d35c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/github.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/github.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/51220166140dfa447b5a79050473721a6404d35c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/github.md"
+    }
+  },
+  {
+    "name": "github_copilot.md",
+    "path": "docs/my-website/docs/providers/github_copilot.md",
+    "sha": "e9fd3444f5f2ffde6d1bafceadf18265009c411d",
+    "size": 5659,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/github_copilot.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/github_copilot.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e9fd3444f5f2ffde6d1bafceadf18265009c411d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/github_copilot.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/github_copilot.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e9fd3444f5f2ffde6d1bafceadf18265009c411d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/github_copilot.md"
+    }
+  },
+  {
+    "name": "gmi.md",
+    "path": "docs/my-website/docs/providers/gmi.md",
+    "sha": "8e321463239de782b3794ec827730c8b1bb75be1",
+    "size": 4507,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gmi.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gmi.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/8e321463239de782b3794ec827730c8b1bb75be1",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gmi.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gmi.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/8e321463239de782b3794ec827730c8b1bb75be1",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gmi.md"
+    }
+  },
+  {
+    "name": "google_ai_studio",
+    "path": "docs/my-website/docs/providers/google_ai_studio",
+    "sha": "173f72d59d5c59420eb3dbbe15217456dedf9470",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/google_ai_studio?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/google_ai_studio",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/173f72d59d5c59420eb3dbbe15217456dedf9470",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/google_ai_studio?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/173f72d59d5c59420eb3dbbe15217456dedf9470",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/google_ai_studio"
+    }
+  },
+  {
+    "name": "gradient_ai.md",
+    "path": "docs/my-website/docs/providers/gradient_ai.md",
+    "sha": "7b5eef04dcde7a4fba5a15f44e97984cd4fb4337",
+    "size": 3463,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gradient_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gradient_ai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7b5eef04dcde7a4fba5a15f44e97984cd4fb4337",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gradient_ai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/gradient_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7b5eef04dcde7a4fba5a15f44e97984cd4fb4337",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/gradient_ai.md"
+    }
+  },
+  {
+    "name": "groq.md",
+    "path": "docs/my-website/docs/providers/groq.md",
+    "sha": "f40df1e7a8f8610f9ef820b41ebeb3a9862cf8c8",
+    "size": 10248,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/groq.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/groq.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f40df1e7a8f8610f9ef820b41ebeb3a9862cf8c8",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/groq.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/groq.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f40df1e7a8f8610f9ef820b41ebeb3a9862cf8c8",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/groq.md"
+    }
+  },
+  {
+    "name": "helicone.md",
+    "path": "docs/my-website/docs/providers/helicone.md",
+    "sha": "3f0cfcbcb28eba2606b26873c791787e1878dc6b",
+    "size": 7716,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/helicone.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/helicone.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3f0cfcbcb28eba2606b26873c791787e1878dc6b",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/helicone.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/helicone.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3f0cfcbcb28eba2606b26873c791787e1878dc6b",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/helicone.md"
+    }
+  },
+  {
+    "name": "heroku.md",
+    "path": "docs/my-website/docs/providers/heroku.md",
+    "sha": "bf37ed64b199ace4a3588ed068db225bdbc2fe4e",
+    "size": 3222,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/heroku.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/heroku.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bf37ed64b199ace4a3588ed068db225bdbc2fe4e",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/heroku.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/heroku.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bf37ed64b199ace4a3588ed068db225bdbc2fe4e",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/heroku.md"
+    }
+  },
+  {
+    "name": "huggingface.md",
+    "path": "docs/my-website/docs/providers/huggingface.md",
+    "sha": "46ea93bbe0bd5d2fcd901b516f1f06e25a9363d0",
+    "size": 11986,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/huggingface.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/huggingface.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/46ea93bbe0bd5d2fcd901b516f1f06e25a9363d0",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/huggingface.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/huggingface.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/46ea93bbe0bd5d2fcd901b516f1f06e25a9363d0",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/huggingface.md"
+    }
+  },
+  {
+    "name": "huggingface_rerank.md",
+    "path": "docs/my-website/docs/providers/huggingface_rerank.md",
+    "sha": "c28908b74edac5682061815c0cfb9e59d6d1f956",
+    "size": 6701,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/huggingface_rerank.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/huggingface_rerank.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c28908b74edac5682061815c0cfb9e59d6d1f956",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/huggingface_rerank.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/huggingface_rerank.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c28908b74edac5682061815c0cfb9e59d6d1f956",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/huggingface_rerank.md"
+    }
+  },
+  {
+    "name": "hyperbolic.md",
+    "path": "docs/my-website/docs/providers/hyperbolic.md",
+    "sha": "7bad527fcfe4b63142665199317fae3841eb45b3",
+    "size": 10353,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/hyperbolic.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/hyperbolic.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7bad527fcfe4b63142665199317fae3841eb45b3",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/hyperbolic.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/hyperbolic.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7bad527fcfe4b63142665199317fae3841eb45b3",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/hyperbolic.md"
+    }
+  },
+  {
+    "name": "infinity.md",
+    "path": "docs/my-website/docs/providers/infinity.md",
+    "sha": "7900d5adb4a5bc7479f6669a7164b2855c25cec1",
+    "size": 7704,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/infinity.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/infinity.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7900d5adb4a5bc7479f6669a7164b2855c25cec1",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/infinity.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/infinity.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/7900d5adb4a5bc7479f6669a7164b2855c25cec1",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/infinity.md"
+    }
+  },
+  {
+    "name": "jina_ai.md",
+    "path": "docs/my-website/docs/providers/jina_ai.md",
+    "sha": "6c13dbf1a8c6d8ed4dfb4b56c00e7b4afb547afa",
+    "size": 3773,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/jina_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/jina_ai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6c13dbf1a8c6d8ed4dfb4b56c00e7b4afb547afa",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/jina_ai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/jina_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6c13dbf1a8c6d8ed4dfb4b56c00e7b4afb547afa",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/jina_ai.md"
+    }
+  },
+  {
+    "name": "lambda_ai.md",
+    "path": "docs/my-website/docs/providers/lambda_ai.md",
+    "sha": "91800faab708f935339ae10dcdfd50323ebd33d1",
+    "size": 7438,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/lambda_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lambda_ai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/91800faab708f935339ae10dcdfd50323ebd33d1",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lambda_ai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/lambda_ai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/91800faab708f935339ae10dcdfd50323ebd33d1",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lambda_ai.md"
+    }
+  },
+  {
+    "name": "langgraph.md",
+    "path": "docs/my-website/docs/providers/langgraph.md",
+    "sha": "eea8459c7237aacdba5029e1396d63236e95be75",
+    "size": 10761,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/langgraph.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/langgraph.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/eea8459c7237aacdba5029e1396d63236e95be75",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/langgraph.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/langgraph.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/eea8459c7237aacdba5029e1396d63236e95be75",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/langgraph.md"
+    }
+  },
+  {
+    "name": "lemonade.md",
+    "path": "docs/my-website/docs/providers/lemonade.md",
+    "sha": "fc77b78a76c5b22a854dcedee1fba85bef44b4f2",
+    "size": 4840,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/lemonade.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lemonade.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/fc77b78a76c5b22a854dcedee1fba85bef44b4f2",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lemonade.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/lemonade.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/fc77b78a76c5b22a854dcedee1fba85bef44b4f2",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lemonade.md"
+    }
+  },
+  {
+    "name": "litellm_proxy.md",
+    "path": "docs/my-website/docs/providers/litellm_proxy.md",
+    "sha": "918ac6755a5311588a1380052fdb9e4efe2ebf87",
+    "size": 7214,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/litellm_proxy.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/litellm_proxy.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/918ac6755a5311588a1380052fdb9e4efe2ebf87",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/litellm_proxy.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/litellm_proxy.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/918ac6755a5311588a1380052fdb9e4efe2ebf87",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/litellm_proxy.md"
+    }
+  },
+  {
+    "name": "llamafile.md",
+    "path": "docs/my-website/docs/providers/llamafile.md",
+    "sha": "3539bc2eb4ff954cf2dee37cf71ee7d99efccac6",
+    "size": 4365,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/llamafile.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/llamafile.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3539bc2eb4ff954cf2dee37cf71ee7d99efccac6",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/llamafile.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/llamafile.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3539bc2eb4ff954cf2dee37cf71ee7d99efccac6",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/llamafile.md"
+    }
+  },
+  {
+    "name": "llamagate.md",
+    "path": "docs/my-website/docs/providers/llamagate.md",
+    "sha": "bc3626947718b2f64ac9b91302b009c3b599ffae",
+    "size": 6552,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/llamagate.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/llamagate.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bc3626947718b2f64ac9b91302b009c3b599ffae",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/llamagate.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/llamagate.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bc3626947718b2f64ac9b91302b009c3b599ffae",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/llamagate.md"
+    }
+  },
+  {
+    "name": "lm_studio.md",
+    "path": "docs/my-website/docs/providers/lm_studio.md",
+    "sha": "0cf9acff33db56d4de80b151ee2a055d44989848",
+    "size": 3854,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/lm_studio.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lm_studio.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0cf9acff33db56d4de80b151ee2a055d44989848",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lm_studio.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/lm_studio.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0cf9acff33db56d4de80b151ee2a055d44989848",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/lm_studio.md"
+    }
+  },
+  {
+    "name": "manus.md",
+    "path": "docs/my-website/docs/providers/manus.md",
+    "sha": "92bf2b9b966de3197fb0b9991162b9822f9535f9",
+    "size": 9178,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/manus.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/manus.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/92bf2b9b966de3197fb0b9991162b9822f9535f9",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/manus.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/manus.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/92bf2b9b966de3197fb0b9991162b9822f9535f9",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/manus.md"
+    }
+  },
+  {
+    "name": "meta_llama.md",
+    "path": "docs/my-website/docs/providers/meta_llama.md",
+    "sha": "f4bcbf7692db9f83f44dc0ec66636ff3e7e60bb5",
+    "size": 8729,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/meta_llama.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/meta_llama.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f4bcbf7692db9f83f44dc0ec66636ff3e7e60bb5",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/meta_llama.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/meta_llama.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f4bcbf7692db9f83f44dc0ec66636ff3e7e60bb5",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/meta_llama.md"
+    }
+  },
+  {
+    "name": "milvus_vector_stores.md",
+    "path": "docs/my-website/docs/providers/milvus_vector_stores.md",
+    "sha": "4417351148390f314f91466a3ad3b44debb286fe",
+    "size": 22971,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/milvus_vector_stores.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/milvus_vector_stores.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4417351148390f314f91466a3ad3b44debb286fe",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/milvus_vector_stores.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/milvus_vector_stores.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4417351148390f314f91466a3ad3b44debb286fe",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/milvus_vector_stores.md"
+    }
+  },
+  {
+    "name": "minimax.md",
+    "path": "docs/my-website/docs/providers/minimax.md",
+    "sha": "9505c26aadef8c1b4a9660b359e59f616d401041",
+    "size": 15906,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/minimax.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/minimax.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9505c26aadef8c1b4a9660b359e59f616d401041",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/minimax.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/minimax.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9505c26aadef8c1b4a9660b359e59f616d401041",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/minimax.md"
+    }
+  },
+  {
+    "name": "mistral.md",
+    "path": "docs/my-website/docs/providers/mistral.md",
+    "sha": "8355cd2464c8de2e4d232c18029011bcf8901e8a",
+    "size": 10848,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/mistral.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/mistral.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/8355cd2464c8de2e4d232c18029011bcf8901e8a",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/mistral.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/mistral.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/8355cd2464c8de2e4d232c18029011bcf8901e8a",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/mistral.md"
+    }
+  },
+  {
+    "name": "moonshot.md",
+    "path": "docs/my-website/docs/providers/moonshot.md",
+    "sha": "827f2fd53c12f8207264026b70a24da202e336b7",
+    "size": 7620,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/moonshot.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/moonshot.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/827f2fd53c12f8207264026b70a24da202e336b7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/moonshot.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/moonshot.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/827f2fd53c12f8207264026b70a24da202e336b7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/moonshot.md"
+    }
+  },
+  {
+    "name": "morph.md",
+    "path": "docs/my-website/docs/providers/morph.md",
+    "sha": "e49c60b5665d54cc7a454d5bf7d4bc6f0fd81e82",
+    "size": 2883,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/morph.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/morph.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e49c60b5665d54cc7a454d5bf7d4bc6f0fd81e82",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/morph.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/morph.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e49c60b5665d54cc7a454d5bf7d4bc6f0fd81e82",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/morph.md"
+    }
+  },
+  {
+    "name": "nano-gpt.md",
+    "path": "docs/my-website/docs/providers/nano-gpt.md",
+    "sha": "4e46c032c75a0449a8c21a23e7125ae68ed04aeb",
+    "size": 5038,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nano-gpt.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nano-gpt.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4e46c032c75a0449a8c21a23e7125ae68ed04aeb",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nano-gpt.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nano-gpt.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4e46c032c75a0449a8c21a23e7125ae68ed04aeb",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nano-gpt.md"
+    }
+  },
+  {
+    "name": "nebius.md",
+    "path": "docs/my-website/docs/providers/nebius.md",
+    "sha": "a5d0661fef0ce7a7f582296ce0e32b46f5c19496",
+    "size": 5271,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nebius.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nebius.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a5d0661fef0ce7a7f582296ce0e32b46f5c19496",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nebius.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nebius.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/a5d0661fef0ce7a7f582296ce0e32b46f5c19496",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nebius.md"
+    }
+  },
+  {
+    "name": "nlp_cloud.md",
+    "path": "docs/my-website/docs/providers/nlp_cloud.md",
+    "sha": "3d74fb7e160c6c789d0ed3b8e9843d4788f3ed1d",
+    "size": 1520,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nlp_cloud.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nlp_cloud.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3d74fb7e160c6c789d0ed3b8e9843d4788f3ed1d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nlp_cloud.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nlp_cloud.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3d74fb7e160c6c789d0ed3b8e9843d4788f3ed1d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nlp_cloud.md"
+    }
+  },
+  {
+    "name": "novita.md",
+    "path": "docs/my-website/docs/providers/novita.md",
+    "sha": "f879ef4abaca925286e4ac97dce538c03085d534",
+    "size": 7186,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/novita.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/novita.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f879ef4abaca925286e4ac97dce538c03085d534",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/novita.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/novita.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f879ef4abaca925286e4ac97dce538c03085d534",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/novita.md"
+    }
+  },
+  {
+    "name": "nscale.md",
+    "path": "docs/my-website/docs/providers/nscale.md",
+    "sha": "0413253a4beadf4afeb1466e0cc8da779fb284a9",
+    "size": 5396,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nscale.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nscale.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0413253a4beadf4afeb1466e0cc8da779fb284a9",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nscale.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nscale.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0413253a4beadf4afeb1466e0cc8da779fb284a9",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nscale.md"
+    }
+  },
+  {
+    "name": "nvidia_nim.md",
+    "path": "docs/my-website/docs/providers/nvidia_nim.md",
+    "sha": "9dbfc80f4e4cdeabfdc289cb6fb4e927ed67b116",
+    "size": 7645,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nvidia_nim.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nvidia_nim.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9dbfc80f4e4cdeabfdc289cb6fb4e927ed67b116",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nvidia_nim.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nvidia_nim.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9dbfc80f4e4cdeabfdc289cb6fb4e927ed67b116",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nvidia_nim.md"
+    }
+  },
+  {
+    "name": "nvidia_nim_rerank.md",
+    "path": "docs/my-website/docs/providers/nvidia_nim_rerank.md",
+    "sha": "d28f056c24bc661c3d790a9673f0b419bd26b26d",
+    "size": 10304,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nvidia_nim_rerank.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nvidia_nim_rerank.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d28f056c24bc661c3d790a9673f0b419bd26b26d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nvidia_nim_rerank.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/nvidia_nim_rerank.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d28f056c24bc661c3d790a9673f0b419bd26b26d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/nvidia_nim_rerank.md"
+    }
+  },
+  {
+    "name": "oci.md",
+    "path": "docs/my-website/docs/providers/oci.md",
+    "sha": "182bb4407a7135f80bb462d9f70f9ff62e79c763",
+    "size": 15313,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/oci.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/oci.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/182bb4407a7135f80bb462d9f70f9ff62e79c763",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/oci.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/oci.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/182bb4407a7135f80bb462d9f70f9ff62e79c763",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/oci.md"
+    }
+  },
+  {
+    "name": "ollama.md",
+    "path": "docs/my-website/docs/providers/ollama.md",
+    "sha": "bf32993c1dd21d97cf2e7ab111a4da4ce03778f8",
+    "size": 18486,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ollama.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ollama.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bf32993c1dd21d97cf2e7ab111a4da4ce03778f8",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ollama.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ollama.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bf32993c1dd21d97cf2e7ab111a4da4ce03778f8",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ollama.md"
+    }
+  },
+  {
+    "name": "openai.md",
+    "path": "docs/my-website/docs/providers/openai.md",
+    "sha": "1f4a1687e8baabfccbd9e79ee20f103941342773",
+    "size": 39874,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1f4a1687e8baabfccbd9e79ee20f103941342773",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1f4a1687e8baabfccbd9e79ee20f103941342773",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai.md"
+    }
+  },
+  {
+    "name": "openai",
+    "path": "docs/my-website/docs/providers/openai",
+    "sha": "134ea3dc1277927278ff0422801502154f92e23a",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openai?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/134ea3dc1277927278ff0422801502154f92e23a",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openai?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/134ea3dc1277927278ff0422801502154f92e23a",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai"
+    }
+  },
+  {
+    "name": "openai_compatible.md",
+    "path": "docs/my-website/docs/providers/openai_compatible.md",
+    "sha": "f67500f2b108dcd01404f8e96f7f1d1aa49ad029",
+    "size": 4380,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openai_compatible.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai_compatible.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f67500f2b108dcd01404f8e96f7f1d1aa49ad029",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai_compatible.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openai_compatible.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f67500f2b108dcd01404f8e96f7f1d1aa49ad029",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openai_compatible.md"
+    }
+  },
+  {
+    "name": "openrouter.md",
+    "path": "docs/my-website/docs/providers/openrouter.md",
+    "sha": "4c79c41cfd5a01090adf0d0c0daf1d827eae93df",
+    "size": 10160,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openrouter.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openrouter.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4c79c41cfd5a01090adf0d0c0daf1d827eae93df",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openrouter.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/openrouter.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4c79c41cfd5a01090adf0d0c0daf1d827eae93df",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/openrouter.md"
+    }
+  },
+  {
+    "name": "ovhcloud.md",
+    "path": "docs/my-website/docs/providers/ovhcloud.md",
+    "sha": "94625b0f2edcbbf4cd1cabe8962768922053cb61",
+    "size": 10472,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ovhcloud.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ovhcloud.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/94625b0f2edcbbf4cd1cabe8962768922053cb61",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ovhcloud.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ovhcloud.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/94625b0f2edcbbf4cd1cabe8962768922053cb61",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ovhcloud.md"
+    }
+  },
+  {
+    "name": "perplexity.md",
+    "path": "docs/my-website/docs/providers/perplexity.md",
+    "sha": "e3991c63bffb80563fca4df1aa6c1546998178e1",
+    "size": 12233,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/perplexity.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/perplexity.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e3991c63bffb80563fca4df1aa6c1546998178e1",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/perplexity.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/perplexity.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/e3991c63bffb80563fca4df1aa6c1546998178e1",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/perplexity.md"
+    }
+  },
+  {
+    "name": "perplexity_embedding.md",
+    "path": "docs/my-website/docs/providers/perplexity_embedding.md",
+    "sha": "92981b2632ec5744b4eaeea16d0d6383f75b4776",
+    "size": 3228,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/perplexity_embedding.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/perplexity_embedding.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/92981b2632ec5744b4eaeea16d0d6383f75b4776",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/perplexity_embedding.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/perplexity_embedding.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/92981b2632ec5744b4eaeea16d0d6383f75b4776",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/perplexity_embedding.md"
+    }
+  },
+  {
+    "name": "petals.md",
+    "path": "docs/my-website/docs/providers/petals.md",
+    "sha": "c64b097c7e4ff573ee8823012dc5d6830cafe0e2",
+    "size": 1300,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/petals.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/petals.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c64b097c7e4ff573ee8823012dc5d6830cafe0e2",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/petals.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/petals.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c64b097c7e4ff573ee8823012dc5d6830cafe0e2",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/petals.md"
+    }
+  },
+  {
+    "name": "poe.md",
+    "path": "docs/my-website/docs/providers/poe.md",
+    "sha": "ba4089ae6a49636629158f2edf0de4a85f08e107",
+    "size": 4306,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/poe.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/poe.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/ba4089ae6a49636629158f2edf0de4a85f08e107",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/poe.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/poe.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/ba4089ae6a49636629158f2edf0de4a85f08e107",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/poe.md"
+    }
+  },
+  {
+    "name": "predibase.md",
+    "path": "docs/my-website/docs/providers/predibase.md",
+    "sha": "978db3d14d158476c71ffb0b0794902750cb64a8",
+    "size": 6099,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/predibase.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/predibase.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/978db3d14d158476c71ffb0b0794902750cb64a8",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/predibase.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/predibase.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/978db3d14d158476c71ffb0b0794902750cb64a8",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/predibase.md"
+    }
+  },
+  {
+    "name": "publicai.md",
+    "path": "docs/my-website/docs/providers/publicai.md",
+    "sha": "1ab8bd5a06c450438562359f8670fb4f0555b648",
+    "size": 5386,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/publicai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/publicai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1ab8bd5a06c450438562359f8670fb4f0555b648",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/publicai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/publicai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1ab8bd5a06c450438562359f8670fb4f0555b648",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/publicai.md"
+    }
+  },
+  {
+    "name": "pydantic_ai_agent.md",
+    "path": "docs/my-website/docs/providers/pydantic_ai_agent.md",
+    "sha": "4e24e6d4e41e7504f4baf1cc4b33e26e78c94b5c",
+    "size": 7541,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/pydantic_ai_agent.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/pydantic_ai_agent.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4e24e6d4e41e7504f4baf1cc4b33e26e78c94b5c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/pydantic_ai_agent.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/pydantic_ai_agent.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/4e24e6d4e41e7504f4baf1cc4b33e26e78c94b5c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/pydantic_ai_agent.md"
+    }
+  },
+  {
+    "name": "ragflow.md",
+    "path": "docs/my-website/docs/providers/ragflow.md",
+    "sha": "73223bd07b5fc345e344b46fe257b906054ebec0",
+    "size": 5842,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ragflow.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ragflow.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/73223bd07b5fc345e344b46fe257b906054ebec0",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ragflow.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ragflow.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/73223bd07b5fc345e344b46fe257b906054ebec0",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ragflow.md"
+    }
+  },
+  {
+    "name": "ragflow_vector_store.md",
+    "path": "docs/my-website/docs/providers/ragflow_vector_store.md",
+    "sha": "bc014cacbe6f47f7490b463c54a838bb08ad35c8",
+    "size": 9050,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ragflow_vector_store.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ragflow_vector_store.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bc014cacbe6f47f7490b463c54a838bb08ad35c8",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ragflow_vector_store.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/ragflow_vector_store.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/bc014cacbe6f47f7490b463c54a838bb08ad35c8",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/ragflow_vector_store.md"
+    }
+  },
+  {
+    "name": "recraft.md",
+    "path": "docs/my-website/docs/providers/recraft.md",
+    "sha": "d4a29c38aa069c642680bc30677e8b0a87c86ba6",
+    "size": 8073,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/recraft.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/recraft.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d4a29c38aa069c642680bc30677e8b0a87c86ba6",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/recraft.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/recraft.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d4a29c38aa069c642680bc30677e8b0a87c86ba6",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/recraft.md"
+    }
+  },
+  {
+    "name": "replicate.md",
+    "path": "docs/my-website/docs/providers/replicate.md",
+    "sha": "db24d21827520549e48bf773f9df5a4a686a933b",
+    "size": 8882,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/replicate.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/replicate.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/db24d21827520549e48bf773f9df5a4a686a933b",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/replicate.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/replicate.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/db24d21827520549e48bf773f9df5a4a686a933b",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/replicate.md"
+    }
+  },
+  {
+    "name": "runwayml",
+    "path": "docs/my-website/docs/providers/runwayml",
+    "sha": "6478a41f7c31cdc56fbee1b39fddf3ebe8268bd7",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/runwayml?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/runwayml",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/6478a41f7c31cdc56fbee1b39fddf3ebe8268bd7",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/runwayml?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/6478a41f7c31cdc56fbee1b39fddf3ebe8268bd7",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/runwayml"
+    }
+  },
+  {
+    "name": "sambanova.md",
+    "path": "docs/my-website/docs/providers/sambanova.md",
+    "sha": "f7be5d3ce77d0d2da6619646455083b57cbdf3e7",
+    "size": 8291,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/sambanova.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sambanova.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f7be5d3ce77d0d2da6619646455083b57cbdf3e7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sambanova.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/sambanova.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/f7be5d3ce77d0d2da6619646455083b57cbdf3e7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sambanova.md"
+    }
+  },
+  {
+    "name": "sap.md",
+    "path": "docs/my-website/docs/providers/sap.md",
+    "sha": "5d11dba5c072db05777cf97c53c8016480b68eac",
+    "size": 27994,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/sap.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sap.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5d11dba5c072db05777cf97c53c8016480b68eac",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sap.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/sap.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/5d11dba5c072db05777cf97c53c8016480b68eac",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sap.md"
+    }
+  },
+  {
+    "name": "sarvam.md",
+    "path": "docs/my-website/docs/providers/sarvam.md",
+    "sha": "6a2924567810a756a214b67c597ea893d062727d",
+    "size": 2002,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/sarvam.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sarvam.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6a2924567810a756a214b67c597ea893d062727d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sarvam.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/sarvam.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6a2924567810a756a214b67c597ea893d062727d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/sarvam.md"
+    }
+  },
+  {
+    "name": "scaleway.md",
+    "path": "docs/my-website/docs/providers/scaleway.md",
+    "sha": "ea57c24db306ac24ca1060b13ca02012a52b1557",
+    "size": 1684,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/scaleway.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/scaleway.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/ea57c24db306ac24ca1060b13ca02012a52b1557",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/scaleway.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/scaleway.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/ea57c24db306ac24ca1060b13ca02012a52b1557",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/scaleway.md"
+    }
+  },
+  {
+    "name": "snowflake.md",
+    "path": "docs/my-website/docs/providers/snowflake.md",
+    "sha": "483bf939fe6420dcae8891a4e94769527d4a7a0c",
+    "size": 3261,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/snowflake.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/snowflake.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/483bf939fe6420dcae8891a4e94769527d4a7a0c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/snowflake.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/snowflake.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/483bf939fe6420dcae8891a4e94769527d4a7a0c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/snowflake.md"
+    }
+  },
+  {
+    "name": "stability.md",
+    "path": "docs/my-website/docs/providers/stability.md",
+    "sha": "c4bc5376d1f762648b982375d29182ebaa541a37",
+    "size": 15913,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/stability.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/stability.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c4bc5376d1f762648b982375d29182ebaa541a37",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/stability.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/stability.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c4bc5376d1f762648b982375d29182ebaa541a37",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/stability.md"
+    }
+  },
+  {
+    "name": "synthetic.md",
+    "path": "docs/my-website/docs/providers/synthetic.md",
+    "sha": "b3ba3d0a9e76cd4aa5ab04ca420d03ac17591155",
+    "size": 3419,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/synthetic.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/synthetic.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b3ba3d0a9e76cd4aa5ab04ca420d03ac17591155",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/synthetic.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/synthetic.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b3ba3d0a9e76cd4aa5ab04ca420d03ac17591155",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/synthetic.md"
+    }
+  },
+  {
+    "name": "text_completion_openai.md",
+    "path": "docs/my-website/docs/providers/text_completion_openai.md",
+    "sha": "d790c01fe0bd434891390926aa58fdeb2f2d359c",
+    "size": 4461,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/text_completion_openai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/text_completion_openai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d790c01fe0bd434891390926aa58fdeb2f2d359c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/text_completion_openai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/text_completion_openai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/d790c01fe0bd434891390926aa58fdeb2f2d359c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/text_completion_openai.md"
+    }
+  },
+  {
+    "name": "togetherai.md",
+    "path": "docs/my-website/docs/providers/togetherai.md",
+    "sha": "584efd91ab664d7f35e1bee824b7b6854384c9da",
+    "size": 11443,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/togetherai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/togetherai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/584efd91ab664d7f35e1bee824b7b6854384c9da",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/togetherai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/togetherai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/584efd91ab664d7f35e1bee824b7b6854384c9da",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/togetherai.md"
+    }
+  },
+  {
+    "name": "topaz.md",
+    "path": "docs/my-website/docs/providers/topaz.md",
+    "sha": "018d269684d8bba000307c36a281ef488ecb6ad2",
+    "size": 611,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/topaz.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/topaz.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/018d269684d8bba000307c36a281ef488ecb6ad2",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/topaz.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/topaz.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/018d269684d8bba000307c36a281ef488ecb6ad2",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/topaz.md"
+    }
+  },
+  {
+    "name": "triton-inference-server.md",
+    "path": "docs/my-website/docs/providers/triton-inference-server.md",
+    "sha": "1d3789fe8a220d1aaaaf7af12c5a919ee4465a26",
+    "size": 5868,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/triton-inference-server.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/triton-inference-server.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1d3789fe8a220d1aaaaf7af12c5a919ee4465a26",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/triton-inference-server.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/triton-inference-server.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/1d3789fe8a220d1aaaaf7af12c5a919ee4465a26",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/triton-inference-server.md"
+    }
+  },
+  {
+    "name": "v0.md",
+    "path": "docs/my-website/docs/providers/v0.md",
+    "sha": "74b6498ca888de580410970dd5e88b1ecaba6d0d",
+    "size": 9056,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/v0.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/v0.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/74b6498ca888de580410970dd5e88b1ecaba6d0d",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/v0.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/v0.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/74b6498ca888de580410970dd5e88b1ecaba6d0d",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/v0.md"
+    }
+  },
+  {
+    "name": "vercel_ai_gateway.md",
+    "path": "docs/my-website/docs/providers/vercel_ai_gateway.md",
+    "sha": "3ff007171eddaad74bce9ec5e4d4af82f83b7e0a",
+    "size": 6894,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vercel_ai_gateway.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vercel_ai_gateway.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3ff007171eddaad74bce9ec5e4d4af82f83b7e0a",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vercel_ai_gateway.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vercel_ai_gateway.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3ff007171eddaad74bce9ec5e4d4af82f83b7e0a",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vercel_ai_gateway.md"
+    }
+  },
+  {
+    "name": "vertex.md",
+    "path": "docs/my-website/docs/providers/vertex.md",
+    "sha": "0079bd2f57ee800e200e0ac50685a668e5e661b7",
+    "size": 92624,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0079bd2f57ee800e200e0ac50685a668e5e661b7",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/0079bd2f57ee800e200e0ac50685a668e5e661b7",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex.md"
+    }
+  },
+  {
+    "name": "vertex_ai",
+    "path": "docs/my-website/docs/providers/vertex_ai",
+    "sha": "7b2f49aad10fd9046b4afc46b59cc3ca9244f3e3",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_ai?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ai",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/7b2f49aad10fd9046b4afc46b59cc3ca9244f3e3",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_ai?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/7b2f49aad10fd9046b4afc46b59cc3ca9244f3e3",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ai"
+    }
+  },
+  {
+    "name": "vertex_ai_agent_engine.md",
+    "path": "docs/my-website/docs/providers/vertex_ai_agent_engine.md",
+    "sha": "3bd40e9868452e7fa4af5d8bfafe96d940deeaab",
+    "size": 11620,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_ai_agent_engine.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ai_agent_engine.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3bd40e9868452e7fa4af5d8bfafe96d940deeaab",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ai_agent_engine.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_ai_agent_engine.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/3bd40e9868452e7fa4af5d8bfafe96d940deeaab",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ai_agent_engine.md"
+    }
+  },
+  {
+    "name": "vertex_batch.md",
+    "path": "docs/my-website/docs/providers/vertex_batch.md",
+    "sha": "01052ba32e3232d54bbb80cb625128660bafdc0f",
+    "size": 9823,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_batch.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_batch.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/01052ba32e3232d54bbb80cb625128660bafdc0f",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_batch.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_batch.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/01052ba32e3232d54bbb80cb625128660bafdc0f",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_batch.md"
+    }
+  },
+  {
+    "name": "vertex_embedding.md",
+    "path": "docs/my-website/docs/providers/vertex_embedding.md",
+    "sha": "9b530f2ae064868bbdec9ddccb3fa59feaf85be9",
+    "size": 16409,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_embedding.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_embedding.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9b530f2ae064868bbdec9ddccb3fa59feaf85be9",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_embedding.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_embedding.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9b530f2ae064868bbdec9ddccb3fa59feaf85be9",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_embedding.md"
+    }
+  },
+  {
+    "name": "vertex_image.md",
+    "path": "docs/my-website/docs/providers/vertex_image.md",
+    "sha": "c4d5d554088b1c9336df9f5bbb98ba33d36ddbb3",
+    "size": 4483,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_image.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_image.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c4d5d554088b1c9336df9f5bbb98ba33d36ddbb3",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_image.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_image.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c4d5d554088b1c9336df9f5bbb98ba33d36ddbb3",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_image.md"
+    }
+  },
+  {
+    "name": "vertex_ocr.md",
+    "path": "docs/my-website/docs/providers/vertex_ocr.md",
+    "sha": "9ff22a03775430afef6551785cee7c0024a5d1ac",
+    "size": 6368,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_ocr.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ocr.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9ff22a03775430afef6551785cee7c0024a5d1ac",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ocr.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_ocr.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9ff22a03775430afef6551785cee7c0024a5d1ac",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_ocr.md"
+    }
+  },
+  {
+    "name": "vertex_partner.md",
+    "path": "docs/my-website/docs/providers/vertex_partner.md",
+    "sha": "75ec3b93087201b1f7f744df43436ac23995253c",
+    "size": 25324,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_partner.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_partner.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/75ec3b93087201b1f7f744df43436ac23995253c",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_partner.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_partner.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/75ec3b93087201b1f7f744df43436ac23995253c",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_partner.md"
+    }
+  },
+  {
+    "name": "vertex_realtime.md",
+    "path": "docs/my-website/docs/providers/vertex_realtime.md",
+    "sha": "00db682a0d79e4de4c54bdc5ef9f55b52e554a28",
+    "size": 5597,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_realtime.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_realtime.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/00db682a0d79e4de4c54bdc5ef9f55b52e554a28",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_realtime.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_realtime.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/00db682a0d79e4de4c54bdc5ef9f55b52e554a28",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_realtime.md"
+    }
+  },
+  {
+    "name": "vertex_self_deployed.md",
+    "path": "docs/my-website/docs/providers/vertex_self_deployed.md",
+    "sha": "b7a71cdbd0e1c4f0cf69dc6914ab227211b154f4",
+    "size": 5823,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_self_deployed.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_self_deployed.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b7a71cdbd0e1c4f0cf69dc6914ab227211b154f4",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_self_deployed.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_self_deployed.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b7a71cdbd0e1c4f0cf69dc6914ab227211b154f4",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_self_deployed.md"
+    }
+  },
+  {
+    "name": "vertex_speech.md",
+    "path": "docs/my-website/docs/providers/vertex_speech.md",
+    "sha": "751782a323c0a443afa429101dc26f9695c96b5a",
+    "size": 10796,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_speech.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_speech.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/751782a323c0a443afa429101dc26f9695c96b5a",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_speech.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vertex_speech.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/751782a323c0a443afa429101dc26f9695c96b5a",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vertex_speech.md"
+    }
+  },
+  {
+    "name": "vllm.md",
+    "path": "docs/my-website/docs/providers/vllm.md",
+    "sha": "6fc3a9f3287bb62c7e55b58349c001de6155e99b",
+    "size": 16834,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vllm.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vllm.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6fc3a9f3287bb62c7e55b58349c001de6155e99b",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vllm.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vllm.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/6fc3a9f3287bb62c7e55b58349c001de6155e99b",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vllm.md"
+    }
+  },
+  {
+    "name": "vllm_batches.md",
+    "path": "docs/my-website/docs/providers/vllm_batches.md",
+    "sha": "44c4d9149125775bd482b627fb7da4389c03be09",
+    "size": 5108,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vllm_batches.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vllm_batches.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/44c4d9149125775bd482b627fb7da4389c03be09",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vllm_batches.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/vllm_batches.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/44c4d9149125775bd482b627fb7da4389c03be09",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/vllm_batches.md"
+    }
+  },
+  {
+    "name": "volcano.md",
+    "path": "docs/my-website/docs/providers/volcano.md",
+    "sha": "efd1e02b60bd996dfd584cf318e0d5af7ab896d6",
+    "size": 3856,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/volcano.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/volcano.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/efd1e02b60bd996dfd584cf318e0d5af7ab896d6",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/volcano.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/volcano.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/efd1e02b60bd996dfd584cf318e0d5af7ab896d6",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/volcano.md"
+    }
+  },
+  {
+    "name": "voyage.md",
+    "path": "docs/my-website/docs/providers/voyage.md",
+    "sha": "43369cd6ab78fe49a1ece811bfb88f5493348e8f",
+    "size": 8450,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/voyage.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/voyage.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/43369cd6ab78fe49a1ece811bfb88f5493348e8f",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/voyage.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/voyage.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/43369cd6ab78fe49a1ece811bfb88f5493348e8f",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/voyage.md"
+    }
+  },
+  {
+    "name": "wandb_inference.md",
+    "path": "docs/my-website/docs/providers/wandb_inference.md",
+    "sha": "c59f08381c64fb4e5fca2195c76dfa985a7a97a5",
+    "size": 6930,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/wandb_inference.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/wandb_inference.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c59f08381c64fb4e5fca2195c76dfa985a7a97a5",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/wandb_inference.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/wandb_inference.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/c59f08381c64fb4e5fca2195c76dfa985a7a97a5",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/wandb_inference.md"
+    }
+  },
+  {
+    "name": "watsonx",
+    "path": "docs/my-website/docs/providers/watsonx",
+    "sha": "9dd720736b8d6d726434d87828436b02213b0b02",
+    "size": 0,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/watsonx?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/watsonx",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/trees/9dd720736b8d6d726434d87828436b02213b0b02",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/watsonx?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/trees/9dd720736b8d6d726434d87828436b02213b0b02",
+      "html": "https://github.com/BerriAI/litellm/tree/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/watsonx"
+    }
+  },
+  {
+    "name": "xai.md",
+    "path": "docs/my-website/docs/providers/xai.md",
+    "sha": "afeecc215280595c3c97aa5df3da039a531d9c38",
+    "size": 8070,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/afeecc215280595c3c97aa5df3da039a531d9c38",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/afeecc215280595c3c97aa5df3da039a531d9c38",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xai.md"
+    }
+  },
+  {
+    "name": "xai_realtime.md",
+    "path": "docs/my-website/docs/providers/xai_realtime.md",
+    "sha": "b36908c4686a724abd140c378bbccf8b9f34bd46",
+    "size": 8057,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xai_realtime.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xai_realtime.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b36908c4686a724abd140c378bbccf8b9f34bd46",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xai_realtime.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xai_realtime.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/b36908c4686a724abd140c378bbccf8b9f34bd46",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xai_realtime.md"
+    }
+  },
+  {
+    "name": "xiaomi_mimo.md",
+    "path": "docs/my-website/docs/providers/xiaomi_mimo.md",
+    "sha": "040f514401522e3a2a7adde8242cb35190a9a66b",
+    "size": 2794,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xiaomi_mimo.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xiaomi_mimo.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/040f514401522e3a2a7adde8242cb35190a9a66b",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xiaomi_mimo.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xiaomi_mimo.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/040f514401522e3a2a7adde8242cb35190a9a66b",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xiaomi_mimo.md"
+    }
+  },
+  {
+    "name": "xinference.md",
+    "path": "docs/my-website/docs/providers/xinference.md",
+    "sha": "9951a1ee3ab5047697ba21d989578c7f6af1f611",
+    "size": 6256,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xinference.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xinference.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9951a1ee3ab5047697ba21d989578c7f6af1f611",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xinference.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/xinference.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/9951a1ee3ab5047697ba21d989578c7f6af1f611",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/xinference.md"
+    }
+  },
+  {
+    "name": "zai.md",
+    "path": "docs/my-website/docs/providers/zai.md",
+    "sha": "937ccd676806df1731b98988bc9d3412141b397e",
+    "size": 3432,
+    "url": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/zai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+    "html_url": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/zai.md",
+    "git_url": "https://api.github.com/repos/BerriAI/litellm/git/blobs/937ccd676806df1731b98988bc9d3412141b397e",
+    "download_url": "https://raw.githubusercontent.com/BerriAI/litellm/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/zai.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/BerriAI/litellm/contents/docs/my-website/docs/providers/zai.md?ref=850fe595ac54fa426bee70c367afdfe865f3b356",
+      "git": "https://api.github.com/repos/BerriAI/litellm/git/blobs/937ccd676806df1731b98988bc9d3412141b397e",
+      "html": "https://github.com/BerriAI/litellm/blob/850fe595ac54fa426bee70c367afdfe865f3b356/docs/my-website/docs/providers/zai.md"
+    }
+  }
+]
