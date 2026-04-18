@@ -26,7 +26,9 @@ Blaze.LlmGateway is an **intelligent, agentic LLM routing proxy** — a single A
 | **Keyword fallback routing** | ✅ Working | Regex/keyword scan; defaults to AzureFoundry |
 | **MCP tool injection** | ✅ Partial | McpConnectionManager connects via Stdio/HTTP; AppendMcpTools injects tools into ChatOptions |
 | **Aspire orchestration** | ✅ Working | AppHost provisions Ollama container, FoundryLocal, GitHub Models; injects secrets as env vars |
-| **Blazor Web UI** | 🟡 Scaffold | Syncfusion Blazor shell; no API connection, no chat UI |
+| **Aspire Dashboard** | ✅ Working | Platform-telemetry UI (traces, logs, metrics, resource graph) auto-provisioned by `Blaze.LlmGateway.AppHost` via `ServiceDefaults` |
+| **Blazor Web UI** | 🟡 Scaffold | Syncfusion Blazor shell; slated as the consumer chat + admin surface; no API connection or chat component wired yet |
+| **Microsoft Agent Framework DevUI** | ❌ Missing | Interactive agent / workflow dev surface (`MapDevUI()` middleware from the Agent Framework NuGet). Lands with the agent plane |
 | **Unit tests** | 🟡 Minimal | 3 tests: LlmRoutingChatClient (2), OllamaMetaRoutingStrategy (1) |
 | **Benchmarks** | 🟡 Scaffold | BenchmarkDotNet project exists; Program.cs is a placeholder |
 | **Circuit breaker** | ❌ Missing | No provider health tracking |
@@ -111,10 +113,11 @@ IServiceProvider.GetKeyedService<IChatClient>(destination.ToString())
 |---|---|
 | P0 | Resilient routing: circuit breaker, configurable fallback chains, streaming failover |
 | P0 | Full MCP tool pipeline: HostedMcpServerTool mapping, dynamic MCP server registration |
+| P0 | Consumer **Blazor chat UI**: functional chat interface wired to `/v1/chat/completions` with streaming, provider override, and session switcher |
 | P1 | Gateway authentication: API key / bearer token auth protecting the `/v1` endpoint |
 | P1 | Full test coverage: 95% line coverage, all failure scenarios covered |
-| P1 | Blazor chat UI: fully functional chat interface connected to the API |
-| P1 | Provider health dashboard: per-provider status, latency, error rate |
+| P1 | **Microsoft Agent Framework DevUI** surface (`MapDevUI()`): interactive agent + workflow dev/debug UI, mounted inside the Api host, gated to non-production by default |
+| P1 | Provider health dashboard: per-provider status, latency, error rate (page inside the Blazor UI) |
 | P2 | Conversation session management: server-side multi-turn history |
 | P2 | Token usage and cost tracking: per-request, per-client, per-provider |
 | P2 | Response caching: exact-match and semantic cache layer |
@@ -189,7 +192,7 @@ IServiceProvider.GetKeyedService<IChatClient>(destination.ToString())
 | FR-05-2 | Per-request metrics: provider, latency (ms), input tokens, output tokens, total cost | ❌ Not implemented |
 | FR-05-3 | Provider health dashboard in the Web UI | ❌ Not implemented |
 | FR-05-4 | Structured log at every routing decision with: strategy, destination, fallback used, duration | 🟡 Partial |
-| FR-05-5 | Aspire dashboard integration for live request traces | 🟡 Via ServiceDefaults |
+| FR-05-5 | **Aspire Dashboard** integration for live request traces, resource health, and structured logs — auto-wired by `ServiceDefaults`; canonical platform-telemetry surface (not to be confused with Agent Framework DevUI, FR-11) | ✅ Wired via ServiceDefaults; LLM-specific span attributes still pending (FR-05-1/2) |
 | FR-05-6 | BenchmarkDotNet suite: P50/P95/P99 latency per provider, routing overhead < 1 ms | ❌ Placeholder only |
 
 ### FR-06 — Response Caching
@@ -218,17 +221,28 @@ IServiceProvider.GetKeyedService<IChatClient>(destination.ToString())
 | FR-08-3 | Automatic context window truncation when history exceeds provider limit | ❌ Not implemented |
 | FR-08-4 | Session expiry / TTL | ❌ Not implemented |
 
-### FR-09 — Web UI (Blazor)
+### FR-09 — Consumer Web UI (Blazor)
+
+The gateway ships **three distinct UI surfaces**, each with a separate role. FR-09 covers the consumer chat + admin surface; FR-11 covers the Agent Framework DevUI; the Aspire Dashboard (already live via `ServiceDefaults`) covers platform telemetry.
+
+| Surface | Project / host | Role | Audience |
+|---|---|---|---|
+| **Aspire Dashboard** | `Blaze.LlmGateway.AppHost` | Traces, logs, metrics, resource graph | Any developer running Aspire locally |
+| **Blazor consumer UI** (FR-09) | `Blaze.LlmGateway.Web` | Chat, provider override, session history, provider/MCP admin pages | End users + operators |
+| **Agent Framework DevUI** (FR-11) | Mounted in `Blaze.LlmGateway.Api` via `MapDevUI()` | Interactive agent/workflow debugging, trace replay | Agent authors, developers |
 
 | ID | Requirement | Current State |
 |---|---|---|
-| FR-09-1 | Chat page with message input and streaming response display | ❌ Not implemented |
-| FR-09-2 | Provider selector (manual override of routing destination) | ❌ Not implemented |
-| FR-09-3 | Provider health status indicators (green/amber/red per provider) | ❌ Not implemented |
-| FR-09-4 | Session/conversation history sidebar | ❌ Not implemented |
-| FR-09-5 | Token usage counter per message | ❌ Not implemented |
-| FR-09-6 | API key configuration screen (enter/update per-provider keys) | ❌ Not implemented |
-| FR-09-7 | MCP server management: add/remove servers, view available tools | ❌ Not implemented |
+| FR-09-1 | Chat page with message input and streaming response display (SSE-native) | ❌ Not implemented |
+| FR-09-2 | Provider selector (manual override of routing destination via `X-LlmGateway-Provider`) | ❌ Not implemented |
+| FR-09-3 | Provider health status indicators (green/amber/red per provider, fed by `/admin/providers`) | ❌ Not implemented |
+| FR-09-4 | Session/conversation history sidebar (reads from `/admin/sessions` or `ISessionStore`) | ❌ Not implemented |
+| FR-09-5 | Token usage counter per message (reads `usage` from SSE final chunk or `/admin/usage`) | ❌ Not implemented |
+| FR-09-6 | API key / provider configuration screen (read-only for provider config in v1; edit-in-place is a stretch) | ❌ Not implemented |
+| FR-09-7 | MCP server management: add/remove servers, view available tools (consumes `/admin/mcp`) | ❌ Not implemented |
+| FR-09-8 | Agent picker and run console (lists `IAgentAdapter` agents, starts runs, streams `AgentEvent`s) | ❌ Not implemented |
+| FR-09-9 | Authenticated against the same API-key / JWT scheme as the `/v1` endpoint (FR-04) | ❌ Not implemented |
+| FR-09-10 | Consumes the API via Aspire service discovery (`https+http://api`) — no hardcoded URLs | ❌ Not implemented |
 
 ### FR-10 — Admin API
 
@@ -240,6 +254,23 @@ IServiceProvider.GetKeyedService<IChatClient>(destination.ToString())
 | FR-10-4 | `PUT /admin/routing` — update routing rules without restart | ❌ Not implemented |
 | FR-10-5 | `GET /admin/mcp` — list connected MCP servers and their tools | ❌ Not implemented |
 | FR-10-6 | `POST /admin/mcp` — register a new MCP server at runtime | ❌ Not implemented |
+
+### FR-11 — Microsoft Agent Framework DevUI
+
+Interactive developer surface for agents and workflows, provided by the **Microsoft Agent Framework** DevUI NuGet (`MapDevUI()` ASP.NET Core middleware). It is **not** an Aspire feature and **not** the Aspire Dashboard — the two are orthogonal. See [research/https-github-com-microsoft-agent-framework.md](../research/https-github-com-microsoft-agent-framework.md) and [research/https-github-com-microsoft-agent-framework-samples.md](../research/https-github-com-microsoft-agent-framework-samples.md).
+
+| ID | Requirement | Current State |
+|---|---|---|
+| FR-11-1 | Mount DevUI middleware inside `Blaze.LlmGateway.Api` via `app.MapDevUI()` on a dedicated route (`/devui` by default) | ❌ Not implemented |
+| FR-11-2 | DevUI discovers every `IAgentAdapter` registered with the agent plane (from ADR-0006) — local Agent Framework agents + Foundry hosted agents | ❌ Not implemented |
+| FR-11-3 | DevUI visualizes agent runs: prompt, tool calls, intermediate messages, final response, token usage, trace timeline | ❌ Not implemented |
+| FR-11-4 | DevUI renders workflow graphs for `Microsoft.Agent.Framework` workflows (sequential, concurrent, handoff, magentic patterns) | ❌ Not implemented |
+| FR-11-5 | DevUI consumes the same OpenTelemetry traces emitted by the agent span schema (NFR-04) — one trace ledger, two consumers (DevUI + Aspire Dashboard) | ❌ Not implemented |
+| FR-11-6 | DevUI is **enabled only in `Development` environment by default**; production hosts require an explicit `LlmGateway:DevUi:Enabled=true` config flag plus auth scope `devui` on the caller | ❌ Not implemented |
+| FR-11-7 | When enabled in non-dev, DevUI calls enter the normal pipeline — subject to auth (FR-04), cloud-escalation policy (ADR-0008), and rate limits (FR-07) | ❌ Not implemented |
+| FR-11-8 | DevUI is reachable both directly (`https://<api-host>/devui`) and via a cross-link from the Blazor UI (FR-09) | ❌ Not implemented |
+| FR-11-9 | DevUI is listed as a discoverable resource in the Aspire Dashboard so developers can navigate to it without memorizing the URL | ❌ Not implemented |
+| FR-11-10 | No agent secrets, API keys, or client-identity tokens are rendered in the DevUI UI — they are redacted in trace payloads | ❌ Not implemented |
 
 ---
 
@@ -261,6 +292,9 @@ IServiceProvider.GetKeyedService<IChatClient>(destination.ToString())
 - All secrets injected via Aspire parameters (user-secrets in dev, Key Vault / env vars in production).
 - Gateway endpoint must support HTTPS in production.
 - Auth middleware must be applied before routing — unauthenticated requests must return 401 before any LLM call is made.
+- **DevUI (FR-11) must be off by default outside `Development`.** Enabling it in staging/production requires both the `LlmGateway:DevUi:Enabled=true` config flag and an authenticated client carrying the `devui` scope. Unauthenticated or unscoped requests to the DevUI route must return 404 (indistinguishable from "not mounted") rather than 401, to avoid confirming the surface exists.
+- **DevUI must not display secrets.** Client API keys, provider API keys, Azure credentials, and OAuth tokens are redacted from any trace or event the DevUI renders.
+- Blazor consumer UI (FR-09) must authenticate against the same scheme as `/v1` — anonymous access to the chat page is not allowed when `LlmGateway:Auth:Required=true`.
 
 ### NFR-04 — Observability
 - Every request must emit an OpenTelemetry span with attributes: provider selected, routing strategy used, input token count, output token count, latency.
@@ -289,7 +323,9 @@ IServiceProvider.GetKeyedService<IChatClient>(destination.ToString())
 
 ### 7.1 Inbound (Clients)
 - Any OpenAI-SDK-compatible client (Python `openai`, JS `openai`, .NET `OpenAIClient`, curl).
-- Blaze.LlmGateway.Web (Blazor) — via Aspire service discovery, `HttpClient`.
+- **Blaze.LlmGateway.Web** (Blazor consumer UI) — via Aspire service discovery, `HttpClient`.
+- **Microsoft Agent Framework DevUI** — hosted inside `Blaze.LlmGateway.Api` (same process) via `MapDevUI()`. Does not cross a network boundary; subject to the same auth pipeline as external clients.
+- **Aspire Dashboard** — observes the host via OpenTelemetry / resource model; does not call `/v1`.
 - ConsoleClient project — ad-hoc testing.
 
 ### 7.2 Outbound (Providers)
@@ -374,10 +410,10 @@ The following areas are the primary extension points, ordered by architectural i
 - Dynamic server registration API
 - Per-request tool selection
 
-### 9.5 Web UI (High Surface Area, Low Core Impact)
-- Blazor chat component, provider status widgets, admin screens
-- API client generated from OpenAPI spec
-- All UI changes are isolated to `Blaze.LlmGateway.Web`
+### 9.5 Web UI surfaces (High Surface Area, Low Core Impact)
+- **Blazor consumer UI** (`Blaze.LlmGateway.Web`): chat component, provider status widgets, session browser, admin screens. API client generated from the OpenAPI spec. All UI changes are isolated to this project.
+- **Agent Framework DevUI**: enabled with a single line (`app.MapDevUI()`) in `Blaze.LlmGateway.Api`. No custom view code — the middleware renders its own UI against the registered `IAgentAdapter` set and the OTel trace feed. Extension surface is just: which agents/workflows to register + env gating.
+- **Aspire Dashboard**: zero extension needed; new resources (e.g. a SQLite container from ADR-0004) appear automatically once declared in `Blaze.LlmGateway.AppHost`.
 
 ### 9.6 Admin API (Medium Impact)
 - New controller/endpoint group in `Blaze.LlmGateway.Api`
@@ -394,12 +430,13 @@ The following areas are the primary extension points, ordered by architectural i
 | OQ-2 | Is response caching a core feature or a pluggable add-on (separate NuGet package)? | Architecture |
 | OQ-3 | What is the target deployment environment — Azure Container Apps, AKS, self-hosted? | Ops |
 | OQ-4 | Should conversation sessions be stored in-process (memory) or externally (Redis, Cosmos DB)? | Architecture |
-| OQ-5 | Is the Blazor Web UI for internal admin only, or a consumer-facing product? | Product |
+| OQ-5 | ~~Is the Blazor Web UI for internal admin only, or a consumer-facing product?~~ **Resolved 2026-04-17: consumer-facing chat + admin surface** (FR-09 expanded). Internal-only admin is deferred to a dedicated admin-only build flag if ever needed. | Product |
 | OQ-6 | What is the token cost tracking source of truth — provider APIs, metered billing, or estimated from token counts? | Finance/Product |
 | OQ-7 | Should the Admin API be separate from the chat API (different port / service), or co-hosted? | Architecture |
 | OQ-8 | Is streaming failover (mid-stream) required for the first resilience sprint, or is pre-stream failover sufficient? | Product |
 | OQ-9 | Will there be an SDK / client library for .NET consumers, or is OpenAI-compatibility sufficient? | Developer Experience |
 | OQ-10 | How should the meta-router Ollama model be deployed in production — sidecar container, separate service, or cloud model? | Ops |
+| OQ-11 | Should the Agent Framework DevUI (FR-11) ship in production images, or be stripped from production builds entirely? Two options: (a) compile-time `#if DEBUG` / `DevUI` trim-out, (b) runtime gate only. Default assumption is (b) — runtime gate with `Development` default-enabled, production default-disabled. | Security, Ops |
 
 ---
 
@@ -410,3 +447,5 @@ The following areas are the primary extension points, ordered by architectural i
 - `dotnet user-secrets` / Aspire parameter injection is the accepted secret management strategy for local dev; Azure Key Vault for production.
 - The Syncfusion Blazor license will remain available; the Web UI will use Syncfusion components for chat and data grid surfaces.
 - All LLM provider SDKs (`Azure.AI.OpenAI`, `OllamaSharp`, `Google.GenAI`, `OpenAI`) will continue to support `.AsIChatClient()` MEAI adapters.
+- The **Microsoft Agent Framework DevUI** NuGet package (ASP.NET middleware form) will be published and maintained by Microsoft; the .NET workflow-DevUI parity gap with the Python package will be closed before Phase 3 opens. If parity slips, FR-11-4 (workflow graph rendering) degrades to "agent runs only" until it lands.
+- The Aspire Dashboard is provided by `.NET Aspire` and remains the canonical platform-telemetry surface — no in-repo replacement will be built.

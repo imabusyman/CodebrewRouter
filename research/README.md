@@ -5,12 +5,14 @@ The `research\` folder contains self-contained research reports and their mirror
 ## Layout
 
 - `github-copilot-sdk.md`
+- `github-awesome-copilot.md`
 - `https-github-com-berriai-litellm.md`
 - `https-github-com-microsoft-agent-framework.md`
 - `https-github-com-microsoft-agent-framework-samples.md`
 - `https-github-com-n8n-io-self-hosted-ai-starter-kit.md`
 - `sources\`
   - `github-copilot-sdk\repo\...`
+  - `github-awesome-copilot\repo\...`
   - `berriai-litellm\repo\...`
   - `microsoft-agent-framework\repo\...`
   - `microsoft-agent-framework-samples\repo\...`
