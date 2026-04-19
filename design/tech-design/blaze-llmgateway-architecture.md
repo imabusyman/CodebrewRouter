@@ -68,8 +68,9 @@ Co-hosting the four planes in one process is locked by [ADR-0001](../adr/0001-pr
 | FR-06-1..4 Caching | §8.4 Caching (scoped; deferred per §12) |
 | FR-07-1..3 Rate limits | §8.3 + follow-on ADR (§12) |
 | FR-08-1..4 Session mgmt | §6.2 Session model + [ADR-0004](../adr/0004-session-state-persistence.md) |
-| FR-09-1..7 Web UI | §7.4 (scope call-out; UI design out of scope for this doc) |
+| FR-09-1..10 Consumer Web UI (Blazor) | §7.4.1 Blazor consumer UI |
 | FR-10-1..6 Admin API | §7.3 Admin API |
+| FR-11-1..10 Agent Framework DevUI | §7.4.2 DevUI (Microsoft Agent Framework) |
 | NFR-01 Performance <1ms routing | §4.4 + §10 Benchmarks |
 | NFR-02 Reliability / non-fatal MCP startup | §5.1 + §4.4 |
 | NFR-03 Secrets / HTTPS / auth-before-routing | §8.1 + §9 Deployment |
@@ -145,8 +146,8 @@ Integrations ──► Agents ──► Infrastructure (Inference + Tool) ──
 | `Blaze.LlmGateway.Infrastructure` | Inference + Tool | Keyed providers, `LlmRoutingChatClient`, `McpConnectionManager`, `McpToolDelegatingClient` | `IProviderRegistry`, `ProviderClientFactory`, `CircuitBreakerDelegatingChatClient`, `CloudEscalationDelegatingChatClient`, hardened MCP |
 | `Blaze.LlmGateway.Agents` *(new)* | Agent | — | `IAgentAdapter`, `AgentFrameworkAdapter`, `FoundryHostedAgentAdapter`, workflow runner |
 | `Blaze.LlmGateway.Integrations` *(new)* | Integration | — | OpenAI DTOs, `ChatCompletionsEndpoint`, admin endpoints, SDK sample hooks |
-| `Blaze.LlmGateway.Api` | composition | Minimal `Program.cs`, manual JSON parsing | DI composition root only — every endpoint is an extension method in `Integrations` |
-| `Blaze.LlmGateway.Web` | UI | Blazor scaffold | Chat UI + admin UI (deferred; see §7.4) |
+| `Blaze.LlmGateway.Api` | composition | Minimal `Program.cs`, manual JSON parsing | DI composition root only — every endpoint is an extension method in `Integrations`. Also mounts the **Agent Framework DevUI** (`MapDevUI()`, FR-11) when enabled — see §7.4.2 |
+| `Blaze.LlmGateway.Web` | UI | Blazor scaffold | Consumer chat + admin UI (FR-09); design in §7.4.1 |
 | `Blaze.LlmGateway.AppHost` | Aspire | Ollama container, Foundry Local, GitHub Models, secrets | + persistence volume, + optional LM Studio / llama.cpp containers |
 | `Blaze.LlmGateway.ServiceDefaults` | cross-cutting | OTel, HTTP resilience, service discovery | + gateway-specific OTel schema enrichers (§8.2) |
 | `Blaze.LlmGateway.Tests` | — | Unit tests for routing | + architecture-assertion fixture, integration tests, SSE contract tests |
@@ -691,7 +692,8 @@ app.Run();
 | Claude Code (custom baseURL) | `/v1/chat/completions` | Streaming, tool_calls round-trip | Supported |
 | Codex / OpenCode | `/v1/chat/completions` | Same | Supported |
 | Copilot SDK sample | `/v1/chat/completions` + MCP | MCP tool round-trip via `HostedMcpServerTool` | Sample project under `samples/` |
-| Internal Blazor Web UI | `/v1/chat/completions` via service discovery | Streaming + session header | Deferred UI, endpoint ready |
+| Internal Blazor Web UI (`Blaze.LlmGateway.Web`) | `/v1/chat/completions` via Aspire service discovery; `/admin/*` for ops pages; `/agents/*` (Phase 3) for agent picker | Streaming + session header + auth scope | Endpoint ready Phase 1; UI build-out Phase 4 (FR-09) |
+| Agent Framework DevUI (in-process middleware) | `/devui` mounted in `Blaze.LlmGateway.Api`; reads OTel + `IAgentAdapter` registry | `MapDevUI()`; auth scope `devui`; cloud-policy enforced | Lands Phase 3 with the agent plane (FR-11; §7.4.2) |
 | Microsoft Agent Framework hosts | `/v1/chat/completions` (via local `IChatClient` bridge) or `/agents/*` (Phase 3) | — | Chat Completions path supported; `/agents/*` deferred |
 | Azure Foundry agents (hosted) | `/agents/*` (Phase 3) | `AgentEvent` stream | Deferred to Phase 3 |
 
@@ -715,15 +717,65 @@ DELETE /admin/sessions/{id}                → purge a session (privacy / admin)
 
 All admin endpoints sit behind an admin-scoped API key (follow-on Auth ADR).
 
-### 7.4 Web UI (scope call-out only)
+### 7.4 UI surfaces
 
-[Blaze.LlmGateway.Web](../../Blaze.LlmGateway.Web) is a Blazor Server app today with only a Syncfusion shell. The UI contract is:
+Blaze ships **three distinct UI surfaces**. They are orthogonal: each has its own audience, lifecycle, and threat model, and none is a substitute for the others. The matrix:
 
-- **Chat surface** — consumes `/v1/chat/completions` with session header.
-- **Provider/MCP dashboard** — consumes `/admin/*`.
-- **Session browser** — consumes `/admin/sessions` and the chat surface.
+| Surface | Project / mount | Audience | Lifecycle | PRD ref |
+|---|---|---|---|---|
+| Aspire Dashboard | `Blaze.LlmGateway.AppHost` (auto via Aspire) | Any developer running the Aspire host locally | Always-on in dev; never shipped to production hosts | FR-05-5 |
+| Blazor consumer UI | `Blaze.LlmGateway.Web` | End users + operators (chat, session browser, admin pages) | Built and deployed alongside the Api host | FR-09 |
+| Microsoft Agent Framework DevUI | `Blaze.LlmGateway.Api` via `app.MapDevUI()` | Agent authors / developers debugging agent runs and workflow graphs | Default-enabled in `Development` environment; gated off in production | FR-11 |
 
-Component-level UI design is deferred to a separate Web-UI design note. The backend contracts this doc specifies are sufficient to start the UI work in parallel.
+#### 7.4.1 Blazor consumer UI
+
+[Blaze.LlmGateway.Web](../../Blaze.LlmGateway.Web) is a Blazor Server app with a Syncfusion shell. The UI contract:
+
+- **Chat page** — consumes `/v1/chat/completions` with `X-LlmGateway-Session-Id`. Streaming SSE rendered token-by-token. Provider override via `X-LlmGateway-Provider` exposed as a dropdown.
+- **Session browser** — consumes `/admin/sessions` (list) and rehydrates a chosen session into the chat page.
+- **Provider / MCP admin pages** — consume `/admin/providers`, `/admin/mcp`. Health badges fed by the `blaze.gateway.requests` and `blaze.gateway.errors` metrics from §8.2.
+- **Agent picker + run console** (Phase 3+) — lists `IAgentAdapter`s from `IAgentRegistry` (ADR-0006), starts runs, streams `AgentEvent`s.
+- **Service-discovery wiring** — the Web project reaches the Api via Aspire service discovery (`https+http://api`); no hardcoded URLs.
+- **Auth** — same scheme as the `/v1` endpoint (FR-04 / §8.1). Anonymous chat is disabled when `LlmGateway:Auth:Required=true`.
+
+Component-level UI design (Syncfusion grid/chat layout, theming) is deferred to a separate Web-UI design note (deferred D14). The backend contracts in §4–§7 are sufficient to begin the UI work in parallel.
+
+#### 7.4.2 Microsoft Agent Framework DevUI
+
+The **Microsoft Agent Framework DevUI** is an ASP.NET Core middleware shipped by Microsoft as part of the agent-framework family. It is **not** a part of .NET Aspire and **not** the Aspire Dashboard — those are separate, lower-level platform telemetry tools. DevUI's job is interactive agent + workflow debugging on top of the OTel trace stream the agent plane already emits (§8.2).
+
+**Mount point.** A single line in `Program.cs`:
+
+```csharp
+// Blaze.LlmGateway.Api/Program.cs (Phase 3+)
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("LlmGateway:DevUi:Enabled"))
+{
+    app.MapDevUI("/devui");   // discovers IAgentAdapter set + OTel feed automatically
+}
+```
+
+**Discovery.** DevUI enumerates registered Agent Framework agents through the standard `AddAsAIAgent()` registration. Because `AgentFrameworkAdapter` (ADR-0006) is itself a thin wrapper over `ChatClientAgent`, every local agent shows up automatically. Foundry hosted agents (`FoundryHostedAgentAdapter`) are surfaced via a small `IAgentAdapter → IAIAgent` shim registered in `AddGatewayAgents`.
+
+**Trace ingestion.** DevUI reads the same OTel spans defined in §8.2 (`agent.run`, `agent.tool_call`). One trace ledger, two consumers — the Aspire Dashboard for cross-resource platform view, DevUI for agent-centric drill-in.
+
+**Gating policy.** Three layers, in order:
+
+1. **Default-off outside dev.** `app.MapDevUI()` is only called when `IsDevelopment()` or `LlmGateway:DevUi:Enabled=true`.
+2. **Auth scope.** When mounted, DevUI sits *inside* the auth pipeline. Callers without the `devui` scope on their `ClientIdentity` get 404 (not 401 — we do not confirm the surface exists).
+3. **Cloud-escalation policy.** Agent runs initiated from DevUI flow through the same `CloudEscalationDelegatingChatClient` (ADR-0008). DevUI does not bypass policy; it *exercises* it.
+
+**Secret hygiene.** Provider API keys, client API keys, Azure credentials, and OAuth tokens are redacted from any rendered trace payload (FR-11-10). The redaction list is the same one used by the OTel exporter in §8.2.
+
+**Aspire Dashboard cross-link.** When mounted, DevUI's URL is registered as a resource link on the Api host in `Blaze.LlmGateway.AppHost` so it appears as a clickable target in the Aspire Dashboard:
+
+```csharp
+// Blaze.LlmGateway.AppHost/Program.cs (Phase 3+)
+var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
+    .WithUrlForEndpoint("https", endpoint => endpoint.DisplayText = "Chat API")
+    .WithUrl("/devui",     "Agent DevUI");
+```
+
+**Phasing.** DevUI lands with the rest of the agent plane in **Phase 3** (see §11). It is not a Phase-1 feature because there are no agents to debug until `IAgentAdapter` and `AgentFrameworkAdapter` exist (ADR-0006).
 
 ### 7.5 Deferred northbound surfaces
 
@@ -813,7 +865,12 @@ Agent-plane spans (Phase 3):
 
 **Structured logs.** Every log line carries `RequestId`, `SessionId`, `ClientId` in addition to its message fields. `FR-01-9` satisfied by the `llm.chat.completion` span + `blaze.gateway.requests` metric combo, plus an `Information` log per routing decision.
 
-**Dashboard.** ServiceDefaults already wires the Aspire dashboard (FR-05-5). Phase 5 adds a dedicated provider-health page in the Web UI consuming `/admin/providers`.
+**Dashboards.** Two consumers of the same OTel ledger:
+
+- **Aspire Dashboard** (FR-05-5) — auto-wired by `ServiceDefaults`. Cross-resource platform telemetry: traces, logs, metrics, resource graph. Always-on in dev. The canonical view for "is the host healthy."
+- **Microsoft Agent Framework DevUI** (FR-11) — agent-centric trace drill-in, run replay, workflow graph rendering. Mounted in `Blaze.LlmGateway.Api` via `MapDevUI()`; gated per §7.4.2. Lands in Phase 3.
+
+Phase 5 adds a dedicated provider-health page in the Blazor consumer UI (§7.4.1) consuming `/admin/providers` for operator-facing summaries that don't require opening the Aspire Dashboard.
 
 ### 8.3 Rate limiting and quotas
 
@@ -1083,10 +1140,11 @@ Maps the five phases from [plan/llm-agent-platform-plan.md](../../plan/llm-agent
 - `/agents/*` northbound endpoints (still no Responses API yet).
 - Session rehydration (not just recording) in Chat Completions.
 - Workflow orchestration MVP: Sequential + Concurrent + Handoff.
+- **Microsoft Agent Framework DevUI** mounted (`MapDevUI()`) — FR-11; default-on in Development, gated in production. Cross-linked from the Aspire Dashboard. See §7.4.2.
 
 ### Phase 4 — Client ecosystem polish
 
-- Blazor Web UI wired to Chat Completions + admin endpoints.
+- **Blazor consumer UI** (FR-09 / §7.4.1) wired to Chat Completions, `/admin/*`, and `/agents/*` — chat page, session browser, provider/MCP admin pages, agent picker, auth.
 - Responses API consideration — follow-on ADR if promoted.
 - A2A evaluation — follow-on ADR if promoted.
 - MCP packaging for Copilot evaluation — follow-on ADR.
@@ -1121,8 +1179,9 @@ These are **not resolved** by this document. They are listed with recommended se
 | D11 | **MCP server export** (Blaze as MCP server) | §7.5 | Phase 4+ |
 | D12 | **Streaming failover mid-stream splicing** | PRD OQ-8 | If/when a consumer demands it; today: terminal-error-frame semantics (§4.4) |
 | D13 | **Cost-tracking source of truth** | PRD OQ-6 | Phase 5 |
-| D14 | **Web UI component design** | PRD FR-09 | Phase 4, separate design note |
+| D14 | **Blazor consumer UI component design** — Syncfusion layout, theming, page breakdown | PRD FR-09, §7.4.1 | Phase 4, separate design note |
 | D15 | **Observability schema freeze** | NFR-04, §8.2 | Phase 2 (after field use proves the attribute set) |
+| D16 | **DevUI production-gating policy** — runtime flag vs. build-time trim, scope semantics, secret-redaction list, 404-vs-401 stance | PRD FR-11, OQ-11, §7.4.2 | Phase 3 (alongside `MapDevUI()` mount) |
 
 Each follow-on ADR will be authored when its phase opens, using the [template](../adr/0000-adr-template.md).
 
@@ -1158,4 +1217,5 @@ Ordered by number. Each file lives in [../adr/](../adr).
 | Date | Change |
 |---|---|
 | 2026-04-17 | Initial draft. All sections and ADRs 0001–0008 authored. Status: Proposed. |
+| 2026-04-18 | UI surfaces revision: §7.4 expanded into three-surface model (Aspire Dashboard, Blazor consumer UI §7.4.1, Microsoft Agent Framework DevUI §7.4.2). FR-09 elevated; FR-11 added in PRD. Phase 3 picks up `MapDevUI()` mount; D16 added for the DevUI production-gating ADR. |
 
