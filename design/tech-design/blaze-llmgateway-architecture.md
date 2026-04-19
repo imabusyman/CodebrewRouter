@@ -150,7 +150,7 @@ Integrations ──► Agents ──► Infrastructure (Inference + Tool) ──
 | `Blaze.LlmGateway.Web` | UI | Blazor scaffold | Consumer chat + admin UI (FR-09); design in §7.4.1 |
 | `Blaze.LlmGateway.AppHost` | Aspire | Ollama container, Foundry Local, GitHub Models, secrets | + persistence volume, + optional LM Studio / llama.cpp containers |
 | `Blaze.LlmGateway.ServiceDefaults` | cross-cutting | OTel, HTTP resilience, service discovery | + gateway-specific OTel schema enrichers (§8.2) |
-| `Blaze.LlmGateway.Tests` | — | Unit tests for routing | + architecture-assertion fixture, integration tests, SSE contract tests |
+| `Blaze.LlmGateway.Tests` | — | Unit tests for routing only | + `Aspire.Hosting.Testing` (§10.2 Tier B), `Microsoft.AspNetCore.Mvc.Testing` (§10.2 Tier A), architecture-assertion fixture, SSE contract tests, DevUI Tier-B suite (FR-11-11..14) |
 | `Blaze.LlmGateway.Benchmarks` | — | Placeholder | Routing overhead, per-provider P50/P95/P99 |
 | `samples/Blaze.LlmGateway.Samples.CopilotSdk` *(new)* | — | — | Copilot SDK reference app (ADR-0007) |
 
@@ -1045,15 +1045,60 @@ Expansion plan per plane. Table aligns with the existing [Blaze.LlmGateway.Tests
 - `Blaze.LlmGateway.Agents` does not reference `Integrations`.
 - No `IChatClient` implementation outside `Blaze.LlmGateway.Infrastructure` except `DelegatingChatClient` descendants. ([CLAUDE.md](../../CLAUDE.md) architectural rule: "New middleware must inherit from `DelegatingChatClient`".)
 
-### 10.2 Integration tests
+### 10.2 Integration tests — two tiers
 
-New `Blaze.LlmGateway.IntegrationTests` project using `WebApplicationFactory<Program>`:
+Integration tests split into two harnesses with distinct cost and coverage profiles. Both live in `Blaze.LlmGateway.Tests` (single project; tier selection by `[Trait("Tier", "A"|"B")]`). PRD NFR-05 requires both.
+
+#### Tier A — In-process, single-project: `WebApplicationFactory<Program>`
+
+Fast (sub-second per test), runs only the Api project, no containers, no Aspire dashboard. Best for protocol-shape and middleware-pipeline assertions where the rest of the topology is irrelevant.
 
 - **SSE contract.** Start the host with a fake `IChatClient`; POST to `/v1/chat/completions` with `stream=true`; assert each frame is `data: {...}\n\n` and the last two are content-with-`finish_reason` and `data: [DONE]\n\n`.
 - **Tool round-trip.** Register a stub MCP server exposing one tool; send a prompt that triggers tool calling; assert the session record captures request + response + latency.
 - **Session round-trip.** Create a session, post three turns, restart the test host, re-post a turn with the same session id; assert the new turn sees all prior history.
 - **Cloud escalation denial.** Configure a `Denied`-policy client; assert routing returns 403 when the meta-router picks a `Cloud` provider *and* all fallback-chain hops are also `Cloud`.
 - **Circuit-breaker open/close.** Fake provider fails N times → breaker opens → next request skips it → after cooldown, half-open probe closes breaker on success.
+
+#### Tier B — Aspire-orchestrated, full topology: `Aspire.Hosting.Testing`
+
+Reference: [`DistributedApplicationTestingBuilder`](https://learn.microsoft.com/dotnet/aspire/testing/overview). Adds the `Aspire.Hosting.Testing` NuGet to `Blaze.LlmGateway.Tests`. Spins up the **real** AppHost — including the Ollama container, Foundry Local, GitHub Models resources, secret parameters, and the Web project — inside an xUnit fixture. Slow (tens of seconds per test for cold start; reuse a shared fixture per class). The only place to assert on cross-resource Aspire behavior.
+
+```csharp
+public sealed class AspireFixture : IAsyncLifetime
+{
+    public DistributedApplication App { get; private set; } = default!;
+
+    public async Task InitializeAsync()
+    {
+        var builder = await DistributedApplicationTestingBuilder
+            .CreateAsync<Projects.Blaze_LlmGateway_AppHost>();
+        // Override secrets / quiet noisy resources for tests:
+        builder.Configuration["Parameters:azure-foundry-api-key"] = "test";
+        // ...
+        App = await builder.BuildAsync();
+        await App.StartAsync();
+    }
+
+    public Task DisposeAsync() => App.DisposeAsync().AsTask();
+}
+```
+
+Tier-B test set:
+
+- **Phase-1 smoke (mandatory).** `var http = App.CreateHttpClient("api"); var r = await http.GetAsync("/alive"); Assert.Equal(HttpStatusCode.OK, r.StatusCode);` — proves `AddServiceDefaults()` is wired on the Api host. This single test would have caught the bug where `Api/Program.cs` references `ServiceDefaults` but never calls it.
+- **Service-discovery wiring.** From the `web` resource, resolve `https+http://api/v1/chat/completions` and assert the resolution succeeds.
+- **Secret-parameter injection.** Set a known parameter value in the test builder; assert the Api process sees it as `LlmGateway__Providers__GithubModels__ApiKey` env var.
+- **DevUI mount (Phase 3).** `var r = await http.GetAsync("/devui"); Assert.Equal(HttpStatusCode.OK, r.StatusCode);` plus a content-type check on the DevUI HTML shell. Satisfies FR-11-11.
+- **DevUI agent discovery (Phase 3).** Register a stub `IAgentAdapter` in the AppHost test override; assert it appears in the DevUI agent-list endpoint. Satisfies FR-11-12.
+- **DevUI gating (Phase 3).** Override env to `Production` + `LlmGateway:DevUi:Enabled=false`; assert `/devui` returns 404 (not 401 — see NFR-03). Satisfies FR-11-13.
+- **DevUI cloud-escalation enforcement (Phase 3).** A `Denied`-policy client invoking an agent through DevUI receives `provider_not_allowed`. Satisfies FR-11-14 + ADR-0008.
+- **Aspire-Dashboard resource-link wiring (Phase 3).** Assert the Api resource exposes a `/devui` URL annotation so the Aspire Dashboard renders it as a navigable link.
+
+#### CI policy
+
+- Tier A runs on every PR build. Target: <30 seconds total.
+- Tier B runs on every PR build but is allowed up to 5 minutes for cold-start. A `[Trait("Tier", "B")]` filter lets developers run only Tier A locally for fast inner-loop work.
+- Both tiers run pre-merge to `main`.
 
 ### 10.3 Benchmarks (fills out the empty `Blaze.LlmGateway.Benchmarks` project — PRD FR-05-6)
 
@@ -1111,6 +1156,12 @@ Maps the five phases from [plan/llm-agent-platform-plan.md](../../plan/llm-agent
 - Session correlation in Chat Completions when `X-LlmGateway-Session-Id` is present (record only; rehydrate is Phase 3).
 - Empty `IAgentAdapter` / `AgentDescriptor` contracts so Phase-3 consumers don't retrofit shapes.
 
+**Test scaffold (mandatory in Phase 1, before any Phase-2/3 work depends on it):**
+- Add `Aspire.Hosting.Testing` to `Blaze.LlmGateway.Tests` and write the Tier-B `AspireFixture` (§10.2).
+- Land **at least three** Tier-B tests: (a) `GET /alive` on the Api resource returns 200 — catches the missing `AddServiceDefaults()` wiring; (b) `GET /alive` on the Web resource returns 200; (c) secret-parameter injection round-trip.
+- Land Tier-A `WebApplicationFactory<Program>` SSE-contract test against a fake `IChatClient`.
+- **Bug fix:** `Blaze.LlmGateway.Api/Program.cs` must call `builder.AddServiceDefaults()` and `app.MapDefaultEndpoints()`. Without this the API host has no OTel, no resilience, no service discovery, no `/health`, no `/alive` — and the Phase-1 smoke test above will fail until it's added (intentionally). PRD §2.4 items 7–8.
+
 **Cross-cutting:**
 - Minimum-viable auth middleware with config-driven API keys → `ClientIdentity` (§8.1). Full Auth ADR still deferred.
 - `CloudEscalationDelegatingChatClient` enforces default-deny (ADR-0008).
@@ -1141,6 +1192,7 @@ Maps the five phases from [plan/llm-agent-platform-plan.md](../../plan/llm-agent
 - Session rehydration (not just recording) in Chat Completions.
 - Workflow orchestration MVP: Sequential + Concurrent + Handoff.
 - **Microsoft Agent Framework DevUI** mounted (`MapDevUI()`) — FR-11; default-on in Development, gated in production. Cross-linked from the Aspire Dashboard. See §7.4.2.
+- **Tier-B DevUI test pass (FR-11-11..14):** mount smoke, agent discovery with stub `IAgentAdapter`, gating-returns-404, cloud-escalation enforcement, Aspire-Dashboard resource-link assertion. Builds on the Phase-1 Aspire fixture from §10.2.
 
 ### Phase 4 — Client ecosystem polish
 
@@ -1218,4 +1270,5 @@ Ordered by number. Each file lives in [../adr/](../adr).
 |---|---|
 | 2026-04-17 | Initial draft. All sections and ADRs 0001–0008 authored. Status: Proposed. |
 | 2026-04-18 | UI surfaces revision: §7.4 expanded into three-surface model (Aspire Dashboard, Blazor consumer UI §7.4.1, Microsoft Agent Framework DevUI §7.4.2). FR-09 elevated; FR-11 added in PRD. Phase 3 picks up `MapDevUI()` mount; D16 added for the DevUI production-gating ADR. |
+| 2026-04-18 | Test strategy revision: §10.2 split into Tier A (`WebApplicationFactory<Program>`) and Tier B (`Aspire.Hosting.Testing` / `DistributedApplicationTestingBuilder`). Phase 1 picks up the Aspire fixture + `GET /alive` smoke test (which catches the missing `AddServiceDefaults()` wiring on the Api host) plus the SSE-contract Tier-A test. Phase 3 picks up the FR-11-11..14 DevUI Tier-B suite. PRD §2.1 + §2.4 updated with the API-host wiring debt. |
 

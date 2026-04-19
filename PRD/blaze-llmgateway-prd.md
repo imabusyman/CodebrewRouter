@@ -30,6 +30,9 @@ Blaze.LlmGateway is an **intelligent, agentic LLM routing proxy** — a single A
 | **Blazor Web UI** | 🟡 Scaffold | Syncfusion Blazor shell; slated as the consumer chat + admin surface; no API connection or chat component wired yet |
 | **Microsoft Agent Framework DevUI** | ❌ Missing | Interactive agent / workflow dev surface (`MapDevUI()` middleware from the Agent Framework NuGet). Lands with the agent plane |
 | **Unit tests** | 🟡 Minimal | 3 tests: LlmRoutingChatClient (2), OllamaMetaRoutingStrategy (1) |
+| **Aspire-orchestrated integration tests** | ❌ Missing | `Aspire.Hosting.Testing` not referenced in `Blaze.LlmGateway.Tests`; no `DistributedApplicationTestingBuilder` harness exists. Required by NFR-05 (Tier B) and FR-11-11..14 |
+| **In-process integration tests** (`WebApplicationFactory<Program>`) | ❌ Missing | No SSE-contract, MCP round-trip, or session round-trip tests today. Required by NFR-05 (Tier A) |
+| **Api host wiring of `AddServiceDefaults()`** | ❌ Missing | `Blaze.LlmGateway.Api/Program.cs` references `ServiceDefaults` but never calls `builder.AddServiceDefaults()` or `app.MapDefaultEndpoints()`. Result: no OTel, resilience, service discovery, or `/health` `/alive` endpoints on the API host. The Web project is wired correctly |
 | **Benchmarks** | 🟡 Scaffold | BenchmarkDotNet project exists; Program.cs is a placeholder |
 | **Circuit breaker** | ❌ Missing | No provider health tracking |
 | **Streaming failover** | ❌ Missing | Mid-stream failure handling not implemented |
@@ -86,6 +89,8 @@ IServiceProvider.GetKeyedService<IChatClient>(destination.ToString())
 4. Benchmarks project is a placeholder (`Console.WriteLine("Hello, World!")`).
 5. `KeywordRoutingStrategy` does not recognize `FoundryLocal`, `GithubModels`, or `OllamaLocal` as keywords.
 6. `McpConnectionManager` double-registration pattern (IHostedService + manually resolved singleton) is fragile.
+7. `Blaze.LlmGateway.Api/Program.cs` references `ServiceDefaults` but never invokes `builder.AddServiceDefaults()` or `app.MapDefaultEndpoints()`. The API host therefore runs without OpenTelemetry, the standard HTTP resilience handler, service discovery, or `/health`/`/alive` endpoints — the very things `ServiceDefaults` exists to provide. The Web project (`Blaze.LlmGateway.Web/Program.cs:7`) is wired correctly. **Phase-1 fix.**
+8. `Blaze.LlmGateway.Tests` has no Aspire integration-test harness. Adding `Aspire.Hosting.Testing` and a one-line `GET /alive` smoke test would have caught (7) automatically. **Phase-1 fix.**
 
 ---
 
@@ -271,6 +276,10 @@ Interactive developer surface for agents and workflows, provided by the **Micros
 | FR-11-8 | DevUI is reachable both directly (`https://<api-host>/devui`) and via a cross-link from the Blazor UI (FR-09) | ❌ Not implemented |
 | FR-11-9 | DevUI is listed as a discoverable resource in the Aspire Dashboard so developers can navigate to it without memorizing the URL | ❌ Not implemented |
 | FR-11-10 | No agent secrets, API keys, or client-identity tokens are rendered in the DevUI UI — they are redacted in trace payloads | ❌ Not implemented |
+| FR-11-11 | DevUI mount is covered by a Tier-B integration test (`DistributedApplicationTestingBuilder`, NFR-05) that spins up the AppHost, fetches `/devui` over the Api resource's HTTP client, and asserts a 200 response and presence of the DevUI HTML shell | ❌ Not implemented |
+| FR-11-12 | DevUI agent-discovery is covered by a Tier-B integration test that registers a stub `IAgentAdapter`, spins up the AppHost, and asserts the agent appears in DevUI's agent-list endpoint | ❌ Not implemented |
+| FR-11-13 | DevUI gating is covered by a negative Tier-B test: with `LlmGateway:DevUi:Enabled=false` and `Production` environment, requests to `/devui` return 404 (per NFR-03) | ❌ Not implemented |
+| FR-11-14 | DevUI cloud-escalation enforcement is covered by a Tier-B test: a `Denied`-policy client invoking an agent through DevUI receives the same `provider_not_allowed` error as a direct `/v1` caller (ADR-0008) | ❌ Not implemented |
 
 ---
 
@@ -306,6 +315,9 @@ Interactive developer surface for agents and workflows, provided by the **Micros
 - All routing strategies must be testable in isolation via `IRoutingStrategy` mock.
 - Circuit breaker state machine must have dedicated unit tests for all state transitions.
 - Integration tests must verify SSE streaming produces valid `text/event-stream` output.
+- **Aspire-orchestrated integration tests.** The Tests project must reference `Aspire.Hosting.Testing` and use `DistributedApplicationTestingBuilder.CreateAsync<Projects.Blaze_LlmGateway_AppHost>(...)` to spin up the full AppHost (Api + Web + Ollama container + Foundry Local + GitHub Models) inside an xUnit test. This is the canonical end-to-end harness — anything that must observe cross-resource behavior (service discovery, secret injection, DevUI mount, Aspire-Dashboard resource wiring) belongs here, not in `WebApplicationFactory<Program>` tests.
+- **Two integration-test tiers — kept separate.** Tier A: `WebApplicationFactory<Program>` against the Api project alone (fast; covers SSE contract, MCP tool round-trip, session round-trip, error contract). Tier B: `DistributedApplicationTestingBuilder` against the AppHost (slower; covers anything Aspire-orchestrated — service discovery, container readiness, DevUI mount, cross-project HTTP). CI runs both; developers can run Tier A on every save and Tier B on demand.
+- **A Tier-B smoke test must exist from Phase 1**, even before there are Phase-3 features to test against — minimally: spin up the AppHost, fetch `GET /alive` on the Api resource, assert 200. This catches the class of bug where the Api forgets to call `AddServiceDefaults()` and silently loses telemetry.
 
 ### NFR-06 — Extensibility
 - Adding a new LLM provider must require: (a) adding a `RouteDestination` enum value, (b) registering a keyed `IChatClient` in `AddLlmProviders`, (c) adding config options class. No other changes.
