@@ -37,7 +37,7 @@ if (-not (Test-Path $srcRoot)) {
 
 $roles = @(
     'conductor', 'planner', 'architect', 'coder',
-    'tester', 'reviewer', 'infra', 'security-review'
+    'tester', 'reviewer', 'infra', 'security-review', 'orchestrator'
 )
 
 # Claude Code -> Copilot CLI tool-name mapping.

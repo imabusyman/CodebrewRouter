@@ -1,0 +1,72 @@
+{
+  "name": "squad",
+  "displayName": "Blaze.LlmGateway Development Squad",
+  "description": "8-agent phased development squad for Blaze.LlmGateway. Orchestrates research, architecture, coding, testing, review, infrastructure, and security workflows.",
+  "version": "1.0.0",
+  "agents": [
+    {
+      "name": "squad.conductor",
+      "path": "agents/squad.conductor.agent.md"
+    },
+    {
+      "name": "squad.planner",
+      "path": "agents/squad.planner.agent.md"
+    },
+    {
+      "name": "squad.architect",
+      "path": "agents/squad.architect.agent.md"
+    },
+    {
+      "name": "squad.coder",
+      "path": "agents/squad.coder.agent.md"
+    },
+    {
+      "name": "squad.tester",
+      "path": "agents/squad.tester.agent.md"
+    },
+    {
+      "name": "squad.reviewer",
+      "path": "agents/squad.reviewer.agent.md"
+    },
+    {
+      "name": "squad.infra",
+      "path": "agents/squad.infra.agent.md"
+    },
+    {
+      "name": "squad.security-review",
+      "path": "agents/squad.security-review.agent.md"
+    }
+  ],
+  "commands": [
+    {
+      "name": "squad-plan",
+      "path": "commands/squad-plan.md"
+    },
+    {
+      "name": "squad-implement",
+      "path": "commands/squad-implement.md"
+    },
+    {
+      "name": "squad-review",
+      "path": "commands/squad-review.md"
+    },
+    {
+      "name": "squad-security",
+      "path": "commands/squad-security.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "reasoning",
+      "path": "skills/reasoning/SKILL.md"
+    },
+    {
+      "name": "quality-gate",
+      "path": "skills/quality-gate/SKILL.md"
+    },
+    {
+      "name": "prove-it-bugfix",
+      "path": "skills/prove-it-bugfix/SKILL.md"
+    }
+  ]
+}
