@@ -2,9 +2,30 @@
 
 ## Custom agents
 
-Two repo-scoped agents are available:
-- **`/agent llm-gateway-architect`** — for architecture decisions, pipeline changes, routing, resilience, and MCP work.
-- **`/agent router`** — classifies intent/complexity and picks the best Copilot model. Run this first on complex tasks.
+The repo ships a Claude-powered **development squad** (ADR-0009) plus two standalone helpers.
+
+### Squad (multi-agent orchestration)
+
+Install the plugin once: `copilot plugin install ./.github/plugins/squad`. Then invoke the Conductor:
+
+- **`/agent squad`** — Conductor. Routes intent through the 8-agent squad and owns phasing, handoff envelopes, and the reasoning log.
+
+Individual squad specialists (usually called via the Conductor, but available directly if needed):
+
+- **`/agent squad.planner`** — research + `spec.md` + ordered steps with file assignments.
+- **`/agent squad.architect`** — ADR author; MEAI pipeline + resilience authority. Absorbs the retired `llm-gateway-architect`.
+- **`/agent squad.coder`** — MEAI-compliant C# implementation inside envelope file-locks.
+- **`/agent squad.tester`** — xUnit + Moq + SSE integration tests; 95% coverage.
+- **`/agent squad.reviewer`** — clean-context diff review; `-warnaserror` + coverage gate.
+- **`/agent squad.infra`** — AppHost / Aspire / secrets. Absorbs the retired `local-ai-setup`.
+- **`/agent squad.security-review`** — ADR-0008 cloud-egress guard; auto-triggered on sensitive diffs.
+
+Source of truth for all squad prompts: `prompts/squad/`. See `prompts/squad/README.md` for the authoring workflow (edit there, run `pwsh ./scripts/sync-squad.ps1` to regenerate this plugin).
+
+### Standalone helpers
+
+- **`/agent model-router`** — classifies intent/complexity and picks the best Copilot model. Run this first on complex one-off tasks that do not need the full squad workflow. (Previously named `router`.)
+- **`/agent local`** — Ollama on-device assistant; orthogonal to the squad, kept as-is.
 
 ## Build, test, and run commands
 

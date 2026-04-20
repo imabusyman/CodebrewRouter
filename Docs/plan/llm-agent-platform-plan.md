@@ -186,6 +186,14 @@ Goal: add real agent scenarios inside the primary host without collapsing archit
 - Define session, memory, and tool boundary contracts between gateway core and agent runtime.
 - Implement durable persisted sessions first.
 
+#### Phase 3 sub-epic — Squad orchestration surface (development-time)
+
+Parallel sub-epic scoped to the *development-time* agent surface (as opposed to the *runtime* agent plane above). Delivers a dual-target (Copilot CLI + Claude Code) Claude-powered development squad authored under `prompts/squad/` and materialized by `scripts/sync-squad.ps1`. Zero .NET code; markdown + JSON + one PowerShell script.
+
+- See [squad-orchestration-plan.md](./squad-orchestration-plan.md) for the tactical task list, file inventory, sync contract, and verification checklist.
+- Governing decision: [ADR-0009](../design/adr/0009-squad-orchestration.md).
+- Unblocks the gaps called out in `CLAUDE.md` §"Known Incomplete Areas" (circuit breaker, streaming failover, `HostedMcpServerTool` mapping, Blazor wiring) by giving contributors an orchestrated multi-agent workflow.
+
 ### Phase 4 - Client ecosystem integration
 
 Goal: make the platform easy to consume.

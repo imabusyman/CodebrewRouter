@@ -101,3 +101,24 @@ SDK mappings (must be followed exactly):
 - No circuit breaker — most pressing resilience gap.
 - Streaming failover — mid-stream failure handling not yet implemented.
 - `Blaze.LlmGateway.Web` — Blazor frontend scaffolded but not yet connected to the API (no HTTP client or chat UI wired up).
+
+## Squad Guardrails
+
+This repository ships an 8-agent Claude-powered development squad (ADR-0009). Source of truth: [`prompts/squad/`](./prompts/squad/). Path-scoped guardrails every squad specialist honors:
+
+- [`prompts/squad/_shared/guardrails.instructions.md`](./prompts/squad/_shared/guardrails.instructions.md) — universal squad rules (MEAI law, streaming, keyed DI, structured-action tags, quality gate).
+- [`prompts/squad/_shared/meai-infrastructure.instructions.md`](./prompts/squad/_shared/meai-infrastructure.instructions.md) — scoped to `Blaze.LlmGateway.Infrastructure/**`, `Blaze.LlmGateway.Api/**`, `Blaze.LlmGateway.Core/**`.
+- [`prompts/squad/_shared/aspire-apphost.instructions.md`](./prompts/squad/_shared/aspire-apphost.instructions.md) — scoped to `Blaze.LlmGateway.AppHost/**`, `Blaze.LlmGateway.ServiceDefaults/**`.
+- [`prompts/squad/_shared/tests.instructions.md`](./prompts/squad/_shared/tests.instructions.md) — scoped to `Blaze.LlmGateway.Tests/**`, `Blaze.LlmGateway.Benchmarks/**`.
+- [`prompts/squad/_shared/adr.instructions.md`](./prompts/squad/_shared/adr.instructions.md) — scoped to `Docs/design/adr/**`.
+- [`prompts/squad/_shared/cloud-egress.instructions.md`](./prompts/squad/_shared/cloud-egress.instructions.md) — ADR-0008 default-deny, scoped to every C# and `appsettings*.json`.
+- [`prompts/squad/_shared/style.instructions.md`](./prompts/squad/_shared/style.instructions.md) — C# style + nullability + build gate.
+
+Protocol and command references:
+
+- Tag vocabulary: [`prompts/squad/protocol/structured-actions.md`](./prompts/squad/protocol/structured-actions.md).
+- Handoff envelope: [`prompts/squad/protocol/handoff-envelope.schema.md`](./prompts/squad/protocol/handoff-envelope.schema.md).
+- Reasoning log: [`prompts/squad/protocol/reasoning-log.schema.md`](./prompts/squad/protocol/reasoning-log.schema.md).
+- Slash commands: `/squad-plan`, `/squad-implement`, `/squad-review`, `/squad-security` (Claude Code) or `/agent squad` (Copilot CLI after `copilot plugin install ./.github/plugins/squad`).
+
+Edit under `prompts/squad/` then run `pwsh ./scripts/sync-squad.ps1` to regenerate the `.github/plugins/squad/` and `.claude/` copies. Never edit the generated copies by hand.

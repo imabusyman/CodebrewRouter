@@ -1,0 +1,13 @@
+{
+  "$schema": "https://aka.ms/copilot-cli/plugin.schema.json",
+  "name": "squad",
+  "version": "0.1.0",
+  "description": "Blaze.LlmGateway development squad — 8 Claude-powered agents orchestrated via Ultralight + DevSquad patterns. See ADR-0009.",
+  "author": "Blaze.LlmGateway team",
+  "homepage": "https://github.com/peterab/CodebrewRouter",
+  "license": "MIT",
+  "agents": "./plugins/squad/agents",
+  "skills": "./plugins/squad/skills",
+  "instructions": "./plugins/squad/instructions",
+  "mcp": "./plugins/squad/.mcp.json"
+}

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/sync-squad.ps1)",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ]
+  }
+}
