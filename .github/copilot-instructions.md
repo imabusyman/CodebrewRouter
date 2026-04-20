@@ -27,6 +27,14 @@ Source of truth for all squad prompts: `prompts/squad/`. See `prompts/squad/READ
 - **`/agent model-router`** — classifies intent/complexity and picks the best Copilot model. Run this first on complex one-off tasks that do not need the full squad workflow. (Previously named `router`.)
 - **`/agent local`** — Ollama on-device assistant; orthogonal to the squad, kept as-is.
 
+### Editing squad prompts
+
+The files under `.github/plugins/squad/` and `.claude/` are **generated**. Edit the source under `prompts/squad/` and regenerate with:
+
+```powershell
+pwsh ./scripts/sync-squad.ps1
+```
+
 ## Build, test, and run commands
 
 ```powershell
@@ -53,6 +61,20 @@ dotnet run --project Blaze.LlmGateway.Api
 
 # Run benchmarks
 dotnet run --project Blaze.LlmGateway.Benchmarks --configuration Release
+```
+
+### Local secrets (Aspire parameters)
+
+All provider credentials are injected via Aspire parameters on the **AppHost** project (not the API):
+
+```powershell
+dotnet user-secrets set "Parameters:azure-foundry-endpoint"  "<https://your-resource.openai.azure.com/>" --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:azure-foundry-api-key"   "<key>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:github-copilot-api-key"  "<token>" --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:gemini-api-key"          "<key>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:openrouter-api-key"      "<key>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:github-models-api-key"   "<PAT>"   --project Blaze.LlmGateway.AppHost
+dotnet user-secrets set "Parameters:syncfusion-license-key"  "<key>"   --project Blaze.LlmGateway.AppHost
 ```
 
 ## High-level architecture
@@ -134,6 +156,24 @@ The routing prompt currently biases providers this way:
 - Current MEAI usage is `GetResponseAsync(...)` and `GetStreamingResponseAsync(...)`; avoid older `CompleteAsync` / `CompleteStreamingAsync` APIs that appear in older docs.
 - Tests in this repo mock `IChatClient.GetResponseAsync(...)` and use `FullyQualifiedName~...` filters for targeted execution.
 - Code style already leans on primary constructors, collection expressions (`[]`), nullable reference types, and end-to-end `CancellationToken` propagation.
+
+## Squad guardrails & ADRs
+
+Path-scoped guardrails every contributor (human or AI) should honor live in `prompts/squad/_shared/`:
+
+- `guardrails.instructions.md` — universal rules (MEAI law, streaming, keyed DI, quality gate).
+- `meai-infrastructure.instructions.md` — scoped to `Infrastructure/**`, `Api/**`, `Core/**`.
+- `aspire-apphost.instructions.md` — scoped to `AppHost/**`, `ServiceDefaults/**`.
+- `tests.instructions.md` — scoped to `Tests/**`, `Benchmarks/**`.
+- `cloud-egress.instructions.md` — ADR-0008 default-deny cloud escalation policy.
+- `style.instructions.md` — C# style + nullability + `-warnaserror` gate.
+
+Architecture decisions live in `Docs/design/adr/`. Particularly relevant:
+
+- **ADR-0008** — cloud escalation policy (default-deny egress).
+- **ADR-0009** — squad orchestration.
+- **ADR-0003** — northbound API surface (OpenAI-compatible `/v1/chat/completions`).
+- **ADR-0002** — provider identity model (keyed DI by `RouteDestination` name).
 
 ## Known implementation gaps
 
