@@ -6,19 +6,29 @@ The repo ships a Claude-powered **development squad** (ADR-0009) plus two standa
 
 ### Squad (multi-agent orchestration)
 
-Install the plugin once: `copilot plugin install ./.github/plugins/squad`. Then invoke the Conductor:
+Install the plugin once: `copilot plugin install ./.github/plugins/squad`. Then invoke either execution path:
+
+#### Phased path (human-gated)
 
 - **`/agent squad`** — Conductor. Routes intent through the 8-agent squad and owns phasing, handoff envelopes, and the reasoning log.
 
 Individual squad specialists (usually called via the Conductor, but available directly if needed):
 
 - **`/agent squad.planner`** — research + `spec.md` + ordered steps with file assignments.
-- **`/agent squad.architect`** — ADR author; MEAI pipeline + resilience authority. Absorbs the retired `llm-gateway-architect`.
+- **`/agent squad.architect`** — ADR author; MEAI pipeline + resilience authority.
 - **`/agent squad.coder`** — MEAI-compliant C# implementation inside envelope file-locks.
 - **`/agent squad.tester`** — xUnit + Moq + SSE integration tests; 95% coverage.
 - **`/agent squad.reviewer`** — clean-context diff review; `-warnaserror` + coverage gate.
-- **`/agent squad.infra`** — AppHost / Aspire / secrets. Absorbs the retired `local-ai-setup`.
+- **`/agent squad.infra`** — AppHost / Aspire / secrets.
 - **`/agent squad.security-review`** — ADR-0008 cloud-egress guard; auto-triggered on sensitive diffs.
+
+#### Parallel path (autonomous)
+
+- **`/orchestrate --prd <path>`** — Orchestrator. Autonomous PRD-driven loop: decompose → parallel worktrees → dispatch subagents → monitor → merge → quality-gate.
+
+**Choose your path:**
+- **Phased Conductor:** Use for exploratory tasks, high-risk changes, or when you want human gates at each phase.
+- **Orchestrator:** Use for well-scoped PRDs and fully autonomous execution; cleaner handoff, faster overall.
 
 Source of truth for all squad prompts: `prompts/squad/`. See `prompts/squad/README.md` for the authoring workflow (edit there, run `pwsh ./scripts/sync-squad.ps1` to regenerate this plugin).
 

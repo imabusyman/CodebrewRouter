@@ -387,3 +387,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Blaze.LlmGateway — Git worktrees (isolated development environments)
+.worktrees/
+

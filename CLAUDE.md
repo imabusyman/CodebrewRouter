@@ -102,9 +102,34 @@ SDK mappings (must be followed exactly):
 - Streaming failover — mid-stream failure handling not yet implemented.
 - `Blaze.LlmGateway.Web` — Blazor frontend scaffolded but not yet connected to the API (no HTTP client or chat UI wired up).
 
+## Squad Orchestration
+
+This repository ships two complementary squad execution paths (ADR-0009 + ADR-0010):
+
+### Phased Conductor (human-gated)
+- **Command:** `/agent squad`
+- **Execution:** Sequential phases with human gates between each boundary (Planner → Architect → Coder → Tester → Reviewer → Security-Review).
+- **Use when:** Task is exploratory, high-risk, or you want human feedback at each phase.
+- **Output:** `Docs/squad/runs/<ts>-<slug>/` with reasoning log + handoffs.
+
+### Orchestrator (autonomous)
+- **Command:** `/orchestrate --prd <path>`
+- **Execution:** Autonomous PRD-driven loop: decompose → parallel worktrees → dispatch subagents → monitor → merge → quality-gate.
+- **Use when:** PRD is complete, task decomposes into parallel non-overlapping streams, and you want fully autonomous execution.
+- **Output:** Same layout as Conductor, plus `.worktrees/<task>/` for isolated development.
+
+**Comparison:**
+| Aspect | Conductor | Orchestrator |
+|---|---|---|
+| Gating | Human gates at each phase | Fully autonomous |
+| Parallelism | Sequential phases | Parallel tasks per phase |
+| Execution speed | Slower (human waits) | Faster (no waits) |
+| Risk level | Lower (human feedback) | Higher (autonomous) |
+| Clean-context review | Per-phase | Post-completion (full log) |
+
 ## Squad Guardrails
 
-This repository ships an 8-agent Claude-powered development squad (ADR-0009). Source of truth: [`prompts/squad/`](./prompts/squad/). Path-scoped guardrails every squad specialist honors:
+This repository ships a 9-agent Claude-powered development squad (ADR-0009 + ADR-0010). Source of truth: [`prompts/squad/`](./prompts/squad/). Path-scoped guardrails every squad specialist honors:
 
 - [`prompts/squad/_shared/guardrails.instructions.md`](./prompts/squad/_shared/guardrails.instructions.md) — universal squad rules (MEAI law, streaming, keyed DI, structured-action tags, quality gate).
 - [`prompts/squad/_shared/meai-infrastructure.instructions.md`](./prompts/squad/_shared/meai-infrastructure.instructions.md) — scoped to `Blaze.LlmGateway.Infrastructure/**`, `Blaze.LlmGateway.Api/**`, `Blaze.LlmGateway.Core/**`.
