@@ -1,13 +1,112 @@
 {
-  "$schema": "https://aka.ms/copilot-cli/plugin.schema.json",
   "name": "squad",
-  "version": "0.1.0",
-  "description": "Blaze.LlmGateway development squad — 8 Claude-powered agents orchestrated via Ultralight + DevSquad patterns. See ADR-0009.",
-  "author": "Blaze.LlmGateway team",
-  "homepage": "https://github.com/peterab/CodebrewRouter",
-  "license": "MIT",
-  "agents": "./plugins/squad/agents",
-  "skills": "./plugins/squad/skills",
-  "instructions": "./plugins/squad/instructions",
-  "mcp": "./plugins/squad/.mcp.json"
+  "displayName": "Blaze.LlmGateway Development Squad",
+  "description": "9-agent development squad for Blaze.LlmGateway. Conductor (phased, human-gated) or Orchestrator (parallel, autonomous). Includes 11 coordination skills for parallel development, task orchestration, and resilience.",
+  "version": "2.0.0",
+  "agents": [
+    {
+      "name": "squad.conductor",
+      "path": "plugins/squad/agents/squad.conductor.agent.md"
+    },
+    {
+      "name": "squad.planner",
+      "path": "plugins/squad/agents/squad.planner.agent.md"
+    },
+    {
+      "name": "squad.architect",
+      "path": "plugins/squad/agents/squad.architect.agent.md"
+    },
+    {
+      "name": "squad.coder",
+      "path": "plugins/squad/agents/squad.coder.agent.md"
+    },
+    {
+      "name": "squad.tester",
+      "path": "plugins/squad/agents/squad.tester.agent.md"
+    },
+    {
+      "name": "squad.reviewer",
+      "path": "plugins/squad/agents/squad.reviewer.agent.md"
+    },
+    {
+      "name": "squad.infra",
+      "path": "plugins/squad/agents/squad.infra.agent.md"
+    },
+    {
+      "name": "squad.security-review",
+      "path": "plugins/squad/agents/squad.security-review.agent.md"
+    },
+    {
+      "name": "squad.orchestrator",
+      "path": "plugins/squad/agents/squad.orchestrator.agent.md"
+    }
+  ],
+  "commands": [
+    {
+      "name": "squad-plan",
+      "path": "plugins/squad/commands/squad-plan.md"
+    },
+    {
+      "name": "squad-implement",
+      "path": "plugins/squad/commands/squad-implement.md"
+    },
+    {
+      "name": "squad-review",
+      "path": "plugins/squad/commands/squad-review.md"
+    },
+    {
+      "name": "squad-security",
+      "path": "plugins/squad/commands/squad-security.md"
+    },
+    {
+      "name": "orchestrate",
+      "path": "plugins/squad/commands/orchestrate.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "reasoning",
+      "path": "plugins/squad/skills/reasoning/SKILL.md"
+    },
+    {
+      "name": "quality-gate",
+      "path": "plugins/squad/skills/quality-gate/SKILL.md"
+    },
+    {
+      "name": "prove-it-bugfix",
+      "path": "plugins/squad/skills/prove-it-bugfix/SKILL.md"
+    },
+    {
+      "name": "claude-devfleet",
+      "path": "plugins/squad/skills/claude-devfleet/SKILL.md"
+    },
+    {
+      "name": "team-builder",
+      "path": "plugins/squad/skills/team-builder/SKILL.md"
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "path": "plugins/squad/skills/dispatching-parallel-agents/SKILL.md"
+    },
+    {
+      "name": "subagent-driven-development",
+      "path": "plugins/squad/skills/subagent-driven-development/SKILL.md"
+    },
+    {
+      "name": "autonomous-agent-harness",
+      "path": "plugins/squad/skills/autonomous-agent-harness/SKILL.md"
+    },
+    {
+      "name": "dmux-workflows",
+      "path": "plugins/squad/skills/dmux-workflows/SKILL.md"
+    },
+    {
+      "name": "write-a-prd",
+      "path": "plugins/squad/skills/write-a-prd/SKILL.md"
+    },
+    {
+      "name": "loop-operator",
+      "path": "plugins/squad/skills/loop-operator/SKILL.md"
+    }
+  ]
 }

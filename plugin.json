@@ -6,107 +6,107 @@
   "agents": [
     {
       "name": "squad.conductor",
-      "path": "agents/squad.conductor.agent.md"
+      "path": ".github/plugins/squad/agents/squad.conductor.agent.md"
     },
     {
       "name": "squad.planner",
-      "path": "agents/squad.planner.agent.md"
+      "path": ".github/plugins/squad/agents/squad.planner.agent.md"
     },
     {
       "name": "squad.architect",
-      "path": "agents/squad.architect.agent.md"
+      "path": ".github/plugins/squad/agents/squad.architect.agent.md"
     },
     {
       "name": "squad.coder",
-      "path": "agents/squad.coder.agent.md"
+      "path": ".github/plugins/squad/agents/squad.coder.agent.md"
     },
     {
       "name": "squad.tester",
-      "path": "agents/squad.tester.agent.md"
+      "path": ".github/plugins/squad/agents/squad.tester.agent.md"
     },
     {
       "name": "squad.reviewer",
-      "path": "agents/squad.reviewer.agent.md"
+      "path": ".github/plugins/squad/agents/squad.reviewer.agent.md"
     },
     {
       "name": "squad.infra",
-      "path": "agents/squad.infra.agent.md"
+      "path": ".github/plugins/squad/agents/squad.infra.agent.md"
     },
     {
       "name": "squad.security-review",
-      "path": "agents/squad.security-review.agent.md"
+      "path": ".github/plugins/squad/agents/squad.security-review.agent.md"
     },
     {
       "name": "squad.orchestrator",
-      "path": "agents/squad.orchestrator.agent.md"
+      "path": ".github/plugins/squad/agents/squad.orchestrator.agent.md"
     }
   ],
   "commands": [
     {
       "name": "squad-plan",
-      "path": "commands/squad-plan.md"
+      "path": ".github/plugins/squad/commands/squad-plan.md"
     },
     {
       "name": "squad-implement",
-      "path": "commands/squad-implement.md"
+      "path": ".github/plugins/squad/commands/squad-implement.md"
     },
     {
       "name": "squad-review",
-      "path": "commands/squad-review.md"
+      "path": ".github/plugins/squad/commands/squad-review.md"
     },
     {
       "name": "squad-security",
-      "path": "commands/squad-security.md"
+      "path": ".github/plugins/squad/commands/squad-security.md"
     },
     {
       "name": "orchestrate",
-      "path": "commands/orchestrate.md"
+      "path": ".github/plugins/squad/commands/orchestrate.md"
     }
   ],
   "skills": [
     {
       "name": "reasoning",
-      "path": "skills/reasoning/SKILL.md"
+      "path": ".github/plugins/squad/skills/reasoning/SKILL.md"
     },
     {
       "name": "quality-gate",
-      "path": "skills/quality-gate/SKILL.md"
+      "path": ".github/plugins/squad/skills/quality-gate/SKILL.md"
     },
     {
       "name": "prove-it-bugfix",
-      "path": "skills/prove-it-bugfix/SKILL.md"
+      "path": ".github/plugins/squad/skills/prove-it-bugfix/SKILL.md"
     },
     {
       "name": "claude-devfleet",
-      "path": "skills/claude-devfleet/SKILL.md"
+      "path": ".github/plugins/squad/skills/claude-devfleet/SKILL.md"
     },
     {
       "name": "team-builder",
-      "path": "skills/team-builder/SKILL.md"
+      "path": ".github/plugins/squad/skills/team-builder/SKILL.md"
     },
     {
       "name": "dispatching-parallel-agents",
-      "path": "skills/dispatching-parallel-agents/SKILL.md"
+      "path": ".github/plugins/squad/skills/dispatching-parallel-agents/SKILL.md"
     },
     {
       "name": "subagent-driven-development",
-      "path": "skills/subagent-driven-development/SKILL.md"
+      "path": ".github/plugins/squad/skills/subagent-driven-development/SKILL.md"
     },
     {
       "name": "autonomous-agent-harness",
-      "path": "skills/autonomous-agent-harness/SKILL.md"
+      "path": ".github/plugins/squad/skills/autonomous-agent-harness/SKILL.md"
     },
     {
       "name": "dmux-workflows",
-      "path": "skills/dmux-workflows/SKILL.md"
+      "path": ".github/plugins/squad/skills/dmux-workflows/SKILL.md"
     },
     {
       "name": "write-a-prd",
-      "path": "skills/write-a-prd/SKILL.md"
+      "path": ".github/plugins/squad/skills/write-a-prd/SKILL.md"
     },
     {
       "name": "loop-operator",
-      "path": "skills/loop-operator/SKILL.md"
+      "path": ".github/plugins/squad/skills/loop-operator/SKILL.md"
     }
   ]
 }
