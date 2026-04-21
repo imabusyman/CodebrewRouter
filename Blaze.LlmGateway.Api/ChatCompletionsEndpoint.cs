@@ -117,15 +117,16 @@ public static class ChatCompletionsEndpoint
     {
         try
         {
-            var completion = await chatClient.CompleteAsync(messages, options, ct);
+            var completion = await chatClient.GetResponseAsync(messages, options, ct);
 
             var id = $"chatcmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
             var created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var responseText = completion.Messages?.FirstOrDefault()?.Text ?? "";
             var choices = new List<Choice>
             {
                 new(
                     Index: 0,
-                    Message: new ChatMessageDto(Role: "assistant", Content: completion.Message.Text ?? ""),
+                    Message: new ChatMessageDto(Role: "assistant", Content: responseText),
                     Delta: null,
                     FinishReason: "stop"
                 )

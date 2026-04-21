@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Infrastructure;
 using Microsoft.AspNetCore.Builder;
@@ -43,11 +44,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// Register LiteLLM-compatible endpoints
-app.MapPost("/v1/chat/completions", ChatCompletionsEndpoint.HandleAsync);
-app.MapPost("/v1/completions", CompletionsEndpoint.HandleAsync);
-app.MapGet("/v1/models", ModelsEndpoint.Handle);
+// Register LiteLLM-compatible endpoints  
+app.RegisterLiteLlmEndpoints();
+
 
 app.MapDefaultEndpoints();
 
 app.Run();
+
+// For testing via WebApplicationFactory
+public partial class Program { }
+

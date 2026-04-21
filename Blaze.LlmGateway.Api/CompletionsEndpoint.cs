@@ -107,13 +107,13 @@ public static class CompletionsEndpoint
     {
         try
         {
-            var completion = await chatClient.CompleteAsync(messages, options, ct);
+            var completion = await chatClient.GetResponseAsync(messages, options, ct);
 
             var id = $"cmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
             var created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var choices = new List<TextChoice>
             {
-                new(Index: 0, Text: completion.Message.Text ?? "", FinishReason: "stop")
+                new(Index: 0, Text: completion.Messages?.FirstOrDefault()?.Text ?? "", FinishReason: "stop")
             };
 
             var result = new TextCompletionResponse(

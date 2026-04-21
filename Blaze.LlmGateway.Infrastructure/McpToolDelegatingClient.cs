@@ -30,20 +30,20 @@ public class McpToolDelegatingClient(
 
     private ChatOptions AppendMcpTools(ChatOptions? options)
     {
-        options ??= new ChatOptions();
-        options.Tools ??= [];
+        var opts = options ?? new ChatOptions();
+        opts.Tools ??= [];
 
         var tools = mcpConnectionManager.GetAllTools().ToList();
-        if (tools.Count == 0) return options;
+        if (tools.Count == 0) return opts;
 
-        var aiTools = options.Tools.ToList();
+        var aiTools = opts.Tools.ToList();
         foreach (var tool in tools)
         {
             logger.LogDebug("Appending MCP tool: {ToolName}", (tool as AIFunction)?.Name ?? tool.GetType().Name);
             aiTools.Add(tool);
         }
 
-        options.Tools = aiTools;
-        return options;
+        opts.Tools = aiTools;
+        return opts;
     }
 }

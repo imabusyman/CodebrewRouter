@@ -4,12 +4,12 @@ namespace Blaze.LlmGateway.Api;
 public record ChatCompletionRequest(
     string Model,
     IList<ChatMessageDto> Messages,
-    double? Temperature = null,
+    float? Temperature = null,
     int? MaxTokens = null,
     bool Stream = false,
-    double? TopP = null,
-    double? FrequencyPenalty = null,
-    double? PresencePenalty = null,
+    float? TopP = null,
+    float? FrequencyPenalty = null,
+    float? PresencePenalty = null,
     IList<Tool>? Tools = null);
 
 /// <summary>Chat message DTO for requests</summary>
@@ -33,10 +33,10 @@ public record TextCompletionRequest(
     string Model,
     string Prompt,
     int? MaxTokens = null,
-    double? Temperature = null,
-    double? TopP = null,
-    double? FrequencyPenalty = null,
-    double? PresencePenalty = null,
+    float? Temperature = null,
+    float? TopP = null,
+    float? FrequencyPenalty = null,
+    float? PresencePenalty = null,
     bool Stream = false);
 
 /// <summary>Chat completion response</summary>
