@@ -16,8 +16,16 @@
 // ============================================================
 
 using Aspire.Hosting.Azure;
+using Microsoft.Extensions.Logging;
 
 var builder = DistributedApplication.CreateBuilder(args);
+
+// Configure logging for Aspire orchestration
+var loggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
+var aspireLogger = loggerFactory.CreateLogger("Blaze.LlmGateway.AppHost");
+aspireLogger.LogInformation("🔵 Aspire Orchestration starting...");
+aspireLogger.LogDebug("  ├─ Environment: {Environment}", builder.Environment.EnvironmentName);
+aspireLogger.LogDebug("  ├─ Wiring resources and dependencies");
 
 // ── Existing parameter-based secrets ──
 var azureFoundryEndpoint  = builder.AddParameter("azure-foundry-endpoint");
@@ -63,4 +71,11 @@ builder.AddProject<Projects.Blaze_LlmGateway_Web>("web")
     .WithReference(api)
     .WithEnvironment("Syncfusion__LicenseKey", syncfusionLicenseKey);
 
-builder.Build().Run();
+aspireLogger.LogDebug("  ├─ API project configured with GitHub Models references");
+aspireLogger.LogDebug("  └─ Web project configured with Syncfusion license");
+aspireLogger.LogInformation("✅ Aspire orchestration ready - building distributed app");
+
+var app = builder.Build();
+
+aspireLogger.LogInformation("🚀 Starting Aspire dashboard and services...");
+app.Run();

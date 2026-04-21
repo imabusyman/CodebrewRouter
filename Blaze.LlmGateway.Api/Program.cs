@@ -7,10 +7,30 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// Detect if running under Aspire and configure logging appropriately
+var isRunningUnderAspire = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPIRE_ORCHESTRATION_ENABLED")) ||
+                           !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT")) ||
+                           builder.Configuration["ASPIRE_RUNNING"] == "true";
+
+// Configure logging: when under Aspire, logs go to Aspire console; otherwise standard console
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+if (!isRunningUnderAspire)
+{
+    // Add simple formatter for standalone runs
+    builder.Logging.AddSimpleConsole(options =>
+    {
+        options.IncludeScopes = true;
+        options.SingleLine = false;
+        options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
+    });
+}
 
 builder.Services.Configure<LlmGatewayOptions>(
     builder.Configuration.GetSection(LlmGatewayOptions.SectionName));
@@ -40,8 +60,17 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
-startupLogger.LogInformation("🟢 Blaze.LlmGateway.Api starting up...");
+var aspireNote = isRunningUnderAspire ? " (via Aspire)" : " (standalone)";
+startupLogger.LogInformation("🟢 Blaze.LlmGateway.Api starting up{AspireNote}...", aspireNote);
 startupLogger.LogDebug("  ├─ Environment: {Environment}", app.Environment.EnvironmentName);
+if (isRunningUnderAspire)
+{
+    startupLogger.LogDebug("  ├─ Running under Aspire orchestration - logs routed to Aspire console");
+}
+else
+{
+    startupLogger.LogDebug("  ├─ Standalone mode - logging to console");
+}
 
 // Enable OpenAPI/Swagger UI
 if (app.Environment.IsDevelopment())
