@@ -1,14 +1,14 @@
 ---
 name: reasoning
-description: Maintain the append-only reasoning log and write handoff envelopes for every squad delegation. Use this when the Conductor delegates to a specialist or when a specialist records a non-trivial decision.
+description: "Maintain the append-only reasoning log and write handoff envelopes for every squad delegation. Use this when the Conductor delegates to a specialist or when a specialist records a non-trivial decision."
 ---
 
-# Reasoning — squad decision log + handoff envelopes
+# Reasoning â€” squad decision log + handoff envelopes
 
 This skill formalizes two disk artifacts that make squad runs auditable:
 
-1. **`reasoning.log.md`** — append-only log of non-trivial decisions.
-2. **`handoff/NN-from-to-to.md`** — per-delegation envelope.
+1. **`reasoning.log.md`** â€” append-only log of non-trivial decisions.
+2. **`handoff/NN-from-to-to.md`** â€” per-delegation envelope.
 
 Follow the schemas exactly. Trivial edits (typo, method rename) do not belong in the log.
 
@@ -17,9 +17,9 @@ Follow the schemas exactly. Trivial edits (typo, method rename) do not belong in
 Write one `##`-level entry per decision. Schema (from `prompts/squad/protocol/reasoning-log.schema.md`):
 
 ```markdown
-## <ISO-8601 UTC> — <role> — <HIGH | MEDIUM | LOW>
+## <ISO-8601 UTC> â€” <role> â€” <HIGH | MEDIUM | LOW>
 Decision: <one factual sentence>
-Rationale: <one or two sentences — why this, not something else>
+Rationale: <one or two sentences â€” why this, not something else>
 Evidence: <artifact path, ADR number, PRD section, code line>
 ```
 

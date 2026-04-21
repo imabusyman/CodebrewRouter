@@ -14,6 +14,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.6.0-preview.1.26215.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageReference Include="Aspire.Hosting.Testing" Version="13.3.0-preview.1.26217.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0-pre.3">
@@ -30,6 +31,7 @@
     <ProjectReference Include="..\Blaze.LlmGateway.Api\Blaze.LlmGateway.Api.csproj" />
     <ProjectReference Include="..\Blaze.LlmGateway.Infrastructure\Blaze.LlmGateway.Infrastructure.csproj" />
     <ProjectReference Include="..\Blaze.LlmGateway.Core\Blaze.LlmGateway.Core.csproj" />
+    <ProjectReference Include="..\Blaze.LlmGateway.AppHost\Blaze.LlmGateway.AppHost.csproj" />
   </ItemGroup>
 
 </Project>

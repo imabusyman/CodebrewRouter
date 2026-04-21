@@ -1,9 +1,9 @@
 ---
 name: dmux-workflows
-description: Orchestrate parallel agent workflows using tmux pane management (via dmux or native tmux). Spin multiple agents in isolated tmux panes, monitor logs, synchronize completion, and collect results. Use this in the Orchestrator parallel path when targeting Unix/Linux or WSL environments for shell-based coordination.
+description: "Orchestrate parallel agent workflows using tmux pane management (via dmux or native tmux). Spin multiple agents in isolated tmux panes, monitor logs, synchronize completion, and collect results. Use this in the Orchestrator parallel path when targeting Unix/Linux or WSL environments for shell-based coordination."
 ---
 
-# dmux Workflows — parallel orchestration via tmux
+# dmux Workflows â€” parallel orchestration via tmux
 
 Use tmux pane multiplexing for true parallel execution with integrated monitoring and log aggregation.
 
@@ -24,11 +24,11 @@ Use tmux pane multiplexing for true parallel execution with integrated monitorin
 
 ```
 tmux session: blaze-squad
-├─ pane:0  [Conductor/Orchestrator] — orchestration logic
-├─ pane:1  [Coder subagent 1]       — implement Provider X
-├─ pane:2  [Coder subagent 2]       — implement Provider Y
-├─ pane:3  [Tester subagent 1]      — test all providers
-└─ pane:4  [Infra subagent 1]       — wire AppHost
+â”œâ”€ pane:0  [Conductor/Orchestrator] â€” orchestration logic
+â”œâ”€ pane:1  [Coder subagent 1]       â€” implement Provider X
+â”œâ”€ pane:2  [Coder subagent 2]       â€” implement Provider Y
+â”œâ”€ pane:3  [Tester subagent 1]      â€” test all providers
+â””â”€ pane:4  [Infra subagent 1]       â€” wire AppHost
 ```
 
 All panes are visible; coordinator watches logs in real time.
@@ -112,5 +112,5 @@ Agent logs exit code or a status string; Orchestrator reads it from the tmux pan
 
 ## See also
 
-- `autonomous-agent-harness` — cross-platform task queue alternative (no tmux).
-- `subagent-driven-development` — structure subagent delegation.
+- `autonomous-agent-harness` â€” cross-platform task queue alternative (no tmux).
+- `subagent-driven-development` â€” structure subagent delegation.

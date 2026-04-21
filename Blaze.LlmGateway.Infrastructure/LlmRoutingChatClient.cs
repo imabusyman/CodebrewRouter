@@ -15,21 +15,16 @@ public class LlmRoutingChatClient(
     IChatClient innerClient,
     IServiceProvider serviceProvider,
     IRoutingStrategy routingStrategy,
-    ILogger<LlmRoutingChatClient> logger) : IChatClient
+    ILogger<LlmRoutingChatClient> logger) : DelegatingChatClient(innerClient)
 {
-    public void Dispose() => innerClient.Dispose();
-
-    public object? GetService(Type serviceType, object? serviceKey = null) =>
-        innerClient.GetService(serviceType, serviceKey);
-
-    public async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> chatMessages, ChatOptions? options = null, CancellationToken cancellationToken = default)
+    public override async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> chatMessages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
         var targetClient = await ResolveTargetClientAsync(chatMessages, cancellationToken);
         logger.LogInformation("Routing request to {TargetClient}", targetClient.GetType().Name);
         return await targetClient.GetResponseAsync(chatMessages, options, cancellationToken);
     }
 
-    public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> chatMessages, ChatOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public override async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> chatMessages, ChatOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var targetClient = await ResolveTargetClientAsync(chatMessages, cancellationToken);
         logger.LogInformation("Routing streaming request to {TargetClient}", targetClient.GetType().Name);

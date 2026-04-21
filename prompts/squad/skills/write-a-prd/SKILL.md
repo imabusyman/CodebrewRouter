@@ -1,6 +1,6 @@
 ---
 name: write-a-prd
-description: Generate a Product Requirements Document from a task description, user intent, or PRD outline. Structure the PRD with sections: Overview, Problem Statement, Goals, Scope, Features, Acceptance Criteria, Metrics. Use this when the Planner or Orchestrator needs to formalize requirements before decomposing into implementation steps.
+description: "Generate a Product Requirements Document from a task description, user intent, or PRD outline. Structure the PRD with sections: Overview, Problem Statement, Goals, Scope, Features, Acceptance Criteria, Metrics. Use this when the Planner or Orchestrator needs to formalize requirements before decomposing into implementation steps."
 ---
 
 # Write a PRD — generate a Product Requirements Document

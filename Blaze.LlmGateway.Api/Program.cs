@@ -9,6 +9,8 @@ using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Services.Configure<LlmGatewayOptions>(
     builder.Configuration.GetSection(LlmGatewayOptions.SectionName));
 
@@ -61,5 +63,7 @@ app.MapPost("/v1/chat/completions", async (HttpRequest request, IChatClient chat
     }
     await request.HttpContext.Response.WriteAsync("data: [DONE]\n\n");
 });
+
+app.MapDefaultEndpoints();
 
 app.Run();

@@ -1,6 +1,6 @@
 ---
 name: prove-it-bugfix
-description: DevSquad-style bug-fix flow — reproduce, write a failing test, fix, verify. Use this whenever the squad task is "fix bug X" or the Planner flags a step as a bug repro.
+description: "DevSquad-style bug-fix flow — reproduce, write a failing test, fix, verify. Use this whenever the squad task is \"fix bug X\" or the Planner flags a step as a bug repro."
 ---
 
 # Prove-It — bug-fix flow

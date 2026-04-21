@@ -1,9 +1,9 @@
 ---
 name: team-builder
-description: Compose parallel teams of specialized agents for a multi-faceted task. Map subtasks to agent roles, balance workload, and validate team composition. Use this when breaking a task into parallel streams that require different expertise (Coder, Tester, Infra, etc.).
+description: "Compose parallel teams of specialized agents for a multi-faceted task. Map subtasks to agent roles, balance workload, and validate team composition. Use this when breaking a task into parallel streams that require different expertise (Coder, Tester, Infra, etc.)."
 ---
 
-# Team Builder — compose parallel agent teams
+# Team Builder â€” compose parallel agent teams
 
 Decomposes complex tasks into parallel streams and assigns each stream to the right specialist.
 
@@ -21,13 +21,13 @@ List all subtasks and identify dependencies:
 
 ```
 Task: Add a new provider
-  ├─ Subtask 1: Core provider implementation (Coder)
-  ├─ Subtask 2: Unit + integration tests (Tester)
-  ├─ Subtask 3: Aspire AppHost wiring (Infra)
-  └─ Subtask 4: ADR + design notes (Architect)
+  â”œâ”€ Subtask 1: Core provider implementation (Coder)
+  â”œâ”€ Subtask 2: Unit + integration tests (Tester)
+  â”œâ”€ Subtask 3: Aspire AppHost wiring (Infra)
+  â””â”€ Subtask 4: ADR + design notes (Architect)
 
-Dependencies: Coder → Tester → Infra (sequential)
-              Architect ∥ Coder (parallel)
+Dependencies: Coder â†’ Tester â†’ Infra (sequential)
+              Architect âˆ¥ Coder (parallel)
 ```
 
 ### 2. Map to roles & estimate
@@ -62,6 +62,6 @@ Per-agent handoff with:
 
 ## See also
 
-- `dispatching-parallel-agents` — automate agent assignment.
-- `claude-devfleet` — use Git worktrees for isolated workspaces.
-- `quality-gate` — ensure parallel builds pass `-warnaserror` + 95% coverage before merge.
+- `dispatching-parallel-agents` â€” automate agent assignment.
+- `claude-devfleet` â€” use Git worktrees for isolated workspaces.
+- `quality-gate` â€” ensure parallel builds pass `-warnaserror` + 95% coverage before merge.

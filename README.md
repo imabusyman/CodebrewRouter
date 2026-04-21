@@ -91,6 +91,41 @@ The core pipeline (routing, streaming, MCP tool injection, and Aspire orchestrat
 
 ---
 
+## 🚀 Development Squad
+
+This repository ships a **9-agent development squad** for rapid, high-quality feature delivery. The squad enforces architectural guardrails, code quality gates (95% coverage, `-warnaserror`), clean-context reviews, and security audits automatically.
+
+### Quick Launch
+
+**Option 1: Human-Gated Phased Development** (Recommended for complex features)
+```bash
+/agent squad "Add circuit breaker pattern to LlmRoutingChatClient"
+```
+
+**Option 2: Autonomous Parallel Development** (For clear, decomposable tasks)
+```bash
+/orchestrate "Implement provider health checks in AppHost"
+```
+
+### The 9 Agents
+- **Conductor** — orchestrates phases and gates decisions
+- **Planner** — research, specification, planning
+- **Architect** — ADR authoring, MEAI pipeline validation
+- **Coder** — C# implementation
+- **Tester** — xUnit tests, 95% coverage enforcement
+- **Reviewer** — clean-context diff review, quality gate
+- **Infra** — AppHost, Aspire, secrets management
+- **Security-Review** — ADR-0008 cloud-egress audits
+- **Orchestrator** — autonomous parallel loop (no human gates)
+
+### See Also
+- **SQUAD_QUICKSTART.md** — Detailed guide with examples and troubleshooting
+- **.github/copilot-instructions.md** — Squad architecture and commands
+- **CLAUDE.md** — Conventions, guardrails, and agent capabilities
+- **Docs/design/adr/0010-parallel-orchestration-path.md** — Why two paths (phased vs. parallel)?
+
+---
+
 ## Agent Guidance
 
 For architecture decisions, pipeline changes, routing strategy work, and MCP integration, use the repo-scoped Copilot agent defined in `.github/agents/llm-gateway-architect.agent.md`. It has deep familiarity with the MEAI pipeline, all providers, and the project's conventions. Full build, test, and run commands are documented in CLAUDE.md.

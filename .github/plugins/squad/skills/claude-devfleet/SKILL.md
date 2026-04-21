@@ -1,9 +1,9 @@
 ---
 name: claude-devfleet
-description: Orchestrate parallel agent development using Git worktrees. Spin isolated checkouts for each task, assign Coders to independent worktrees, monitor progress, and merge results back. Use this when the Conductor or Orchestrator needs to parallelize file-disjoint implementation tasks across multiple agents.
+description: "Orchestrate parallel agent development using Git worktrees. Spin isolated checkouts for each task, assign Coders to independent worktrees, monitor progress, and merge results back. Use this when the Conductor or Orchestrator needs to parallelize file-disjoint implementation tasks across multiple agents."
 ---
 
-# Claude DevFleet — parallel development via Git worktrees
+# Claude DevFleet â€” parallel development via Git worktrees
 
 Enables multi-agent parallel coding without file conflicts. Each agent gets its own worktree on an isolated branch.
 
@@ -55,5 +55,5 @@ Each agent works independently in their worktree. No coordination needed until m
 
 ## See also
 
-- `dispatching-parallel-agents` — assign Coder agents to worktrees automatically.
-- `team-builder` — compose parallel agent teams.
+- `dispatching-parallel-agents` â€” assign Coder agents to worktrees automatically.
+- `team-builder` â€” compose parallel agent teams.

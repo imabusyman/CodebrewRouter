@@ -1,9 +1,9 @@
 ---
 name: subagent-driven-development
-description: Delegate implementation work to specialized subagent instances, each inheriting a task scope and constraints from the parent. Emit structured handoffs, monitor completion signals, aggregate results. Use this in the Orchestrator parallel path when spawning independent Coder/Tester/Infra subagents from a single coordinator.
+description: "Delegate implementation work to specialized subagent instances, each inheriting a task scope and constraints from the parent. Emit structured handoffs, monitor completion signals, aggregate results. Use this in the Orchestrator parallel path when spawning independent Coder/Tester/Infra subagents from a single coordinator."
 ---
 
-# Subagent-Driven Development — hierarchical delegation
+# Subagent-Driven Development â€” hierarchical delegation
 
 Structures multi-agent development as a hierarchy: parent Orchestrator spawns child subagents, each with a bounded scope.
 
@@ -17,10 +17,10 @@ Structures multi-agent development as a hierarchy: parent Orchestrator spawns ch
 
 ```
 Orchestrator (parent)
-  ├─ Coder subagent 1 (worktree A, task scope A)
-  ├─ Coder subagent 2 (worktree B, task scope B)
-  ├─ Tester subagent 1 (tests for A + B)
-  └─ Infra subagent 1 (wire A + B into AppHost)
+  â”œâ”€ Coder subagent 1 (worktree A, task scope A)
+  â”œâ”€ Coder subagent 2 (worktree B, task scope B)
+  â”œâ”€ Tester subagent 1 (tests for A + B)
+  â””â”€ Infra subagent 1 (wire A + B into AppHost)
 ```
 
 Each subagent receives:
@@ -30,7 +30,7 @@ Each subagent receives:
 
 ## Handoff protocol
 
-Parent → subagent:
+Parent â†’ subagent:
 
 ```yaml
 ---
@@ -51,7 +51,7 @@ pending decisions:
 ---
 ```
 
-Subagent → parent:
+Subagent â†’ parent:
 
 ```
 [DONE]
@@ -78,6 +78,6 @@ After all subagents complete `[DONE]`:
 
 ## See also
 
-- `autonomous-agent-harness` — task queue + monitoring for subagents.
-- `dispatching-parallel-agents` — compute file-disjoint task sets.
-- `team-builder` — compose subagent teams manually.
+- `autonomous-agent-harness` â€” task queue + monitoring for subagents.
+- `dispatching-parallel-agents` â€” compute file-disjoint task sets.
+- `team-builder` â€” compose subagent teams manually.

@@ -30,6 +30,7 @@ $repoRoot    = Resolve-Path (Join-Path $PSScriptRoot '..')
 $srcRoot     = Join-Path $repoRoot 'prompts/squad'
 $copilotRoot = Join-Path $repoRoot '.github/plugins/squad'
 $claudeRoot  = Join-Path $repoRoot '.claude'
+$geminiRoot  = Join-Path $repoRoot '.gemini'
 
 if (-not (Test-Path $srcRoot)) {
     throw "Source squad directory not found: $srcRoot"
@@ -41,8 +42,7 @@ $roles = @(
 )
 
 # Claude Code -> Copilot CLI tool-name mapping.
-# Keep the keys in the vocabulary the source prompts actually use.
-$toolMap = @{
+$toolMapCopilot = @{
     'Read'     = 'read'
     'Edit'     = 'edit'
     'Grep'     = 'search'
@@ -51,6 +51,18 @@ $toolMap = @{
     'WebFetch' = 'web'
     'Agent'    = 'agent'
     'Write'    = 'edit'
+}
+
+# Claude Code -> Gemini CLI tool-name mapping.
+$toolMapGemini = @{
+    'Read'     = 'read_file'
+    'Edit'     = 'replace'
+    'Grep'     = 'grep_search'
+    'Glob'     = 'glob'
+    'Bash'     = 'run_shell_command'
+    'WebFetch' = 'web_fetch'
+    'Agent'    = 'generalist'
+    'Write'    = 'write_file'
 }
 
 function Ensure-Dir {
@@ -87,16 +99,25 @@ function Extract-FrontmatterValue {
 }
 
 function Translate-Tools {
-    param([string]$ToolsLine, [hashtable]$Map)
-    # ToolsLine like "[Read, Edit, Grep, Glob, Bash, WebFetch]"
-    if (-not $ToolsLine) { return '[]' }
+    param([string]$ToolsLine, [hashtable]$Map, [switch]$Gemini)
+    # ToolsLine like "[Read, Edit, Grep, Glob, Bash, WebFetch]" or "Read, Edit"
+    if (-not $ToolsLine) { return if ($Gemini) { "" } else { "[]" } }
     $inner = $ToolsLine.Trim('[', ']', ' ')
-    if (-not $inner) { return '[]' }
+    if (-not $inner) { return if ($Gemini) { "" } else { "[]" } }
     $translated = $inner.Split(',') `
         | ForEach-Object { $_.Trim() } `
         | ForEach-Object { if ($Map.ContainsKey($_)) { $Map[$_] } else { $_.ToLowerInvariant() } } `
         | Select-Object -Unique
-    return '[' + ($translated -join ', ') + ']'
+    
+    if ($Gemini) {
+        # Return as YAML list for Gemini
+        $yaml = "`n"
+        foreach ($t in $translated) { $yaml += "  - $t`n" }
+        return $yaml.TrimEnd()
+    } else {
+        # Return as bracketed list for Copilot/Claude
+        return "[" + ($translated -join ", ") + "]"
+    }
 }
 
 function Emit-ClaudeAgent {
@@ -108,11 +129,31 @@ function Emit-ClaudeAgent {
     Write-Host "  [claude]  agents/squad-$Role.md" -ForegroundColor Cyan
 }
 
+function Emit-GeminiAgent {
+    param([string]$Role, [hashtable]$Parsed)
+    $target = Join-Path $geminiRoot "agents/squad-$Role.md"
+    $toolsSrc = Extract-FrontmatterValue -Frontmatter $Parsed.Frontmatter -Key 'tools'
+    $toolsTranslated = Translate-Tools -ToolsLine $toolsSrc -Map $toolMapGemini -Gemini
+
+    # Gemini agents use YAML frontmatter but with specific keys.
+    $newFrontmatter = ($Parsed.Frontmatter -split "`n") | ForEach-Object {
+        if ($_ -match '^\s*tools\s*:') { 
+            if ($toolsTranslated) { "tools:$toolsTranslated" } else { "tools: []" }
+        }
+        elseif ($_ -match '^\s*model\s*:') { "model: inherit" }
+        else { $_ }
+    }
+    $newFrontmatter = ($newFrontmatter -join "`n").TrimEnd()
+    $content = "---`n$newFrontmatter`n---`n$($Parsed.Body)"
+    Write-File -Path $target -Content $content
+    Write-Host "  [gemini]  agents/squad-$Role.md" -ForegroundColor Green
+}
+
 function Emit-CopilotAgent {
     param([string]$Role, [hashtable]$Parsed)
     $target = Join-Path $copilotRoot "agents/squad.$Role.agent.md"
     $toolsSrc = Extract-FrontmatterValue -Frontmatter $Parsed.Frontmatter -Key 'tools'
-    $toolsTranslated = Translate-Tools -ToolsLine $toolsSrc -Map $toolMap
+    $toolsTranslated = Translate-Tools -ToolsLine $toolsSrc -Map $toolMapCopilot
 
     # Rewrite only the tools: line; leave everything else identical.
     $newFrontmatter = ($Parsed.Frontmatter -split "`n") | ForEach-Object {
@@ -140,11 +181,13 @@ Write-Host ""
 Write-Host "Squad sync: $srcRoot" -ForegroundColor Green
 Write-Host "  -> $copilotRoot" -ForegroundColor Green
 Write-Host "  -> $claudeRoot" -ForegroundColor Green
+Write-Host "  -> $geminiRoot" -ForegroundColor Green
 Write-Host ""
 
 # 1. Agents — per-target variants with translated tool names.
 Ensure-Dir -Path (Join-Path $copilotRoot 'agents')
 Ensure-Dir -Path (Join-Path $claudeRoot 'agents')
+Ensure-Dir -Path (Join-Path $geminiRoot 'agents')
 
 foreach ($role in $roles) {
     $src = Join-Path $srcRoot "$role.prompt.md"
@@ -156,6 +199,7 @@ foreach ($role in $roles) {
     $parsed = Parse-Frontmatter -Content $raw
     Emit-ClaudeAgent  -Role $role -Parsed $parsed
     Emit-CopilotAgent -Role $role -Parsed $parsed
+    Emit-GeminiAgent  -Role $role -Parsed $parsed
 }
 
 # 2. Shared instructions — copied verbatim to both targets.
@@ -163,6 +207,11 @@ Copy-Verbatim `
     -SourceDir (Join-Path $srcRoot '_shared') `
     -DestDir   (Join-Path $copilotRoot 'instructions') `
     -Label     'copilot'
+
+Copy-Verbatim `
+    -SourceDir (Join-Path $srcRoot '_shared') `
+    -DestDir   (Join-Path $geminiRoot 'instructions') `
+    -Label     'gemini'
 
 # 3. Protocol schemas — copied to both targets for reference.
 Copy-Verbatim `
@@ -175,6 +224,11 @@ Copy-Verbatim `
     -DestDir   (Join-Path $claudeRoot 'squad-protocol') `
     -Label     'claude'
 
+Copy-Verbatim `
+    -SourceDir (Join-Path $srcRoot 'protocol') `
+    -DestDir   (Join-Path $geminiRoot 'squad-protocol') `
+    -Label     'gemini'
+
 # 4. Commands — Claude Code slash commands live under .claude/commands/.
 Copy-Verbatim `
     -SourceDir (Join-Path $srcRoot 'commands') `
@@ -186,6 +240,13 @@ Copy-Verbatim `
     -SourceDir (Join-Path $srcRoot 'commands') `
     -DestDir   (Join-Path $copilotRoot 'commands') `
     -Label     'copilot'
+
+# Gemini CLI uses .toml for commands usually, but can read .md agents as commands if configured.
+# We'll copy the .md commands to .gemini/commands/ just in case.
+Copy-Verbatim `
+    -SourceDir (Join-Path $srcRoot 'commands') `
+    -DestDir   (Join-Path $geminiRoot 'commands') `
+    -Label     'gemini'
 
 # 5. Skills — per-skill directories each holding a SKILL.md.
 function Copy-Skills {
@@ -213,7 +274,12 @@ Copy-Skills `
     -DestDir   (Join-Path $copilotRoot 'skills') `
     -Label     'copilot'
 
+Copy-Skills `
+    -SourceDir (Join-Path $srcRoot 'skills') `
+    -DestDir   (Join-Path $geminiRoot 'skills') `
+    -Label     'gemini'
+
 Write-Host ""
 Write-Host "Squad sync complete." -ForegroundColor Green
-Write-Host "Review the diff before committing: git diff .github/plugins/squad .claude"
+Write-Host "Review the diff before committing: git diff .github/plugins/squad .claude .gemini"
 Write-Host ""

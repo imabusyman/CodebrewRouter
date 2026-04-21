@@ -1,9 +1,9 @@
 ---
 name: autonomous-agent-harness
-description: Provide a task queue, scheduler, and persistent memory system for autonomous multi-agent loops. Track task state, monitor agent progress, retry on failure, and persist decisions across sessions. Use this in the Orchestrator parallel path when running an autonomous PRD-driven loop without human gates.
+description: "Provide a task queue, scheduler, and persistent memory system for autonomous multi-agent loops. Track task state, monitor agent progress, retry on failure, and persist decisions across sessions. Use this in the Orchestrator parallel path when running an autonomous PRD-driven loop without human gates."
 ---
 
-# Autonomous Agent Harness — task queue + scheduler + memory
+# Autonomous Agent Harness â€” task queue + scheduler + memory
 
 A runtime framework for fully autonomous agent workflows (no human gates). Manages task queues, agent scheduling, persistent decision logs, and failure recovery.
 
@@ -30,7 +30,7 @@ Queue:
 State transitions:
 
 ```
-pending → assigned → in_progress → done / blocked / failed → (retry or skip)
+pending â†’ assigned â†’ in_progress â†’ done / blocked / failed â†’ (retry or skip)
 ```
 
 ### 2. Scheduler
@@ -46,7 +46,7 @@ pending → assigned → in_progress → done / blocked / failed → (retry or s
 Append-only decision log under `Docs/squad/runs/<ts>/`:
 
 ```markdown
-## 2026-04-20T15:45:00Z — scheduler — MEDIUM
+## 2026-04-20T15:45:00Z â€” scheduler â€” MEDIUM
 Decision: Task 2 (tests) was skipped due to missing implementation.
 Rationale: Quality gate requires tests to run after impl completes.
 Evidence: Task 1 still in [in_progress]; Task 2 moved to [queued].
@@ -64,7 +64,7 @@ Recovery across sessions: On restart, read the log, resume from the last checkpo
 
 The Orchestrator (Conductor's parallel-path sibling) drives the harness:
 
-1. Load PRD → generate task queue.
+1. Load PRD â†’ generate task queue.
 2. **Loop:**
    - Pull next ready task from queue.
    - Dispatch to appropriate agent (Coder / Tester / Infra).
@@ -89,6 +89,6 @@ harness:
 
 ## See also
 
-- `loop-operator` — supervise the autonomous loop, detect stalls, safe interventions.
-- `subagent-driven-development` — structure subagent delegation.
-- `dispatching-parallel-agents` — compute task sets from plan.
+- `loop-operator` â€” supervise the autonomous loop, detect stalls, safe interventions.
+- `subagent-driven-development` â€” structure subagent delegation.
+- `dispatching-parallel-agents` â€” compute task sets from plan.

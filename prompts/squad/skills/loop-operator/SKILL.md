@@ -1,9 +1,9 @@
 ---
 name: loop-operator
-description: Supervise an autonomous multi-agent loop, detecting stalls, managing timeouts, and performing safe interventions when agents are blocked or slow. Monitor agent health, log decisions, and escalate issues. Use this in the Orchestrator parallel path to ensure the autonomous loop makes progress and doesn't deadlock or hang.
+description: "Supervise an autonomous multi-agent loop, detecting stalls, managing timeouts, and performing safe interventions when agents are blocked or slow. Monitor agent health, log decisions, and escalate issues. Use this in the Orchestrator parallel path to ensure the autonomous loop makes progress and doesn't deadlock or hang."
 ---
 
-# Loop Operator — autonomous loop supervision and recovery
+# Loop Operator â€” autonomous loop supervision and recovery
 
 A guardian process that monitors the Orchestrator's autonomous loop for stalls, timeouts, and deadlocks. Detects problems and intervenes safely.
 
@@ -92,12 +92,12 @@ Each agent must emit periodic heartbeats:
 [CHECKPOINT] Task X, step 5/10, 50% done. ETA 20 mins.
 ```
 
-Loop operator reads handoff artifact's `progress` field; if no update for 30 mins → stall detected.
+Loop operator reads handoff artifact's `progress` field; if no update for 30 mins â†’ stall detected.
 
 ## Decisions logged
 
 ```markdown
-## 2026-04-20T16:00:00Z — loop-operator — MEDIUM
+## 2026-04-20T16:00:00Z â€” loop-operator â€” MEDIUM
 Decision: Task 1 (Coder) timed out after 1h. Reassigned to fresh Coder.
 Rationale: No heartbeat for 45 mins; task was hanging on API call.
 Evidence: .worktrees/task-1/logs/coder.log shows [CHECKPOINT] stopped at t=0:15.
@@ -106,5 +106,5 @@ Action: Killed agent; reset worktree; re-dispatched with timeout=30m.
 
 ## See also
 
-- `autonomous-agent-harness` — task queue driver (Loop Operator monitors it).
-- `subagent-driven-development` — defines agent structure that Loop Operator supervises.
+- `autonomous-agent-harness` â€” task queue driver (Loop Operator monitors it).
+- `subagent-driven-development` â€” defines agent structure that Loop Operator supervises.
