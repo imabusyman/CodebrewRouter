@@ -39,17 +39,23 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+startupLogger.LogInformation("🟢 Blaze.LlmGateway.Api starting up...");
+startupLogger.LogDebug("  ├─ Environment: {Environment}", app.Environment.EnvironmentName);
+
 // Enable OpenAPI/Swagger UI
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    startupLogger.LogInformation("  ├─ OpenAPI/Swagger enabled at /openapi/v1.json");
 }
 
 // Register LiteLLM-compatible endpoints  
 app.RegisterLiteLlmEndpoints();
 
-
 app.MapDefaultEndpoints();
+
+startupLogger.LogInformation("✅ Blaze.LlmGateway.Api startup complete");
 
 app.Run();
 

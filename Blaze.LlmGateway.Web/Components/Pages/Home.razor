@@ -37,10 +37,12 @@
 
         var requestBody = new
         {
+            model = "gpt-4o",  // Default to gpt-4o, will be routed to appropriate provider
             messages = new[]
             {
                 new { role = "user", content = userPrompt }
-            }
+            },
+            stream = true  // Always stream for better UX
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
