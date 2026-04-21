@@ -15,21 +15,22 @@ builder.AddServiceDefaults();
 builder.Services.Configure<LlmGatewayOptions>(
     builder.Configuration.GetSection(LlmGatewayOptions.SectionName));
 
-// MCP connection manager (hosted service + singleton accessor)
-builder.Services.AddSingleton<IEnumerable<McpConnectionConfig>>([
-    new McpConnectionConfig
-    {
-        Id = "microsoft-learn",
-        TransportType = "Stdio",
-        Command = "npx",
-        Arguments = ["-y", "@microsoft/mcp-server-microsoft-learn"]
-    }
-]);
-builder.Services.AddHostedService<McpConnectionManager>();
-builder.Services.AddSingleton(sp =>
-    sp.GetServices<IHostedService>().OfType<McpConnectionManager>().First());
+// MCP integration disabled (microsoft-learn server connection issues)
+// To re-enable: uncomment below and ensure @microsoft/mcp-server-microsoft-learn is available
+// builder.Services.AddSingleton<IEnumerable<McpConnectionConfig>>([
+//     new McpConnectionConfig
+//     {
+//         Id = "microsoft-learn",
+//         TransportType = "Stdio",
+//         Command = "npx",
+//         Arguments = ["-y", "@microsoft/mcp-server-microsoft-learn"]
+//     }
+// ]);
+// builder.Services.AddHostedService<McpConnectionManager>();
+// builder.Services.AddSingleton(sp =>
+//     sp.GetServices<IHostedService>().OfType<McpConnectionManager>().First());
 
-// Keyed provider clients + routing/MCP pipeline
+// Keyed provider clients + routing pipeline (MCP disabled for now)
 builder.Services.AddLlmProviders();
 builder.Services.AddLlmInfrastructure();
 

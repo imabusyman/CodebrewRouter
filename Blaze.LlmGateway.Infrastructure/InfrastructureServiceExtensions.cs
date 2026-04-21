@@ -123,12 +123,19 @@ public static class InfrastructureServiceExtensions
         {
             var fallback = sp.GetRequiredKeyedService<IChatClient>("AzureFoundry");
             var strategy = sp.GetRequiredService<IRoutingStrategy>();
-            var mcpManager = sp.GetRequiredService<McpConnectionManager>();
             var routerLogger = sp.GetRequiredService<ILogger<LlmRoutingChatClient>>();
-            var mcpLogger = sp.GetRequiredService<ILogger<McpToolDelegatingClient>>();
 
+            // MCP tool injection disabled (server connection issues)
+            // To re-enable: uncomment McpConnectionManager registration in Program.cs
+            // and uncomment the McpToolDelegatingClient wrapper below
+            
             IChatClient router = new LlmRoutingChatClient(fallback, sp, strategy, routerLogger);
-            return new McpToolDelegatingClient(router, mcpManager, mcpLogger);
+            // Wrap with MCP layer if available:
+            // var mcpManager = sp.GetRequiredService<McpConnectionManager>();
+            // var mcpLogger = sp.GetRequiredService<ILogger<McpToolDelegatingClient>>();
+            // return new McpToolDelegatingClient(router, mcpManager, mcpLogger);
+            
+            return router;
         });
 
         return services;
