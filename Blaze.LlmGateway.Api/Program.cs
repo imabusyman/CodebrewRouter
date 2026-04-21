@@ -32,37 +32,21 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddLlmProviders();
 builder.Services.AddLlmInfrastructure();
 
+// Configure OpenAPI/Swagger
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
-app.MapPost("/v1/chat/completions", async (HttpRequest request, IChatClient chatClient) =>
+// Enable OpenAPI/Swagger UI
+if (app.Environment.IsDevelopment())
 {
-    using var doc = await JsonSerializer.DeserializeAsync<JsonDocument>(request.Body);
-    var messages = new List<ChatMessage>();
+    app.MapOpenApi();
+}
 
-    if (doc?.RootElement.TryGetProperty("messages", out var msgsEl) == true)
-    {
-        foreach (var msg in msgsEl.EnumerateArray())
-        {
-            var roleStr = msg.GetProperty("role").GetString() ?? "user";
-            var content = msg.GetProperty("content").GetString() ?? "";
-            var role = roleStr.ToLowerInvariant() switch
-            {
-                "system" => ChatRole.System,
-                "assistant" => ChatRole.Assistant,
-                _ => ChatRole.User
-            };
-            messages.Add(new ChatMessage(role, content));
-        }
-    }
-
-    request.HttpContext.Response.ContentType = "text/event-stream";
-    await foreach (var update in chatClient.GetStreamingResponseAsync(messages))
-    {
-        var chunk = new { choices = new[] { new { delta = new { content = update.Text } } } };
-        await request.HttpContext.Response.WriteAsync($"data: {JsonSerializer.Serialize(chunk)}\n\n");
-    }
-    await request.HttpContext.Response.WriteAsync("data: [DONE]\n\n");
-});
+// Register LiteLLM-compatible endpoints
+app.MapPost("/v1/chat/completions", ChatCompletionsEndpoint.HandleAsync);
+app.MapPost("/v1/completions", CompletionsEndpoint.HandleAsync);
+app.MapGet("/v1/models", ModelsEndpoint.Handle);
 
 app.MapDefaultEndpoints();
 
