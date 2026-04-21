@@ -28,9 +28,11 @@ var openRouterApiKey      = builder.AddParameter("openrouter-api-key",     secre
 var githubModelsApiKey    = builder.AddParameter("github-models-api-key",  secret: true);
 var syncfusionLicenseKey  = builder.AddParameter("syncfusion-license-key", secret: true);
 
-// ── Azure Foundry Local (runs Foundry Local as an Aspire-managed resource) ──
-var aiFoundry = builder.AddAzureAIFoundry("ai-foundry").RunAsFoundryLocal();
-var foundryChat = aiFoundry.AddDeployment("foundry-chat", AIFoundryModel.Local.Phi4Mini);
+// ── Azure Foundry Local (optional: requires Docker) ──
+// Note: RunAsFoundryLocal() requires IContainerRuntime (Docker daemon)
+// Uncomment below if Docker is properly configured
+// var aiFoundry = builder.AddAzureAIFoundry("ai-foundry").RunAsFoundryLocal();
+// var foundryChat = aiFoundry.AddDeployment("foundry-chat", AIFoundryModel.Local.Phi4Mini);
 
 // ── GitHub Models ──
 var ghGpt4oMini = builder.AddGitHubModel("gh-gpt4o-mini", "openai/gpt-4o-mini")
@@ -38,14 +40,15 @@ var ghGpt4oMini = builder.AddGitHubModel("gh-gpt4o-mini", "openai/gpt-4o-mini")
 var ghPhi4Mini = builder.AddGitHubModel("gh-phi4-mini", "microsoft/phi-4-mini-instruct")
     .WithApiKey(githubModelsApiKey);
 
-// ── Local Ollama container (backup for remote 192.168.16.56) ──
-var ollamaLocal = builder.AddContainer("ollama-local", "ollama/ollama")
-    .WithEndpoint(port: 11434, targetPort: 11434, name: "ollama", scheme: "http")
-    .WithVolume("ollama-data", "/root/.ollama");
+// ── Local Ollama container (optional: requires Docker) ──
+// Uncomment if you have Ollama Docker image available
+// var ollamaLocal = builder.AddContainer("ollama-local", "ollama/ollama")
+//     .WithEndpoint(port: 11434, targetPort: 11434, name: "ollama", scheme: "http")
+//     .WithVolume("ollama-data", "/root/.ollama");
 
 // ── API project — wire all resources ──
 var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
-    .WithReference(foundryChat)
+    // .WithReference(foundryChat)  // Commented out: Foundry Local requires Docker
     .WithReference(ghGpt4oMini)
     .WithReference(ghPhi4Mini)
     .WithEnvironment("LlmGateway__Providers__AzureFoundry__Endpoint", azureFoundryEndpoint)
