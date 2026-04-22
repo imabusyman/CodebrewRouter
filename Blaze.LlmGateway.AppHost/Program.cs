@@ -17,6 +17,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -65,6 +66,10 @@ var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
     .WithEnvironment("LlmGateway__Providers__Gemini__ApiKey",         geminiApiKey)
     .WithEnvironment("LlmGateway__Providers__OpenRouter__ApiKey",     openRouterApiKey)
     .WithEnvironment("LlmGateway__Providers__GithubModels__ApiKey",   githubModelsApiKey);
+
+// Add documentation links as custom URLs in the dashboard
+api.WithUrl("/swagger", "Swagger UI")
+   .WithUrl("/scalar", "Scalar API Reference");
 
 // ── Dev UIs (Docker-based; optional) ──────────────────────────────────────
 // These are pure dev-time playgrounds for exercising the OpenAI-compatible
@@ -146,12 +151,20 @@ builder.AddProject<Projects.Blaze_LlmGateway_Web>("web")
     .WithReference(api)
     .WithEnvironment("Syncfusion__LicenseKey", syncfusionLicenseKey);
 
+// ── Scalar API Reference integration for Aspire dashboard ──
+builder.AddScalarApiReference()
+    .WithApiReference(api, "/openapi/v1.json");
+
 aspireLogger.LogDebug("  ├─ API project configured with GitHub Models references");
 aspireLogger.LogDebug("  ├─ Dev UI playgrounds resolved (see flags above)");
+aspireLogger.LogDebug("  ├─ Scalar API Reference configured for dashboard");
 aspireLogger.LogDebug("  └─ Web project configured with Syncfusion license");
 aspireLogger.LogInformation("✅ Aspire orchestration ready - building distributed app");
 
 var app = builder.Build();
 
 aspireLogger.LogInformation("🚀 Starting Aspire dashboard and services...");
+aspireLogger.LogInformation("  📚 API Documentation available in Aspire Dashboard and via:");
+aspireLogger.LogInformation("     • Swagger UI: http://localhost:5000/swagger");
+aspireLogger.LogInformation("     • Scalar API Reference: http://localhost:5000/scalar");
 app.Run();
