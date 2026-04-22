@@ -1,5 +1,7 @@
 using System.Text;
 using System.Text.Json;
+using Blaze.LlmGateway.Core.ModelCatalog;
+using Blaze.LlmGateway.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.AI;
@@ -51,6 +53,8 @@ public class CompletionsIntegrationTests : IAsyncLifetime
                     services.AddKeyedSingleton<IChatClient>("FoundryLocal", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("GithubModels", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockChatClient.Object);
+                    services.AddSingleton<IModelCatalog>(new FakeModelCatalog());
+                    services.AddSingleton<IModelSelectionResolver>(new FakeModelSelectionResolver(mockChatClient.Object));
                 });
             });
 
@@ -385,5 +389,22 @@ public class CompletionsIntegrationTests : IAsyncLifetime
         yield return new ChatResponseUpdate(ChatRole.Assistant, "Once upon ");
         yield return new ChatResponseUpdate(ChatRole.Assistant, "a time, ");
         yield return new ChatResponseUpdate(ChatRole.Assistant, "there was.");
+    }
+
+    private sealed class FakeModelSelectionResolver(IChatClient client) : IModelSelectionResolver
+    {
+        public Task<IChatClient?> ResolveAsync(string modelId, CancellationToken cancellationToken = default)
+            => Task.FromResult<IChatClient?>(client);
+    }
+
+    private sealed class FakeModelCatalog : IModelCatalog
+    {
+        public Task<IReadOnlyList<AvailableModel>> GetAvailableModelsAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<AvailableModel>>([
+                new AvailableModel("gpt-3.5-turbo", "AzureFoundry", "openai", "configured")
+            ]);
+
+        public Task<AvailableModel?> FindByIdAsync(string modelId, CancellationToken cancellationToken = default)
+            => Task.FromResult<AvailableModel?>(new AvailableModel(modelId, "AzureFoundry", "openai", "configured"));
     }
 }

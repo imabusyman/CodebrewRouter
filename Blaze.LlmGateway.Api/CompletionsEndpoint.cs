@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Blaze.LlmGateway.Infrastructure;
 
 namespace Blaze.LlmGateway.Api;
 
@@ -15,6 +16,7 @@ public static class CompletionsEndpoint
     public static async Task<IResult> HandleAsync(
         TextCompletionRequest req,
         IChatClient chatClient,
+        IModelSelectionResolver modelSelectionResolver,
         HttpContext httpContext,
         CancellationToken ct)
     {
@@ -57,12 +59,12 @@ public static class CompletionsEndpoint
         if (req.Stream)
         {
             // Streaming response via SSE
-            return await HandleStreamingAsync(httpContext, messages, options, req.Model, chatClient, ct);
+            return await HandleStreamingAsync(httpContext, messages, options, req.Model, chatClient, modelSelectionResolver, ct);
         }
         else
         {
             // Non-streaming response
-            return await HandleNonStreamingAsync(messages, options, req.Model, chatClient, ct);
+            return await HandleNonStreamingAsync(messages, options, req.Model, chatClient, modelSelectionResolver, ct);
         }
     }
 
@@ -72,6 +74,7 @@ public static class CompletionsEndpoint
         ChatOptions options,
         string model,
         IChatClient chatClient,
+        IModelSelectionResolver modelSelectionResolver,
         CancellationToken ct)
     {
         httpContext.Response.ContentType = "text/event-stream";
@@ -84,7 +87,8 @@ public static class CompletionsEndpoint
 
         try
         {
-            await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, ct))
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, ct);
+            await foreach (var update in selectedClient.GetStreamingResponseAsync(messages, options, ct))
             {
                 var choice = new { text = update.Text, index = 0, finish_reason = (string?)null };
                 var chunk = new { id, @object = "text_completion.chunk", created, model, choices = new[] { choice } };
@@ -107,11 +111,13 @@ public static class CompletionsEndpoint
         ChatOptions options,
         string model,
         IChatClient chatClient,
+        IModelSelectionResolver modelSelectionResolver,
         CancellationToken ct)
     {
         try
         {
-            var completion = await chatClient.GetResponseAsync(messages, options, ct);
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, ct);
+            var completion = await selectedClient.GetResponseAsync(messages, options, ct);
 
             var id = $"cmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
             var created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -135,5 +141,14 @@ public static class CompletionsEndpoint
         {
             return Results.StatusCode(500);
         }
+    }
+
+    private static async Task<IChatClient> ResolveClientAsync(
+        string model,
+        IChatClient defaultClient,
+        IModelSelectionResolver modelSelectionResolver,
+        CancellationToken cancellationToken)
+    {
+        return await modelSelectionResolver.ResolveAsync(model, cancellationToken) ?? defaultClient;
     }
 }

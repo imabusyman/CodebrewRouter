@@ -2,6 +2,7 @@ using Azure;
 using Azure.AI.OpenAI;
 using Azure.Identity;
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Infrastructure.RoutingStrategies;
 using Google.GenAI;
 using Microsoft.Extensions.AI;
@@ -94,6 +95,7 @@ public static class InfrastructureServiceExtensions
 
     public static IServiceCollection AddLlmInfrastructure(this IServiceCollection services)
     {
+        services.AddSingleton<IModelSelectionResolver, ModelSelectionResolver>();
         services.AddSingleton<KeywordRoutingStrategy>();
         services.AddSingleton<IRoutingStrategy>(sp =>
         {

@@ -91,4 +91,5 @@ public record ModelInfo(
     string Id,
     string Object,
     string Provider,
-    string? OwnedBy = null);
+    string? OwnedBy = null,
+    string? Source = null);

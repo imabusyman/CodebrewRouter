@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.AI;
@@ -49,6 +50,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
                     services.AddKeyedSingleton<IChatClient>("FoundryLocal", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("GithubModels", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockChatClient.Object);
+                    services.AddSingleton<IModelCatalog>(new FakeModelCatalog());
                 });
             });
 
@@ -99,6 +101,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
             Assert.True(model.TryGetProperty("id", out _), "Model missing 'id'");
             Assert.True(model.TryGetProperty("object", out _), "Model missing 'object'");
             Assert.True(model.TryGetProperty("provider", out _), "Model missing 'provider'");
+            Assert.True(model.TryGetProperty("source", out _), "Model missing 'source'");
         }
     }
 
@@ -320,5 +323,17 @@ public class ModelsIntegrationTests : IAsyncLifetime
     {
         yield return new ChatResponseUpdate(ChatRole.Assistant, "response");
         await Task.CompletedTask;
+    }
+
+    private sealed class FakeModelCatalog : IModelCatalog
+    {
+        public Task<IReadOnlyList<AvailableModel>> GetAvailableModelsAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<AvailableModel>>([
+                new AvailableModel("gpt-4o", "AzureFoundry", "openai", "configured"),
+                new AvailableModel("gemma4:e4b", "OllamaLocal", "ollama", "live")
+            ]);
+
+        public Task<AvailableModel?> FindByIdAsync(string modelId, CancellationToken cancellationToken = default)
+            => Task.FromResult<AvailableModel?>(null);
     }
 }

@@ -15,7 +15,6 @@
 // map them to Azure Key Vault references via Aspire's resource model.
 // ============================================================
 
-using Aspire.Hosting.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 

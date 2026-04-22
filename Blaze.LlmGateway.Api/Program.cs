@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +35,9 @@ if (!isRunningUnderAspire)
 
 builder.Services.Configure<LlmGatewayOptions>(
     builder.Configuration.GetSection(LlmGatewayOptions.SectionName));
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<IModelCatalog, ModelCatalogService>();
 
 // MCP integration disabled (microsoft-learn server connection issues)
 // To re-enable: uncomment below and ensure @microsoft/mcp-server-microsoft-learn is available

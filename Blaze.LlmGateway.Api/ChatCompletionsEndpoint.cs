@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Blaze.LlmGateway.Infrastructure;
 
 namespace Blaze.LlmGateway.Api;
 
@@ -15,6 +16,7 @@ public static class ChatCompletionsEndpoint
     public static async Task<IResult> HandleAsync(
         ChatCompletionRequest req,
         IChatClient chatClient,
+        IModelSelectionResolver modelSelectionResolver,
         HttpContext httpContext,
         CancellationToken ct)
     {
@@ -83,13 +85,13 @@ public static class ChatCompletionsEndpoint
         {
             logger?.LogInformation("  └─ Using STREAMING mode");
             // Streaming response via SSE
-            return await HandleStreamingAsync(httpContext, messages, options, req.Model, chatClient, logger, ct);
+            return await HandleStreamingAsync(httpContext, messages, options, req.Model, chatClient, modelSelectionResolver, logger, ct);
         }
         else
         {
             logger?.LogInformation("  └─ Using NON-STREAMING mode");
             // Non-streaming response
-            return await HandleNonStreamingAsync(messages, options, req.Model, chatClient, logger, ct);
+            return await HandleNonStreamingAsync(messages, options, req.Model, chatClient, modelSelectionResolver, logger, ct);
         }
     }
 
@@ -99,6 +101,7 @@ public static class ChatCompletionsEndpoint
         ChatOptions options,
         string model,
         IChatClient chatClient,
+        IModelSelectionResolver modelSelectionResolver,
         ILogger<ChatCompletionRequest>? logger,
         CancellationToken ct)
     {
@@ -114,8 +117,9 @@ public static class ChatCompletionsEndpoint
 
         try
         {
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
             var chunkCount = 0;
-            await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, ct))
+            await foreach (var update in selectedClient.GetStreamingResponseAsync(messages, options, ct))
             {
                 chunkCount++;
                 var choice = new { index = 0, delta = new { content = update.Text }, finish_reason = (string?)null };
@@ -149,6 +153,7 @@ public static class ChatCompletionsEndpoint
         ChatOptions options,
         string model,
         IChatClient chatClient,
+        IModelSelectionResolver modelSelectionResolver,
         ILogger<ChatCompletionRequest>? logger,
         CancellationToken ct)
     {
@@ -156,8 +161,9 @@ public static class ChatCompletionsEndpoint
         {
             logger?.LogInformation("⏳ Getting non-streaming response from chat client");
             var sw = System.Diagnostics.Stopwatch.StartNew();
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
             
-            var completion = await chatClient.GetResponseAsync(messages, options, ct);
+            var completion = await selectedClient.GetResponseAsync(messages, options, ct);
             
             sw.Stop();
             logger?.LogInformation("✅ Received response in {ElapsedMs}ms", sw.ElapsedMilliseconds);
@@ -192,5 +198,23 @@ public static class ChatCompletionsEndpoint
             logger?.LogError(ex, "❌ Error in non-streaming handler");
             return Results.StatusCode(500);
         }
+    }
+
+    private static async Task<IChatClient> ResolveClientAsync(
+        string model,
+        IChatClient defaultClient,
+        IModelSelectionResolver modelSelectionResolver,
+        ILogger<ChatCompletionRequest>? logger,
+        CancellationToken cancellationToken)
+    {
+        var selectedClient = await modelSelectionResolver.ResolveAsync(model, cancellationToken);
+        if (selectedClient is not null)
+        {
+            logger?.LogInformation("🎛️ Honoring selected model {Model}", model);
+            return selectedClient;
+        }
+
+        logger?.LogInformation("🧭 No direct client match for model {Model}; using routed default client", model);
+        return defaultClient;
     }
 }

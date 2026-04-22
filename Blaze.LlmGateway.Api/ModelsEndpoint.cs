@@ -1,5 +1,4 @@
-using Microsoft.Extensions.Options;
-using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.ModelCatalog;
 
 namespace Blaze.LlmGateway.Api;
 
@@ -10,39 +9,16 @@ namespace Blaze.LlmGateway.Api;
 public static class ModelsEndpoint
 {
     /// <summary>Handle model listing requests</summary>
-    public static IResult Handle(IServiceProvider sp)
+    public static async Task<IResult> HandleAsync(IModelCatalog modelCatalog, CancellationToken cancellationToken)
     {
-        var models = new List<ModelInfo>();
-
-        // Get the LLM gateway options
-        var options = sp.GetRequiredService<IOptions<LlmGatewayOptions>>();
-        var opts = options.Value.Providers;
-
-        // Map provider names to their configured models
-        var providerModels = new Dictionary<string, (string model, string ownedBy)>
-        {
-            ["AzureFoundry"] = (opts.AzureFoundry.Model, "openai"),
-            ["GithubCopilot"] = (opts.GithubCopilot.Model, "openai"),
-            ["Gemini"] = (opts.Gemini.Model, "google"),
-            ["OpenRouter"] = (opts.OpenRouter.Model, "qwen"),
-            ["FoundryLocal"] = (opts.FoundryLocal.Model, "openai"),
-            ["GithubModels"] = (opts.GithubModels.Model, "openai"),
-            ["OllamaLocal"] = (opts.OllamaLocal.Model, "meta")
-        };
-
-        // Collect all available models
-        foreach (var (providerName, (model, ownedBy)) in providerModels)
-        {
-            if (!string.IsNullOrWhiteSpace(model))
-            {
-                models.Add(new ModelInfo(
-                    Id: model,
-                    Object: "model",
-                    Provider: providerName,
-                    OwnedBy: ownedBy
-                ));
-            }
-        }
+        var models = (await modelCatalog.GetAvailableModelsAsync(cancellationToken))
+            .Select(model => new ModelInfo(
+                Id: model.Id,
+                Object: "model",
+                Provider: model.Provider,
+                OwnedBy: model.OwnedBy,
+                Source: model.Source))
+            .ToList();
 
         var response = new ModelsResponse(
             Object: "list",
