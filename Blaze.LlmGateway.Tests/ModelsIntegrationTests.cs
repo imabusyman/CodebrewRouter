@@ -42,9 +42,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
                             [new ChatMessage(ChatRole.Assistant, "response")]));
 
                     services.AddSingleton(mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("Ollama", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("AzureFoundry", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("OllamaBackup", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("GithubCopilot", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("Gemini", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OpenRouter", mockChatClient.Object);
@@ -138,7 +136,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
             }
         }
 
-        var knownProviders = new[] { "Ollama", "AzureFoundry", "Gemini", "GithubModels", "OpenRouter", "GithubCopilot" };
+        var knownProviders = new[] { "AzureFoundry", "Gemini", "GithubModels", "OpenRouter", "GithubCopilot", "OllamaLocal" };
         var hasKnownProvider = providers.Any(p => knownProviders.Contains(p));
         Assert.True(hasKnownProvider, $"No known providers found. Found: {string.Join(", ", providers)}");
     }
@@ -271,7 +269,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
         // Assert
         Assert.True(json.RootElement.TryGetProperty("data", out var data));
 
-        var validProviders = new[] { "Ollama", "AzureFoundry", "Gemini", "GithubModels", "OpenRouter", "GithubCopilot", "OllamaBackup", "FoundryLocal", "OllamaLocal" };
+        var validProviders = new[] { "AzureFoundry", "Gemini", "GithubModels", "OpenRouter", "GithubCopilot", "FoundryLocal", "OllamaLocal" };
 
         foreach (var model in data.EnumerateArray())
         {

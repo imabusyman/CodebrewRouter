@@ -105,6 +105,8 @@ public static class ChatCompletionsEndpoint
         httpContext.Response.ContentType = "text/event-stream";
         httpContext.Response.Headers.Append("Cache-Control", "no-cache");
         httpContext.Response.Headers.Append("Connection", "keep-alive");
+        // Disable proxy/nginx buffering so each SSE chunk reaches the client immediately.
+        httpContext.Response.Headers.Append("X-Accel-Buffering", "no");
 
         var id = $"chatcmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
         var created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -120,6 +122,7 @@ public static class ChatCompletionsEndpoint
                 var chunk = new { id, @object = "text_completion.chunk", created, model, choices = new[] { choice } };
                 var json = JsonSerializer.Serialize(chunk);
                 await httpContext.Response.WriteAsync($"data: {json}\n\n", ct);
+                await httpContext.Response.Body.FlushAsync(ct);
                 
                 if (chunkCount % 10 == 0)
                     logger?.LogDebug("  ├─ Streamed {ChunkCount} chunks so far", chunkCount);
@@ -134,6 +137,7 @@ public static class ChatCompletionsEndpoint
         finally
         {
             await httpContext.Response.WriteAsync("data: [DONE]\n\n", ct);
+            await httpContext.Response.Body.FlushAsync(ct);
             logger?.LogDebug("  └─ [DONE] marker sent");
         }
 

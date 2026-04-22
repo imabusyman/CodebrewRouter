@@ -68,6 +68,29 @@ The gateway is instrumented with OpenTelemetry via the shared ServiceDefaults pr
 
 ---
 
+## Dev UI Playgrounds
+
+For interactively testing `/v1/chat/completions` (including streaming, routing, and MCP tools) the AppHost orchestrates ready-made chat UIs as container/executable resources. The Blazor project (`Blaze.LlmGateway.Web`) is intentionally left for a real application — use the playgrounds below for ad-hoc testing.
+
+Both are toggled via `appsettings.json` on the AppHost (or env overrides):
+
+```jsonc
+// Blaze.LlmGateway.AppHost/appsettings.json
+"DevUI": {
+  "OpenWebUI": true,        // default
+  "AgentFramework": false   // opt-in
+}
+```
+
+| Playground | Resource | Prereqs |
+|---|---|---|
+| **Open WebUI** | container `ghcr.io/open-webui/open-webui:main`, port 8080 | Docker Desktop. `OPENAI_API_BASE_URL` points at `{api}/v1` automatically. Login disabled for local dev. Chats persist in the `blaze-openwebui-data` volume. |
+| **Agent Framework DevUI** | executable `devui` (port 8765) | Python 3.11+ with `pip install agent-framework-devui` (exposes `devui` on PATH). Useful for tool/trace inspection. |
+
+Once `dotnet run --project Blaze.LlmGateway.AppHost` is up, open the Aspire dashboard and click the `openwebui` resource URL to reach the chat UI. The gateway also exposes a permissive `devui` CORS policy in Development so browser UIs can call the API directly.
+
+---
+
 ## Current Status
 
 The core pipeline (routing, streaming, MCP tool injection, and Aspire orchestration) is operational. The following areas are scaffolded but not yet complete:

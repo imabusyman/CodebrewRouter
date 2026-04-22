@@ -10,9 +10,10 @@ using Microsoft.Extensions.Logging;
 namespace Blaze.LlmGateway.Infrastructure.RoutingStrategies;
 
 /// <summary>
-/// Meta-routing strategy that delegates routing decisions to the Ollama "router" model.
-/// Sends the incoming prompt to the router model asking it to classify which provider should handle it.
-/// Falls back to <see cref="KeywordRoutingStrategy"/> on any failure.
+/// Meta-routing strategy that delegates routing decisions to a local Ollama "router" model
+/// (the keyed <c>OllamaLocal</c> client). Sends the incoming prompt to the router model asking
+/// it to classify which provider should handle it. Falls back to <see cref="KeywordRoutingStrategy"/>
+/// on any failure.
 /// </summary>
 public class OllamaMetaRoutingStrategy(
     IChatClient routerClient,
@@ -28,9 +29,10 @@ public class OllamaMetaRoutingStrategy(
 
         Routing guidelines:
         - AzureFoundry: enterprise/business tasks, Office 365, Azure-specific questions
-        - Ollama: local/private tasks, coding assistance, general chat
-        - OllamaBackup: if primary Ollama is unavailable or for less critical tasks
+        - OllamaLocal: local/private tasks, coding assistance, general chat on the local Ollama container
+        - FoundryLocal: local Foundry Local models (OpenAI-compatible)
         - GithubCopilot: code generation, debugging, GitHub-related tasks
+        - GithubModels: GitHub Models inference API tasks
         - Gemini: multimodal tasks, Google services, search-oriented questions
         - OpenRouter: creative writing, open-source model tasks, Qwen/general AI queries
         """;

@@ -16,7 +16,7 @@ namespace Blaze.LlmGateway.Tests;
 public class LlmRoutingChatClientTests
 {
     [Fact]
-    public async Task RoutesToOllama_WhenStrategyResolvesOllama()
+    public async Task RoutesToOllamaLocal_WhenStrategyResolvesOllamaLocal()
     {
         // Arrange
         var mockOllamaClient = new Mock<IChatClient>();
@@ -29,10 +29,10 @@ public class LlmRoutingChatClientTests
         var mockStrategy = new Mock<IRoutingStrategy>();
         mockStrategy
             .Setup(s => s.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(RouteDestination.Ollama);
+            .ReturnsAsync(RouteDestination.OllamaLocal);
 
         var services = new ServiceCollection();
-        services.AddKeyedSingleton<IChatClient>("Ollama", mockOllamaClient.Object);
+        services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockOllamaClient.Object);
         var serviceProvider = services.BuildServiceProvider();
 
         var router = new LlmRoutingChatClient(mockInnerClient.Object, serviceProvider, mockStrategy.Object, mockLogger.Object);

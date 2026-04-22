@@ -11,8 +11,6 @@ public class LlmGatewayOptions
 public class ProvidersOptions
 {
     public AzureFoundryOptions AzureFoundry { get; set; } = new();
-    public OllamaOptions Ollama { get; set; } = new();
-    public OllamaOptions OllamaBackup { get; set; } = new();
     public GitHubCopilotOptions GithubCopilot { get; set; } = new();
     public GeminiOptions Gemini { get; set; } = new();
     public OpenRouterOptions OpenRouter { get; set; } = new();
@@ -27,12 +25,6 @@ public class AzureFoundryOptions
     public string Model { get; set; } = "gpt-4o";
     /// <summary>Optional. If absent, DefaultAzureCredential is used.</summary>
     public string? ApiKey { get; set; }
-}
-
-public class OllamaOptions
-{
-    public string BaseUrl { get; set; } = "http://192.168.16.56:11434";
-    public string Model { get; set; } = "llama3.2";
 }
 
 public class GitHubCopilotOptions

@@ -22,8 +22,6 @@ public static class ModelsEndpoint
         var providerModels = new Dictionary<string, (string model, string ownedBy)>
         {
             ["AzureFoundry"] = (opts.AzureFoundry.Model, "openai"),
-            ["Ollama"] = (opts.Ollama.Model, "meta"),
-            ["OllamaBackup"] = (opts.OllamaBackup.Model, "meta"),
             ["GithubCopilot"] = (opts.GithubCopilot.Model, "openai"),
             ["Gemini"] = (opts.Gemini.Model, "google"),
             ["OpenRouter"] = (opts.OpenRouter.Model, "qwen"),

@@ -57,6 +57,20 @@ builder.Services.AddLlmInfrastructure();
 // Configure OpenAPI/Swagger
 builder.Services.AddOpenApi();
 
+// Dev-only permissive CORS so playground UIs (Open WebUI, Agent Framework DevUI)
+// running as sibling Aspire resources can call /v1/chat/completions from the browser.
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("devui", policy => policy
+            .SetIsOriginAllowed(_ => true)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+    });
+}
+
 var app = builder.Build();
 
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -76,7 +90,9 @@ else
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseCors("devui");
     startupLogger.LogInformation("  ├─ OpenAPI/Swagger enabled at /openapi/v1.json");
+    startupLogger.LogInformation("  ├─ Permissive 'devui' CORS policy active (Development only)");
 }
 
 // Register LiteLLM-compatible endpoints  

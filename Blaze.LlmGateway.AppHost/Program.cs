@@ -16,6 +16,7 @@
 // ============================================================
 
 using Aspire.Hosting.Azure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -66,12 +67,88 @@ var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
     .WithEnvironment("LlmGateway__Providers__OpenRouter__ApiKey",     openRouterApiKey)
     .WithEnvironment("LlmGateway__Providers__GithubModels__ApiKey",   githubModelsApiKey);
 
-// ── Web project ──
+// ── Dev UIs (Docker-based; optional) ──────────────────────────────────────
+// These are pure dev-time playgrounds for exercising the OpenAI-compatible
+// /v1/chat/completions endpoint with streaming. They are orchestrated as
+// container / executable resources so they don't pollute Blaze.LlmGateway.Web,
+// which is reserved for the real Blazor application.
+//
+// Toggle each via appsettings (AppHost) or env vars:
+//   DevUI:OpenWebUI     (default true)   — Open WebUI chat playground
+//   DevUI:AgentFramework (default false) — Microsoft Agent Framework DevUI (Python)
+//
+// Open WebUI requires Docker Desktop (or another container runtime) to be running.
+var enableOpenWebUi = builder.Configuration.GetValue("DevUI:OpenWebUI", defaultValue: true);
+var enableAgentDevUi = builder.Configuration.GetValue("DevUI:AgentFramework", defaultValue: false);
+
+if (enableOpenWebUi)
+{
+    aspireLogger.LogInformation("  ├─ Open WebUI playground: enabled (container)");
+
+    var openWebUi = builder.AddContainer("openwebui", "ghcr.io/open-webui/open-webui", "main")
+        .WithHttpEndpoint(targetPort: 8080, name: "http")
+        .WithVolume("blaze-openwebui-data", "/app/backend/data")
+        // Point Open WebUI at our gateway's OpenAI-compatible surface.
+        .WithEnvironment(ctx =>
+        {
+            var apiEndpoint = api.GetEndpoint("http");
+            ctx.EnvironmentVariables["OPENAI_API_BASE_URL"] =
+                ReferenceExpression.Create($"{apiEndpoint}/v1");
+        })
+        // Open WebUI always sends an Authorization: Bearer header; the gateway
+        // ignores it today, but we set a deterministic dev token so logs/filters
+        // can identify playground traffic if needed.
+        .WithEnvironment("OPENAI_API_KEY", "sk-blaze-devui")
+        .WithEnvironment("WEBUI_AUTH", "false")              // skip login for local dev
+        .WithEnvironment("ENABLE_OLLAMA_API", "false")       // OpenAI path only
+        .WithEnvironment("WEBUI_NAME", "Blaze LLM Gateway Playground")
+        .WithEnvironment("DEFAULT_MODELS", "blaze-auto")
+        .WaitFor(api);
+
+    _ = openWebUi;
+}
+else
+{
+    aspireLogger.LogInformation("  ├─ Open WebUI playground: disabled (set DevUI:OpenWebUI=true to enable)");
+}
+
+if (enableAgentDevUi)
+{
+    // Microsoft Agent Framework DevUI ships as a Python package
+    // (`pip install agent-framework-devui` exposes the `devui` CLI).
+    // We orchestrate it as an executable resource; the user must have
+    // Python 3.11+ and the package installed on PATH.
+    aspireLogger.LogInformation("  ├─ Agent Framework DevUI: enabled (executable — requires `pip install agent-framework-devui`)");
+
+    var devUi = builder.AddExecutable(
+            name: "agent-devui",
+            command: "devui",
+            workingDirectory: AppContext.BaseDirectory,
+            args: ["--host", "127.0.0.1", "--port", "8765"])
+        .WithHttpEndpoint(port: 8765, targetPort: 8765, name: "http", isProxied: false)
+        .WithEnvironment(ctx =>
+        {
+            var apiEndpoint = api.GetEndpoint("http");
+            ctx.EnvironmentVariables["OPENAI_BASE_URL"] =
+                ReferenceExpression.Create($"{apiEndpoint}/v1");
+        })
+        .WithEnvironment("OPENAI_API_KEY", "sk-blaze-devui")
+        .WaitFor(api);
+
+    _ = devUi;
+}
+else
+{
+    aspireLogger.LogInformation("  ├─ Agent Framework DevUI: disabled (set DevUI:AgentFramework=true to enable)");
+}
+
+// ── Web project (reserved for the real Blazor app; playgrounds above cover testing) ──
 builder.AddProject<Projects.Blaze_LlmGateway_Web>("web")
     .WithReference(api)
     .WithEnvironment("Syncfusion__LicenseKey", syncfusionLicenseKey);
 
 aspireLogger.LogDebug("  ├─ API project configured with GitHub Models references");
+aspireLogger.LogDebug("  ├─ Dev UI playgrounds resolved (see flags above)");
 aspireLogger.LogDebug("  └─ Web project configured with Syncfusion license");
 aspireLogger.LogInformation("✅ Aspire orchestration ready - building distributed app");
 

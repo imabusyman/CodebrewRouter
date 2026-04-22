@@ -44,9 +44,7 @@ public class CompletionsIntegrationTests : IAsyncLifetime
                             [new ChatMessage(ChatRole.Assistant, "Once upon a time, there was a tale")]));
 
                     services.AddSingleton(mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("Ollama", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("AzureFoundry", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("OllamaBackup", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("GithubCopilot", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("Gemini", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OpenRouter", mockChatClient.Object);

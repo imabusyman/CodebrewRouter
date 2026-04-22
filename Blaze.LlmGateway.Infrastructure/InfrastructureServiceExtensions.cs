@@ -29,22 +29,6 @@ public static class InfrastructureServiceExtensions
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 
-        // Ollama — primary router model at 192.168.16.56
-        services.AddKeyedSingleton<IChatClient>("Ollama", (sp, _) =>
-        {
-            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.Ollama;
-            return ((IChatClient)new OllamaApiClient(new Uri(opts.BaseUrl), opts.Model))
-                .AsBuilder().UseFunctionInvocation().Build();
-        });
-
-        // OllamaBackup — backup/general model on the same server
-        services.AddKeyedSingleton<IChatClient>("OllamaBackup", (sp, _) =>
-        {
-            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaBackup;
-            return ((IChatClient)new OllamaApiClient(new Uri(opts.BaseUrl), opts.Model))
-                .AsBuilder().UseFunctionInvocation().Build();
-        });
-
         // GithubCopilot — GitHub Copilot API
         services.AddKeyedSingleton<IChatClient>("GithubCopilot", (sp, _) =>
         {
@@ -113,7 +97,7 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<KeywordRoutingStrategy>();
         services.AddSingleton<IRoutingStrategy>(sp =>
         {
-            var routerClient = sp.GetRequiredKeyedService<IChatClient>("Ollama");
+            var routerClient = sp.GetRequiredKeyedService<IChatClient>("OllamaLocal");
             var fallback = sp.GetRequiredService<KeywordRoutingStrategy>();
             var logger = sp.GetRequiredService<ILogger<OllamaMetaRoutingStrategy>>();
             return new OllamaMetaRoutingStrategy(routerClient, fallback, logger);

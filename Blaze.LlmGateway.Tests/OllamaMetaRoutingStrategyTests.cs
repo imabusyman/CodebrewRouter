@@ -30,7 +30,7 @@ public class OllamaMetaRoutingStrategyTests
     [InlineData("Gemini", RouteDestination.Gemini)]
     [InlineData("OpenRouter", RouteDestination.OpenRouter)]
     [InlineData("GithubCopilot", RouteDestination.GithubCopilot)]
-    [InlineData("OllamaBackup", RouteDestination.OllamaBackup)]
+    [InlineData("OllamaLocal", RouteDestination.OllamaLocal)]
     public async Task ReturnsCorrectDestination_WhenRouterReturnsExactName(string routerResponse, RouteDestination expected)
     {
         var mockRouter = new Mock<IChatClient>();
@@ -74,13 +74,13 @@ public class OllamaMetaRoutingStrategyTests
         var fallback = new Mock<IRoutingStrategy>();
         fallback
             .Setup(f => f.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(RouteDestination.Ollama);
+            .ReturnsAsync(RouteDestination.OllamaLocal);
 
         var strategy = CreateStrategy(mockRouter, fallback);
 
         var result = await strategy.ResolveAsync(UserMessages("Hello"));
 
-        Assert.Equal(RouteDestination.Ollama, result);
+        Assert.Equal(RouteDestination.OllamaLocal, result);
         fallback.Verify(f => f.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -112,13 +112,13 @@ public class OllamaMetaRoutingStrategyTests
         var fallback = new Mock<IRoutingStrategy>();
         fallback
             .Setup(f => f.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(RouteDestination.Ollama);
+            .ReturnsAsync(RouteDestination.OllamaLocal);
 
         var strategy = CreateStrategy(mockRouter, fallback);
 
         var result = await strategy.ResolveAsync([]);
 
-        Assert.Equal(RouteDestination.Ollama, result);
+        Assert.Equal(RouteDestination.OllamaLocal, result);
         mockRouter.Verify(
             c => c.GetResponseAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()),
             Times.Never);

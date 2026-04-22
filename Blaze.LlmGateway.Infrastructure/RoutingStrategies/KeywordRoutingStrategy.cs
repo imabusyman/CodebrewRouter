@@ -23,8 +23,8 @@ public class KeywordRoutingStrategy(
 
         var destination = lastUserMessage switch
         {
-            _ when lastUserMessage.Contains("ollama backup") || lastUserMessage.Contains("ollamabackup") => RouteDestination.OllamaBackup,
-            _ when lastUserMessage.Contains("ollama") => RouteDestination.Ollama,
+            _ when lastUserMessage.Contains("ollama") => RouteDestination.OllamaLocal,
+            _ when lastUserMessage.Contains("foundry local") || lastUserMessage.Contains("foundrylocal") => RouteDestination.FoundryLocal,
             _ when lastUserMessage.Contains("copilot") || lastUserMessage.Contains("github") => RouteDestination.GithubCopilot,
             _ when lastUserMessage.Contains("gemini") => RouteDestination.Gemini,
             _ when lastUserMessage.Contains("openrouter") || lastUserMessage.Contains("qwen") => RouteDestination.OpenRouter,

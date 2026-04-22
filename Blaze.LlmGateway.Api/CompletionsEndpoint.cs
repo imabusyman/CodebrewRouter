@@ -77,6 +77,7 @@ public static class CompletionsEndpoint
         httpContext.Response.ContentType = "text/event-stream";
         httpContext.Response.Headers.Append("Cache-Control", "no-cache");
         httpContext.Response.Headers.Append("Connection", "keep-alive");
+        httpContext.Response.Headers.Append("X-Accel-Buffering", "no");
 
         var id = $"cmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
         var created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -89,11 +90,13 @@ public static class CompletionsEndpoint
                 var chunk = new { id, @object = "text_completion.chunk", created, model, choices = new[] { choice } };
                 var json = JsonSerializer.Serialize(chunk);
                 await httpContext.Response.WriteAsync($"data: {json}\n\n", ct);
+                await httpContext.Response.Body.FlushAsync(ct);
             }
         }
         finally
         {
             await httpContext.Response.WriteAsync("data: [DONE]\n\n", ct);
+            await httpContext.Response.Body.FlushAsync(ct);
         }
 
         return Results.Empty;
