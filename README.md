@@ -68,6 +68,91 @@ The gateway is instrumented with OpenTelemetry via the shared ServiceDefaults pr
 
 ---
 
+## API Documentation
+
+The API now exposes three complementary documentation surfaces:
+
+| Surface | URL | Purpose |
+|---|---|---|
+| OpenAPI JSON | `/openapi/v1.json` | Built-in ASP.NET Core OpenAPI document for tooling and machine consumption. |
+| Swagger JSON | `/openapi/v1.swagger.json` | Swashbuckle-generated document used by Swagger UI. |
+| Swagger UI | `/swagger` | Interactive API explorer and request runner. |
+| Scalar | `/scalar` | Polished API reference with a docs-first reading experience. |
+
+Both interactive docs surfaces are available for the API host and are intended to help consumers understand the OpenAI-compatible contract, including the difference between regular JSON responses and streaming SSE responses.
+
+### Sample requests
+
+#### Chat completions (JSON response)
+
+```bash
+curl -X POST http://localhost:5022/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      { "role": "system", "content": "You are concise." },
+      { "role": "user", "content": "Explain the routing behavior in 3 bullets." }
+    ],
+    "temperature": 0.2,
+    "stream": false
+  }'
+```
+
+#### Chat completions (streaming SSE)
+
+```bash
+curl -N -X POST http://localhost:5022/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      { "role": "user", "content": "Stream a short API summary." }
+    ],
+    "stream": true
+  }'
+```
+
+Streaming responses are emitted as `text/event-stream`, with each event prefixed by `data:` and terminated by a final `data: [DONE]` marker.
+
+#### Legacy completions
+
+```bash
+curl -X POST http://localhost:5022/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "prompt": "Write a one sentence summary of Blaze.LlmGateway.",
+    "maxTokens": 64,
+    "stream": false
+  }'
+```
+
+#### Model catalog
+
+```bash
+curl http://localhost:5022/v1/models
+```
+
+#### Validation error example
+
+If a required field such as `model` is missing, the gateway returns an OpenAI-style error envelope:
+
+```json
+{
+  "error": {
+    "message": "Missing required field: model",
+    "type": "invalid_request_error",
+    "code": "missing_field"
+  }
+}
+```
+
+For quick local experimentation, `Blaze.LlmGateway.Api\Blaze.LlmGateway.Api.http` includes ready-to-run requests for the docs endpoints, chat completions, legacy completions, streaming examples, and validation failures.
+
+---
+
 ## Dev UI Playgrounds
 
 For interactively testing `/v1/chat/completions` (including streaming, routing, and MCP tools) the AppHost orchestrates ready-made chat UIs as container/executable resources. The Blazor project (`Blaze.LlmGateway.Web`) is intentionally left for a real application — use the playgrounds below for ad-hoc testing.

@@ -1,6 +1,90 @@
 @Blaze.LlmGateway.Api_HostAddress = http://localhost:5022
 
-GET {{Blaze.LlmGateway.Api_HostAddress}}/weatherforecast/
+### OpenAPI JSON
+GET {{Blaze.LlmGateway.Api_HostAddress}}/openapi/v1.json
 Accept: application/json
 
-###
+### Swagger-backed JSON document
+GET {{Blaze.LlmGateway.Api_HostAddress}}/openapi/v1.swagger.json
+Accept: application/json
+
+### List available models
+GET {{Blaze.LlmGateway.Api_HostAddress}}/v1/models
+Accept: application/json
+
+### Chat completions - non-streaming
+POST {{Blaze.LlmGateway.Api_HostAddress}}/v1/chat/completions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a concise assistant."
+    },
+    {
+      "role": "user",
+      "content": "Explain how this gateway routes requests in 3 bullets."
+    }
+  ],
+  "temperature": 0.2,
+  "maxTokens": 256,
+  "stream": false
+}
+
+### Chat completions - streaming (SSE)
+POST {{Blaze.LlmGateway.Api_HostAddress}}/v1/chat/completions
+Content-Type: application/json
+Accept: text/event-stream
+
+{
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Stream a short summary of the API."
+    }
+  ],
+  "stream": true
+}
+
+### Legacy completions - non-streaming
+POST {{Blaze.LlmGateway.Api_HostAddress}}/v1/completions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": "gpt-4",
+  "prompt": "Write a one sentence summary of Blaze.LlmGateway.",
+  "maxTokens": 64,
+  "temperature": 0.3,
+  "stream": false
+}
+
+### Legacy completions - streaming (SSE)
+POST {{Blaze.LlmGateway.Api_HostAddress}}/v1/completions
+Content-Type: application/json
+Accept: text/event-stream
+
+{
+  "model": "gpt-4",
+  "prompt": "Stream a short release note for the gateway.",
+  "stream": true
+}
+
+### Validation error example - missing model
+POST {{Blaze.LlmGateway.Api_HostAddress}}/v1/chat/completions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "This request is intentionally invalid."
+    }
+  ],
+  "stream": false
+}

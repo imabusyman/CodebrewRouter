@@ -1,5 +1,37 @@
 namespace Blaze.LlmGateway.Api;
 
+/// <summary>Standard error envelope returned for invalid requests.</summary>
+public record ErrorResponse(
+    ErrorDetail Error);
+
+/// <summary>Detailed error payload modeled after OpenAI-style failures.</summary>
+public record ErrorDetail(
+    string Message,
+    string Type,
+    string Code);
+
+/// <summary>Documentation-only SSE chunk example for chat completion streaming responses.</summary>
+public record ChatCompletionStreamChunk(
+    string Id,
+    string Object,
+    long Created,
+    string Model,
+    IList<Choice> Choices);
+
+/// <summary>Documentation-only SSE chunk example for legacy text completion streaming responses.</summary>
+public record TextCompletionStreamChunk(
+    string Id,
+    string Object,
+    long Created,
+    string Model,
+    IList<TextStreamChoice> Choices);
+
+/// <summary>Legacy text completion chunk choice emitted during streaming.</summary>
+public record TextStreamChoice(
+    string Text,
+    int Index,
+    string? FinishReason);
+
 /// <summary>Chat completion request (OpenAI-compatible)</summary>
 public record ChatCompletionRequest(
     string Model,

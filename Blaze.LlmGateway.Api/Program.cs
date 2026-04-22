@@ -9,6 +9,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,16 @@ builder.Services.AddLlmInfrastructure();
 
 // Configure OpenAPI/Swagger
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+});
 
 // Dev-only permissive CORS so playground UIs (Open WebUI, Agent Framework DevUI)
 // running as sibling Aspire resources can call /v1/chat/completions from the browser.
@@ -90,14 +101,33 @@ else
     startupLogger.LogDebug("  ├─ Standalone mode - logging to console");
 }
 
-// Enable OpenAPI/Swagger UI
+app.MapOpenApi();
+app.MapSwagger("/openapi/{documentName}.swagger.json");
+app.UseSwaggerUI(options =>
+{
+    options.RoutePrefix = "swagger";
+    options.SwaggerEndpoint("/openapi/v1.swagger.json", "Blaze.LlmGateway API v1");
+    options.DocumentTitle = "Blaze.LlmGateway Swagger UI";
+    options.DisplayRequestDuration();
+});
+app.MapScalarApiReference("/scalar", options =>
+{
+    options.WithTitle("Blaze.LlmGateway API Reference")
+        .WithTheme(ScalarTheme.BluePlanet)
+        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+        .AddDocument("v1", "Blaze.LlmGateway API", "/openapi/v1.json", true);
+});
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseCors("devui");
-    startupLogger.LogInformation("  ├─ OpenAPI/Swagger enabled at /openapi/v1.json");
     startupLogger.LogInformation("  ├─ Permissive 'devui' CORS policy active (Development only)");
 }
+
+startupLogger.LogInformation("  ├─ OpenAPI JSON available at /openapi/v1.json");
+startupLogger.LogInformation("  ├─ Swagger JSON available at /openapi/v1.swagger.json");
+startupLogger.LogInformation("  ├─ Swagger UI available at /swagger");
+startupLogger.LogInformation("  ├─ Scalar API reference available at /scalar");
 
 // Register LiteLLM-compatible endpoints  
 app.RegisterLiteLlmEndpoints();
