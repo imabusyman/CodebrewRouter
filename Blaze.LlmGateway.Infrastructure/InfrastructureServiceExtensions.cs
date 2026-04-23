@@ -3,7 +3,9 @@ using Azure.AI.OpenAI;
 using Azure.Identity;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
+using Blaze.LlmGateway.Core.TaskRouting;
 using Blaze.LlmGateway.Infrastructure.RoutingStrategies;
+using Blaze.LlmGateway.Infrastructure.TaskClassification;
 using Google.GenAI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -114,15 +116,38 @@ public static class InfrastructureServiceExtensions
             // MCP tool injection disabled (server connection issues)
             // To re-enable: uncomment McpConnectionManager registration in Program.cs
             // and uncomment the McpToolDelegatingClient wrapper below
-            
+
             IChatClient router = new LlmRoutingChatClient(fallback, sp, strategy, routerLogger);
             // Wrap with MCP layer if available:
             // var mcpManager = sp.GetRequiredService<McpConnectionManager>();
             // var mcpLogger = sp.GetRequiredService<ILogger<McpToolDelegatingClient>>();
             // return new McpToolDelegatingClient(router, mcpManager, mcpLogger);
-            
+
             return router;
         });
+
+        // ── codebrewRouter virtual model ──────────────────────────────────────
+
+        // Expose CodebrewRouterOptions from the nested LlmGatewayOptions property
+        // so CodebrewRouterChatClient can receive IOptions<CodebrewRouterOptions> directly.
+        services.AddSingleton<IOptions<CodebrewRouterOptions>>(sp =>
+            Options.Create(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.CodebrewRouter));
+
+        // Task classifier: Ollama-backed with keyword fallback (zero-latency on Ollama outage)
+        services.AddSingleton<KeywordTaskClassifier>();
+        services.AddSingleton<ITaskClassifier>(sp => new OllamaTaskClassifier(
+            sp.GetRequiredKeyedService<IChatClient>("OllamaLocal"),
+            sp.GetRequiredService<KeywordTaskClassifier>(),
+            sp.GetRequiredService<ILogger<OllamaTaskClassifier>>()));
+
+        // codebrewRouter keyed client — resolved by ModelSelectionResolver when model = "codebrewRouter"
+        services.AddKeyedSingleton<IChatClient>("CodebrewRouter", (sp, _) =>
+            (IChatClient)new CodebrewRouterChatClient(
+                sp.GetRequiredKeyedService<IChatClient>("AzureFoundry"),  // InnerClient hard fallback
+                sp.GetRequiredService<ITaskClassifier>(),
+                sp.GetRequiredService<IOptions<CodebrewRouterOptions>>(),
+                sp,
+                sp.GetRequiredService<ILogger<CodebrewRouterChatClient>>()));
 
         return services;
     }

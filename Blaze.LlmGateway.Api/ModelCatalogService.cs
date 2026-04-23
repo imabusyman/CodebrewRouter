@@ -39,6 +39,8 @@ public sealed class ModelCatalogService(
     {
         var providers = options.Value.Providers;
 
+        var cbr = options.Value.CodebrewRouter;
+
         AvailableModel?[] configuredModels =
         [
             CreateConfiguredModel(providers.AzureFoundry.Model, "AzureFoundry", "openai", providers.AzureFoundry.Endpoint),
@@ -47,7 +49,11 @@ public sealed class ModelCatalogService(
             CreateConfiguredModel(providers.OpenRouter.Model, "OpenRouter", "qwen", providers.OpenRouter.Endpoint),
             CreateConfiguredModel(providers.FoundryLocal.Model, "FoundryLocal", "openai", providers.FoundryLocal.Endpoint),
             CreateConfiguredModel(providers.GithubModels.Model, "GithubModels", "openai", providers.GithubModels.Endpoint),
-            CreateConfiguredModel(providers.OllamaLocal.Model, "OllamaLocal", "ollama", providers.OllamaLocal.BaseUrl)
+            CreateConfiguredModel(providers.OllamaLocal.Model, "OllamaLocal", "ollama", providers.OllamaLocal.BaseUrl),
+            // codebrewRouter — task-aware virtual model
+            cbr.Enabled && !string.IsNullOrWhiteSpace(cbr.ModelId)
+                ? new AvailableModel(cbr.ModelId, "CodebrewRouter", "codebrew", "virtual")
+                : null
         ];
 
         return configuredModels.Where(model => model is not null).Cast<AvailableModel>().ToArray();

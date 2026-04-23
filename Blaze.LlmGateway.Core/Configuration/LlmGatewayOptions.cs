@@ -6,6 +6,7 @@ public class LlmGatewayOptions
 
     public ProvidersOptions Providers { get; set; } = new();
     public RoutingOptions Routing { get; set; } = new();
+    public CodebrewRouterOptions CodebrewRouter { get; set; } = new();
 }
 
 public class ProvidersOptions
