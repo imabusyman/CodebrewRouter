@@ -35,11 +35,7 @@ All provider credentials are injected via Aspire parameters. Set them once on th
 ```bash
 dotnet user-secrets set "Parameters:azure-foundry-endpoint"  "<https://your-resource.openai.azure.com/>" --project Blaze.LlmGateway.AppHost
 dotnet user-secrets set "Parameters:azure-foundry-api-key"   "<key>"   --project Blaze.LlmGateway.AppHost
-dotnet user-secrets set "Parameters:github-copilot-api-key"  "<token>" --project Blaze.LlmGateway.AppHost
-dotnet user-secrets set "Parameters:gemini-api-key"          "<key>"   --project Blaze.LlmGateway.AppHost
-dotnet user-secrets set "Parameters:openrouter-api-key"      "<key>"   --project Blaze.LlmGateway.AppHost
 dotnet user-secrets set "Parameters:github-models-api-key"   "<PAT>"   --project Blaze.LlmGateway.AppHost
-dotnet user-secrets set "Parameters:syncfusion-license-key"  "<key>"   --project Blaze.LlmGateway.AppHost
 ```
 
 ## Architecture
@@ -51,8 +47,7 @@ dotnet user-secrets set "Parameters:syncfusion-license-key"  "<key>"   --project
 | `Core` | Domain types only — `RouteDestination` enum, `LlmGatewayOptions` config classes. Zero external deps. |
 | `Infrastructure` | Routing middleware, MCP integration, routing strategies. All MEAI pipeline components live here. |
 | `Api` | `Program.cs` wires DI, registers providers via extension methods, exposes the SSE endpoint. |
-| `Web` | Blazor Server frontend using Syncfusion components. References the API via Aspire service discovery. |
-| `AppHost` | .NET Aspire orchestration — provisions Ollama container, GitHub Models, Azure Foundry Local, and wires secrets as environment variables. |
+| `AppHost` | .NET Aspire orchestration — provisions GitHub Models resources, Agent Framework DevUI playground, and wires secrets as environment variables. |
 | `ServiceDefaults` | Shared Aspire conventions — OpenTelemetry, HTTP resilience, service discovery. |
 | `Tests` | xUnit + Moq unit tests. 95% coverage target. |
 | `Benchmarks` | BenchmarkDotNet for provider latency and routing overhead. |
@@ -71,18 +66,17 @@ New middleware must inherit from `DelegatingChatClient` — never implement `ICh
 
 ### Routing
 
-- **Primary:** `OllamaMetaRoutingStrategy` — sends the prompt to a local "router" model that classifies which `RouteDestination` to use.
-- **Fallback:** `KeywordRoutingStrategy` — parses keywords from the last user message (e.g. "gemini" → Gemini, "azure" → AzureFoundry). Default destination: AzureFoundry.
+- **Primary:** `OllamaMetaRoutingStrategy` — sends the prompt to a local Ollama "router" model that classifies which `RouteDestination` to use. Ollama is retained internally as the classifier brain only; it is not a selectable destination.
+- **Fallback:** `KeywordRoutingStrategy` — parses keywords from the last user message (e.g. "foundry local" → FoundryLocal, "github" → GithubModels, "azure" → AzureFoundry). Default destination: AzureFoundry.
 
 ### Providers (Keyed DI keys)
 
-9 providers registered as keyed `IChatClient` services: `"AzureFoundry"`, `"Ollama"`, `"OllamaBackup"`, `"GithubCopilot"`, `"Gemini"`, `"OpenRouter"`, `"FoundryLocal"`, `"GithubModels"`, `"OllamaLocal"`.
+Three selectable destinations registered as keyed `IChatClient` services: `"AzureFoundry"`, `"FoundryLocal"`, `"GithubModels"`. A fourth keyed client, `"OllamaLocal"`, is registered as an internal classifier brain for `OllamaMetaRoutingStrategy` / `OllamaTaskClassifier` but is **not** in `RouteDestination` and is **not** exposed via `/v1/models`. The `"CodebrewRouter"` virtual keyed client is a task-routing facade over the three real providers.
 
 SDK mappings (must be followed exactly):
 - Azure Foundry / FoundryLocal → `AzureOpenAIClient` → `.AsChatClient()`
-- Ollama variants → `OllamaApiClient` → `.AsChatClient()`
-- GitHub Copilot, GitHub Models, OpenRouter → `OpenAIClient` (custom endpoint) → `.AsChatClient()`
-- Gemini → `Google.GenAI` client → `.AsIChatClient()`
+- GitHub Models → `OpenAIClient` (custom endpoint) → `.AsChatClient()`
+- OllamaLocal (internal classifier) → `OllamaApiClient` → `.AsChatClient()`
 
 ## Architectural Rules
 
@@ -100,7 +94,6 @@ SDK mappings (must be followed exactly):
 - `LlmRoutingChatClient` and `McpToolDelegatingClient` — should inherit `DelegatingChatClient` (currently implement `IChatClient` directly).
 - No circuit breaker — most pressing resilience gap.
 - Streaming failover — mid-stream failure handling not yet implemented.
-- `Blaze.LlmGateway.Web` — Blazor frontend scaffolded but not yet connected to the API (no HTTP client or chat UI wired up).
 
 ## Squad Orchestration
 

@@ -42,17 +42,6 @@ public static class InfrastructureServiceExtensions
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 
-        // GithubModels — GitHub Models inference API (OpenAI-compatible)
-        services.AddKeyedSingleton<IChatClient>("GithubModels", (sp, _) =>
-        {
-            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.GithubModels;
-            var client = new OpenAIClient(
-                new ApiKeyCredential(opts.ApiKey),
-                new OpenAIClientOptions { Endpoint = new Uri(opts.Endpoint) });
-            return client.GetChatClient(opts.Model).AsIChatClient()
-                .AsBuilder().UseFunctionInvocation().Build();
-        });
-
         // OllamaLocal — local Ollama container (backup for remote server)
         services.AddKeyedSingleton<IChatClient>("OllamaLocal", (sp, _) =>
         {
@@ -70,23 +59,47 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<KeywordRoutingStrategy>();
         services.AddSingleton<IRoutingStrategy>(sp =>
         {
-            var routerClient = sp.GetRequiredKeyedService<IChatClient>("OllamaLocal");
-            var fallback = sp.GetRequiredService<KeywordRoutingStrategy>();
+            // Try to use OllamaLocal for meta-routing if available, otherwise use keyword-only routing
+            var keywordFallback = sp.GetRequiredService<KeywordRoutingStrategy>();
             var logger = sp.GetRequiredService<ILogger<OllamaMetaRoutingStrategy>>();
-            return new OllamaMetaRoutingStrategy(routerClient, fallback, logger);
+            
+            var routerClient = sp.GetKeyedService<IChatClient>("OllamaLocal");
+            if (routerClient is not null)
+            {
+                return new OllamaMetaRoutingStrategy(routerClient, keywordFallback, logger);
+            }
+            
+            // Ollama not available — use keyword routing directly
+            logger.LogInformation("OllamaLocal not available; using keyword-only routing strategy");
+            return keywordFallback;
+        });
+
+        // Register failover strategy with configuration
+        services.AddSingleton<IFailoverStrategy>(sp =>
+        {
+            var strategy = new ConfiguredFailoverStrategy(
+                sp.GetRequiredService<IOptions<LlmGatewayOptions>>(),
+                sp.GetRequiredService<ILogger<ConfiguredFailoverStrategy>>());
+            strategy.Initialize();
+            return strategy;
         });
 
         services.AddSingleton<IChatClient>(sp =>
         {
-            var fallback = sp.GetRequiredKeyedService<IChatClient>("AzureFoundry");
+            // Get the first available provider as fallback (for InnerClient wrapper)
+            var fallback = sp.GetKeyedService<IChatClient>("GithubModels")
+                          ?? sp.GetKeyedService<IChatClient>("AzureFoundry")
+                          ?? sp.GetRequiredKeyedService<IChatClient>("FoundryLocal");
+            
             var strategy = sp.GetRequiredService<IRoutingStrategy>();
+            var failoverStrategy = sp.GetRequiredService<IFailoverStrategy>();
             var routerLogger = sp.GetRequiredService<ILogger<LlmRoutingChatClient>>();
 
             // MCP tool injection disabled (server connection issues)
             // To re-enable: uncomment McpConnectionManager registration in Program.cs
             // and uncomment the McpToolDelegatingClient wrapper below
 
-            IChatClient router = new LlmRoutingChatClient(fallback, sp, strategy, routerLogger);
+            IChatClient router = new LlmRoutingChatClient(fallback, sp, strategy, failoverStrategy, routerLogger);
             // Wrap with MCP layer if available:
             // var mcpManager = sp.GetRequiredService<McpConnectionManager>();
             // var mcpLogger = sp.GetRequiredService<ILogger<McpToolDelegatingClient>>();

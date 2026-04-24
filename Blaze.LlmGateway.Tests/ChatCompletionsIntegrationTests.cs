@@ -61,9 +61,6 @@ public class ChatCompletionsIntegrationTests : IAsyncLifetime
                     // Register mock as singleton and keyed clients
                     services.AddSingleton(mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("AzureFoundry", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("GithubCopilot", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("Gemini", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("OpenRouter", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("FoundryLocal", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("GithubModels", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockChatClient.Object);

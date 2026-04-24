@@ -13,7 +13,6 @@ public class ProvidersOptions
 {
     public AzureFoundryOptions AzureFoundry { get; set; } = new();
     public FoundryLocalOptions FoundryLocal { get; set; } = new();
-    public GitHubModelsOptions GithubModels { get; set; } = new();
     public OllamaLocalOptions OllamaLocal { get; set; } = new();
 }
 
@@ -33,13 +32,6 @@ public class FoundryLocalOptions
     public string ApiKey { get; set; } = "notneeded";
 }
 
-public class GitHubModelsOptions
-{
-    public string Endpoint { get; set; } = "https://models.inference.ai.azure.com";
-    public string ApiKey { get; set; } = "";
-    public string Model { get; set; } = "gpt-4o-mini";
-}
-
 public class OllamaLocalOptions
 {
     public string BaseUrl { get; set; } = "http://localhost:11434";
@@ -52,4 +44,10 @@ public class RoutingOptions
     public string RouterModel { get; set; } = "router";
     /// <summary>Fallback destination when meta-routing fails.</summary>
     public string FallbackDestination { get; set; } = nameof(RouteDestination.AzureFoundry);
+    /// <summary>Failover chains: maps primary destination to list of fallback providers to try if primary fails.</summary>
+    public Dictionary<string, List<string>> FailoverChains { get; set; } = new()
+    {
+        { "AzureFoundry", ["FoundryLocal"] },
+        { "FoundryLocal", ["AzureFoundry"] }
+    };
 }

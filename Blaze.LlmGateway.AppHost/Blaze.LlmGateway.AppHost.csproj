@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Blaze.LlmGateway.Api\Blaze.LlmGateway.Api.csproj" />
-    <ProjectReference Include="..\Blaze.LlmGateway.Web\Blaze.LlmGateway.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,5 +17,9 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>c332e6d9-60a4-4174-a2b5-b601f9dc0d06</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="devui-agents\**\*.*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
 </Project>

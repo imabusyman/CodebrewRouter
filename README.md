@@ -8,7 +8,7 @@ An intelligent, agentic LLM routing proxy for .NET 10. Blaze.LlmGateway exposes 
 
 Blaze.LlmGateway sits between your application and multiple LLM providers. Clients send standard OpenAI-compatible chat requests to one endpoint. The gateway classifies the request, selects the most appropriate provider, injects any available MCP tools, and streams the response back — all transparently.
 
-The gateway currently supports nine providers: Azure AI Foundry, Azure Foundry Local, Ollama (primary, backup, and local), GitHub Copilot, GitHub Models, Google Gemini, and OpenRouter.
+The gateway currently targets three dev providers: **Azure AI Foundry**, **Azure Foundry Local**, and **GitHub Models**. A local Ollama client is retained internally as the routing/classifier brain but is not exposed as a selectable provider.
 
 ---
 
@@ -18,7 +18,7 @@ Routing is handled in two stages:
 
 **Stage 1 — Meta-routing:** The last user message is sent to a local Ollama "router" model configured to return a provider name. This gives the gateway intent-aware, semantic routing at near-zero cost.
 
-**Stage 2 — Keyword fallback:** If the Ollama router fails or returns an unrecognized response, a keyword strategy scans the message for provider hints (e.g. "gemini", "azure", "ollama"). If no match is found, the request falls back to Azure AI Foundry.
+**Stage 2 — Keyword fallback:** If the Ollama router fails or returns an unrecognized response, a keyword strategy scans the message for provider hints (e.g. "foundry local", "github", "azure"). If no match is found, the request falls back to Azure AI Foundry.
 
 ---
 
@@ -29,8 +29,7 @@ Routing is handled in two stages:
 | Blaze.LlmGateway.Core | Domain types: RouteDestination enum and LlmGatewayOptions configuration. No external dependencies. |
 | Blaze.LlmGateway.Infrastructure | MEAI middleware pipeline, routing strategies, MCP connection management, and provider registrations. |
 | Blaze.LlmGateway.Api | Minimal API host. Wires DI via extension methods and exposes the POST /v1/chat/completions SSE streaming endpoint. |
-| Blaze.LlmGateway.Web | Blazor Server frontend (Syncfusion components). Scaffolded; not yet connected to the API. |
-| Blaze.LlmGateway.AppHost | .NET Aspire orchestration. Provisions the Ollama container, Foundry Local, and GitHub Models. Injects all secrets as environment variables. |
+| Blaze.LlmGateway.AppHost | .NET Aspire orchestration. Provisions GitHub Models resources and the Agent Framework DevUI playground. Injects all secrets as environment variables. |
 | Blaze.LlmGateway.ServiceDefaults | Shared Aspire conventions: OpenTelemetry, HTTP resilience, health checks, and service discovery. |
 | Blaze.LlmGateway.Tests | xUnit unit tests with Moq. 95% coverage target. |
 | Blaze.LlmGateway.Benchmarks | BenchmarkDotNet project for provider latency and routing overhead analysis. |
@@ -155,24 +154,22 @@ For quick local experimentation, `Blaze.LlmGateway.Api\Blaze.LlmGateway.Api.http
 
 ## Dev UI Playgrounds
 
-For interactively testing `/v1/chat/completions` (including streaming, routing, and MCP tools) the AppHost orchestrates ready-made chat UIs as container/executable resources. The Blazor project (`Blaze.LlmGateway.Web`) is intentionally left for a real application — use the playgrounds below for ad-hoc testing.
-
-Both are toggled via `appsettings.json` on the AppHost (or env overrides):
+For interactively testing `/v1/chat/completions` (including streaming and routing) the AppHost orchestrates two ready-made playgrounds as container / executable resources. Both are toggled via `appsettings.json` on the AppHost (or env overrides):
 
 ```jsonc
 // Blaze.LlmGateway.AppHost/appsettings.json
 "DevUI": {
-  "OpenWebUI": true,        // default
-  "AgentFramework": false   // opt-in
+  "OpenWebUI": true,        // default — generic OpenAI-compatible chat UI
+  "AgentFramework": false   // opt-in — Python Agent Framework DevUI
 }
 ```
 
-| Playground | Resource | Prereqs |
-|---|---|---|
-| **Open WebUI** | container `ghcr.io/open-webui/open-webui:main`, port 8080 | Docker Desktop. `OPENAI_API_BASE_URL` points at `{api}/v1` automatically. Login disabled for local dev. Chats persist in the `blaze-openwebui-data` volume. |
-| **Agent Framework DevUI** | executable `devui` (port 8765) | Python 3.11+ with `pip install agent-framework-devui` (exposes `devui` on PATH). Useful for tool/trace inspection. |
+| Playground | Resource | Prereqs | Good for |
+|---|---|---|---|
+| **Open WebUI** | container `ghcr.io/open-webui/open-webui:main`, port 8080 | Docker Desktop. `OPENAI_API_BASE_URL` is wired at `{api}/v1` automatically. Login disabled for local dev; chats persist in the `blaze-openwebui-data` volume. | Everyday chat testing, comparing routed responses, multi-turn conversations. |
+| **Agent Framework DevUI** | executable `devui` (port 8765) | Python 3.11+ with `pip install agent-framework-devui` (puts `devui` on PATH). AppHost passes the bundled `devui-agents/` directory containing a `gateway_agent` that chats through the gateway. | Trace / telemetry inspection and exercising the Python `agent-framework` SDK against the gateway. |
 
-Once `dotnet run --project Blaze.LlmGateway.AppHost` is up, open the Aspire dashboard and click the `openwebui` resource URL to reach the chat UI. The gateway also exposes a permissive `devui` CORS policy in Development so browser UIs can call the API directly.
+Once `dotnet run --project Blaze.LlmGateway.AppHost` is up, open the Aspire dashboard and click the `openwebui` (or `agent-devui`) resource URL to reach the playground.
 
 ---
 
@@ -180,7 +177,6 @@ Once `dotnet run --project Blaze.LlmGateway.AppHost` is up, open the Aspire dash
 
 The core pipeline (routing, streaming, MCP tool injection, and Aspire orchestration) is operational. The following areas are scaffolded but not yet complete:
 
-- Blazor Web UI — shell exists but has no API connection or chat interface.
 - Circuit breaker — no provider health tracking or automatic failover.
 - Streaming failover — mid-stream failure handling is not implemented.
 - Authentication — no API key or bearer token enforcement on the gateway itself.

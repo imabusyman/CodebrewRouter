@@ -6,5 +6,4 @@
   <Project Path="Blaze.LlmGateway.Infrastructure/Blaze.LlmGateway.Infrastructure.csproj" />
   <Project Path="Blaze.LlmGateway.ServiceDefaults/Blaze.LlmGateway.ServiceDefaults.csproj" />
   <Project Path="Blaze.LlmGateway.Tests/Blaze.LlmGateway.Tests.csproj" />
-  <Project Path="Blaze.LlmGateway.Web/Blaze.LlmGateway.Web.csproj" />
 </Solution>

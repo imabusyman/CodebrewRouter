@@ -172,10 +172,10 @@ public class AzureFoundryIntegrationTests : IAsyncLifetime
     }
 
     /// <summary>
-    /// MOCKED TEST: Verify model appears in /v1/models list
+    /// MOCKED TEST: Verify models endpoint returns CodebrewRouter model
     /// </summary>
     [Fact]
-    public async Task AzureFoundry_ModelsEndpoint_IncludesGpt4o()
+    public async Task AzureFoundry_ModelsEndpoint_IncludesCodebrewRouter()
     {
         // Act
         var response = await _client!.GetAsync("/v1/models");
@@ -188,7 +188,8 @@ public class AzureFoundryIntegrationTests : IAsyncLifetime
         Assert.True(json.RootElement.TryGetProperty("data", out var data));
         var models = data.EnumerateArray().Select(m => m.GetProperty("id").GetString()).ToList();
         
-        Assert.Contains("gpt-4o", models);
+        // CodebrewRouter is always configured as a virtual model
+        Assert.Contains("codebrewRouter", models);
     }
 
     /// <summary>

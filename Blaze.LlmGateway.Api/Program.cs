@@ -38,6 +38,7 @@ builder.Services.Configure<LlmGatewayOptions>(
     builder.Configuration.GetSection(LlmGatewayOptions.SectionName));
 
 builder.Services.AddHttpClient();
+builder.Services.AddSingleton<AzureFoundryModelDiscovery>();
 builder.Services.AddSingleton<IModelCatalog, ModelCatalogService>();
 
 // MCP integration disabled (microsoft-learn server connection issues)
@@ -59,18 +60,9 @@ builder.Services.AddSingleton<IModelCatalog, ModelCatalogService>();
 builder.Services.AddLlmProviders();
 builder.Services.AddLlmInfrastructure();
 
-// Configure OpenAPI/Swagger
+// Configure OpenAPI
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        options.IncludeXmlComments(xmlPath);
-    }
-});
 
 // Dev-only permissive CORS so playground UIs (Open WebUI, Agent Framework DevUI)
 // running as sibling Aspire resources can call /v1/chat/completions from the browser.
@@ -102,14 +94,6 @@ else
 }
 
 app.MapOpenApi();
-app.MapSwagger("/openapi/{documentName}.swagger.json");
-app.UseSwaggerUI(options =>
-{
-    options.RoutePrefix = "swagger";
-    options.SwaggerEndpoint("/openapi/v1.swagger.json", "Blaze.LlmGateway API v1");
-    options.DocumentTitle = "Blaze.LlmGateway Swagger UI";
-    options.DisplayRequestDuration();
-});
 app.MapScalarApiReference("/scalar", options =>
 {
     options.WithTitle("Blaze.LlmGateway API Reference")
@@ -118,6 +102,72 @@ app.MapScalarApiReference("/scalar", options =>
         .AddDocument("v1", "Blaze.LlmGateway API", "/openapi/v1.json", true);
 });
 
+// Landing page at `/` linking to Swagger, Scalar, raw OpenAPI, and key endpoints.
+const string landingHtml = """
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Blaze.LlmGateway</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+           max-width: 720px; margin: 4rem auto; padding: 0 1.25rem; line-height: 1.55; }
+    h1 { margin: 0 0 .25rem 0; font-size: 1.75rem; }
+    p.lede { margin: 0 0 2rem 0; color: #666; }
+    section { margin: 1.5rem 0; }
+    section h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em;
+                 color: #888; margin: 0 0 .5rem 0; font-weight: 600; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { margin: .25rem 0; }
+    a.card { display: block; padding: .75rem 1rem; border: 1px solid #ccc6; border-radius: 8px;
+             text-decoration: none; color: inherit; transition: background .15s; }
+    a.card:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
+    a.card .title { font-weight: 600; }
+    a.card .path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                   font-size: .85em; opacity: .7; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+           background: #8881; padding: .1em .35em; border-radius: 4px; }
+    footer { margin-top: 3rem; color: #888; font-size: .85em; }
+  </style>
+</head>
+<body>
+  <h1>Blaze.LlmGateway</h1>
+  <p class="lede">OpenAI-compatible routing proxy over Azure Foundry and Foundry Local with intelligent model discovery.</p>
+
+  <section>
+    <h2>API docs</h2>
+    <ul>
+      <li><a class="card" href="/scalar"><span class="title">Scalar API Reference</span>
+          <span class="path">/scalar</span></a></li>
+      <li><a class="card" href="/openapi/v1.json"><span class="title">OpenAPI document (JSON)</span>
+          <span class="path">/openapi/v1.json</span></a></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Core endpoints</h2>
+    <ul>
+      <li><a class="card" href="/v1/models"><span class="title">GET /v1/models</span>
+          <span class="path">List available models</span></a></li>
+      <li><a class="card" href="/scalar#tag/chat"><span class="title">POST /v1/chat/completions</span>
+          <span class="path">Streaming chat (SSE). Try it in Scalar.</span></a></li>
+      <li><a class="card" href="/health"><span class="title">GET /health</span>
+          <span class="path">Health probe</span></a></li>
+    </ul>
+  </section>
+
+  <footer>
+    Tip: point an OpenAI-compatible client at <code>/v1</code> with any non-empty API key.
+  </footer>
+</body>
+</html>
+""";
+
+app.MapGet("/", () => Results.Content(landingHtml, "text/html; charset=utf-8"))
+   .ExcludeFromDescription();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("devui");
@@ -125,9 +175,7 @@ if (app.Environment.IsDevelopment())
 }
 
 startupLogger.LogInformation("  ├─ OpenAPI JSON available at /openapi/v1.json");
-startupLogger.LogInformation("  ├─ Swagger JSON available at /openapi/v1.swagger.json");
-startupLogger.LogInformation("  ├─ Swagger UI available at /swagger");
-startupLogger.LogInformation("  ├─ Scalar API reference available at /scalar");
+startupLogger.LogInformation("  ├─ Scalar available at /scalar");
 
 // Register LiteLLM-compatible endpoints  
 app.RegisterLiteLlmEndpoints();

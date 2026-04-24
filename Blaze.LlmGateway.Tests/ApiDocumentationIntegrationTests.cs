@@ -43,9 +43,6 @@ public sealed class ApiDocumentationIntegrationTests : IAsyncLifetime
 
                     services.AddSingleton(mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("AzureFoundry", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("GithubCopilot", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("Gemini", mockChatClient.Object);
-                    services.AddKeyedSingleton<IChatClient>("OpenRouter", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("FoundryLocal", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("GithubModels", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockChatClient.Object);
@@ -79,21 +76,17 @@ public sealed class ApiDocumentationIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task SwaggerDocument_IsAvailable()
     {
+        // Swagger document is no longer available - API uses Scalar only
         var response = await _client!.GetAsync("/openapi/v1.swagger.json");
-
-        response.EnsureSuccessStatusCode();
-        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
     public async Task SwaggerUi_IsAvailable()
     {
+        // Swagger UI is no longer available - API uses Scalar only
         var response = await _client!.GetAsync("/swagger/index.html");
-
-        response.EnsureSuccessStatusCode();
-        Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Swagger UI", body);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -110,7 +103,8 @@ public sealed class ApiDocumentationIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task SwaggerDocument_ContainsLiteLlmEndpoints()
     {
-        var response = await _client!.GetAsync("/openapi/v1.swagger.json");
+        // Check OpenAPI document instead (Swagger document no longer generated)
+        var response = await _client!.GetAsync("/openapi/v1.json");
         var body = await response.Content.ReadAsStringAsync();
         using var json = JsonDocument.Parse(body);
 
@@ -123,7 +117,8 @@ public sealed class ApiDocumentationIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task SwaggerDocument_ContainsEndpointDescriptions()
     {
-        var response = await _client!.GetAsync("/openapi/v1.swagger.json");
+        // Check OpenAPI document instead (Swagger document no longer generated)
+        var response = await _client!.GetAsync("/openapi/v1.json");
         var body = await response.Content.ReadAsStringAsync();
         using var json = JsonDocument.Parse(body);
 

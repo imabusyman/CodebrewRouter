@@ -27,10 +27,8 @@ public class OllamaMetaRoutingStrategyTests
 
     [Theory]
     [InlineData("AzureFoundry", RouteDestination.AzureFoundry)]
-    [InlineData("Gemini", RouteDestination.Gemini)]
-    [InlineData("OpenRouter", RouteDestination.OpenRouter)]
-    [InlineData("GithubCopilot", RouteDestination.GithubCopilot)]
-    [InlineData("OllamaLocal", RouteDestination.OllamaLocal)]
+    [InlineData("FoundryLocal", RouteDestination.FoundryLocal)]
+    [InlineData("GithubModels", RouteDestination.GithubModels)]
     public async Task ReturnsCorrectDestination_WhenRouterReturnsExactName(string routerResponse, RouteDestination expected)
     {
         var mockRouter = new Mock<IChatClient>();
@@ -53,14 +51,14 @@ public class OllamaMetaRoutingStrategyTests
         var mockRouter = new Mock<IChatClient>();
         mockRouter
             .Setup(c => c.GetResponseAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ChatResponse([new ChatMessage(ChatRole.Assistant, "gemini")]));
+            .ReturnsAsync(new ChatResponse([new ChatMessage(ChatRole.Assistant, "githubmodels")]));
 
         var fallback = new Mock<IRoutingStrategy>();
         var strategy = CreateStrategy(mockRouter, fallback);
 
         var result = await strategy.ResolveAsync(UserMessages("Search google"));
 
-        Assert.Equal(RouteDestination.Gemini, result);
+        Assert.Equal(RouteDestination.GithubModels, result);
     }
 
     [Fact]
@@ -74,13 +72,13 @@ public class OllamaMetaRoutingStrategyTests
         var fallback = new Mock<IRoutingStrategy>();
         fallback
             .Setup(f => f.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(RouteDestination.OllamaLocal);
+            .ReturnsAsync(RouteDestination.FoundryLocal);
 
         var strategy = CreateStrategy(mockRouter, fallback);
 
         var result = await strategy.ResolveAsync(UserMessages("Hello"));
 
-        Assert.Equal(RouteDestination.OllamaLocal, result);
+        Assert.Equal(RouteDestination.FoundryLocal, result);
         fallback.Verify(f => f.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -112,13 +110,13 @@ public class OllamaMetaRoutingStrategyTests
         var fallback = new Mock<IRoutingStrategy>();
         fallback
             .Setup(f => f.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(RouteDestination.OllamaLocal);
+            .ReturnsAsync(RouteDestination.FoundryLocal);
 
         var strategy = CreateStrategy(mockRouter, fallback);
 
         var result = await strategy.ResolveAsync([]);
 
-        Assert.Equal(RouteDestination.OllamaLocal, result);
+        Assert.Equal(RouteDestination.FoundryLocal, result);
         mockRouter.Verify(
             c => c.GetResponseAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()),
             Times.Never);
@@ -130,14 +128,14 @@ public class OllamaMetaRoutingStrategyTests
         var mockRouter = new Mock<IChatClient>();
         mockRouter
             .Setup(c => c.GetResponseAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ChatResponse([new ChatMessage(ChatRole.Assistant, "I think you should use OpenRouter for this.")]));
+            .ReturnsAsync(new ChatResponse([new ChatMessage(ChatRole.Assistant, "I think you should use GithubModels for this.")]));
 
         var fallback = new Mock<IRoutingStrategy>();
         var strategy = CreateStrategy(mockRouter, fallback);
 
         var result = await strategy.ResolveAsync(UserMessages("Write a poem"));
 
-        Assert.Equal(RouteDestination.OpenRouter, result);
+        Assert.Equal(RouteDestination.GithubModels, result);
         fallback.Verify(f => f.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

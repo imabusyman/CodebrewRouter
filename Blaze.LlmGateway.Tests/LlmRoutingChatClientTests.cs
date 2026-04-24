@@ -19,31 +19,34 @@ public class LlmRoutingChatClientTests
     public async Task RoutesToOllamaLocal_WhenStrategyResolvesOllamaLocal()
     {
         // Arrange
-        var mockOllamaClient = new Mock<IChatClient>();
-        mockOllamaClient
+        var mockFoundryLocalClient = new Mock<IChatClient>();
+        mockFoundryLocalClient
             .Setup(c => c.GetResponseAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ChatResponse(new[] { new ChatMessage(ChatRole.Assistant, "Ollama Response") }));
+            .ReturnsAsync(new ChatResponse(new[] { new ChatMessage(ChatRole.Assistant, "FoundryLocal Response") }));
 
         var mockInnerClient = new Mock<IChatClient>();
         var mockLogger = new Mock<ILogger<LlmRoutingChatClient>>();
         var mockStrategy = new Mock<IRoutingStrategy>();
         mockStrategy
             .Setup(s => s.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(RouteDestination.OllamaLocal);
+            .ReturnsAsync(RouteDestination.FoundryLocal);
 
+        var mockFailoverStrategy = new Mock<IFailoverStrategy>();
+        mockFailoverStrategy.Setup(f => f.GetFailoverChainAsync(It.IsAny<RouteDestination>())).Returns(new List<RouteDestination>());
+        
         var services = new ServiceCollection();
-        services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockOllamaClient.Object);
+        services.AddKeyedSingleton<IChatClient>("FoundryLocal", mockFoundryLocalClient.Object);
         var serviceProvider = services.BuildServiceProvider();
 
-        var router = new LlmRoutingChatClient(mockInnerClient.Object, serviceProvider, mockStrategy.Object, mockLogger.Object);
-        var messages = new List<ChatMessage> { new ChatMessage(ChatRole.User, "Hello ollama") };
+        var router = new LlmRoutingChatClient(mockInnerClient.Object, serviceProvider, mockStrategy.Object, mockFailoverStrategy.Object, mockLogger.Object);
+        var messages = new List<ChatMessage> { new ChatMessage(ChatRole.User, "Hello foundry") };
 
         // Act
         var result = await router.GetResponseAsync(messages);
 
         // Assert
-        Assert.Equal("Ollama Response", result.Text);
-        mockOllamaClient.Verify(
+        Assert.Equal("FoundryLocal Response", result.Text);
+        mockFoundryLocalClient.Verify(
             c => c.GetResponseAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -58,15 +61,18 @@ public class LlmRoutingChatClientTests
             .ReturnsAsync(new ChatResponse(new[] { new ChatMessage(ChatRole.Assistant, "Fallback Response") }));
 
         var mockLogger = new Mock<ILogger<LlmRoutingChatClient>>();
+        var mockFailoverStrategy = new Mock<IFailoverStrategy>();
+        mockFailoverStrategy.Setup(f => f.GetFailoverChainAsync(It.IsAny<RouteDestination>())).Returns(new List<RouteDestination>());
+        
         var mockStrategy = new Mock<IRoutingStrategy>();
         mockStrategy
             .Setup(s => s.ResolveAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(RouteDestination.Gemini);
+            .ReturnsAsync(RouteDestination.GithubModels);
 
-        // Empty DI — no keyed Gemini client registered
+        // Empty DI — no keyed GithubModels client registered
         var serviceProvider = new ServiceCollection().BuildServiceProvider();
 
-        var router = new LlmRoutingChatClient(mockInnerClient.Object, serviceProvider, mockStrategy.Object, mockLogger.Object);
+        var router = new LlmRoutingChatClient(mockInnerClient.Object, serviceProvider, mockStrategy.Object, mockFailoverStrategy.Object, mockLogger.Object);
         var messages = new List<ChatMessage> { new ChatMessage(ChatRole.User, "What is 2+2?") };
 
         // Act
