@@ -28,13 +28,9 @@ public class OllamaMetaRoutingStrategy(
         {string.Join(", ", Enum.GetNames<RouteDestination>())}
 
         Routing guidelines:
-        - AzureFoundry: enterprise/business tasks, Office 365, Azure-specific questions
-        - OllamaLocal: local/private tasks, coding assistance, general chat on the local Ollama container
-        - FoundryLocal: local Foundry Local models (OpenAI-compatible)
-        - GithubCopilot: code generation, debugging, GitHub-related tasks
-        - GithubModels: GitHub Models inference API tasks
-        - Gemini: multimodal tasks, Google services, search-oriented questions
-        - OpenRouter: creative writing, open-source model tasks, Qwen/general AI queries
+        - AzureFoundry: enterprise/business tasks, Office 365, Azure-specific questions, general high-quality chat
+        - FoundryLocal: local/private tasks that must stay on this machine (Foundry Local, OpenAI-compatible)
+        - GithubModels: code generation, debugging, GitHub-related tasks, inference via GitHub Models
         """;
 
     public async Task<RouteDestination> ResolveAsync(IEnumerable<ChatMessage> messages, CancellationToken cancellationToken = default)

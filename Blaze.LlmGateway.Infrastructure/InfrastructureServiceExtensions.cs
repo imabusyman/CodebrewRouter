@@ -6,7 +6,6 @@ using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Core.TaskRouting;
 using Blaze.LlmGateway.Infrastructure.RoutingStrategies;
 using Blaze.LlmGateway.Infrastructure.TaskClassification;
-using Google.GenAI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,36 +28,6 @@ public static class InfrastructureServiceExtensions
                 ? new AzureOpenAIClient(new Uri(opts.Endpoint), new DefaultAzureCredential())
                 : new AzureOpenAIClient(new Uri(opts.Endpoint), new AzureKeyCredential(opts.ApiKey));
             return azureClient.GetChatClient(opts.Model).AsIChatClient()
-                .AsBuilder().UseFunctionInvocation().Build();
-        });
-
-        // GithubCopilot — GitHub Copilot API
-        services.AddKeyedSingleton<IChatClient>("GithubCopilot", (sp, _) =>
-        {
-            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.GithubCopilot;
-            var client = new OpenAIClient(
-                new ApiKeyCredential(opts.ApiKey),
-                new OpenAIClientOptions { Endpoint = new Uri(opts.Endpoint) });
-            return client.GetChatClient(opts.Model).AsIChatClient()
-                .AsBuilder().UseFunctionInvocation().Build();
-        });
-
-        // Gemini
-        services.AddKeyedSingleton<IChatClient>("Gemini", (sp, _) =>
-        {
-            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.Gemini;
-            return new Client(apiKey: opts.ApiKey).AsIChatClient(opts.Model)
-                .AsBuilder().UseFunctionInvocation().Build();
-        });
-
-        // OpenRouter — Qwen3 free model
-        services.AddKeyedSingleton<IChatClient>("OpenRouter", (sp, _) =>
-        {
-            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OpenRouter;
-            var client = new OpenAIClient(
-                new ApiKeyCredential(opts.ApiKey),
-                new OpenAIClientOptions { Endpoint = new Uri(opts.Endpoint) });
-            return client.GetChatClient(opts.Model).AsIChatClient()
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 

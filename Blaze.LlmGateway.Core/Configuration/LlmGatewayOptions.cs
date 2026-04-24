@@ -12,9 +12,6 @@ public class LlmGatewayOptions
 public class ProvidersOptions
 {
     public AzureFoundryOptions AzureFoundry { get; set; } = new();
-    public GitHubCopilotOptions GithubCopilot { get; set; } = new();
-    public GeminiOptions Gemini { get; set; } = new();
-    public OpenRouterOptions OpenRouter { get; set; } = new();
     public FoundryLocalOptions FoundryLocal { get; set; } = new();
     public GitHubModelsOptions GithubModels { get; set; } = new();
     public OllamaLocalOptions OllamaLocal { get; set; } = new();
@@ -26,26 +23,6 @@ public class AzureFoundryOptions
     public string Model { get; set; } = "gpt-4o";
     /// <summary>Optional. If absent, DefaultAzureCredential is used.</summary>
     public string? ApiKey { get; set; }
-}
-
-public class GitHubCopilotOptions
-{
-    public string Endpoint { get; set; } = "https://api.githubcopilot.com";
-    public string ApiKey { get; set; } = "";
-    public string Model { get; set; } = "gpt-4o";
-}
-
-public class GeminiOptions
-{
-    public string ApiKey { get; set; } = "";
-    public string Model { get; set; } = "gemini-2.0-flash";
-}
-
-public class OpenRouterOptions
-{
-    public string Endpoint { get; set; } = "https://openrouter.ai/api/v1";
-    public string ApiKey { get; set; } = "";
-    public string Model { get; set; } = "qwen/qwen3-235b-a22b:free";
 }
 
 public class FoundryLocalOptions

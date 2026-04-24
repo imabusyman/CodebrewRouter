@@ -20,12 +20,12 @@ public class CodebrewRouterOptions
     /// </summary>
     public Dictionary<string, string[]> FallbackRules { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Reasoning"]             = ["AzureFoundry", "Gemini", "GithubCopilot", "GithubModels"],
-        ["Coding"]                = ["GithubCopilot", "AzureFoundry", "GithubModels", "OllamaLocal"],
-        ["Research"]              = ["AzureFoundry", "Gemini", "OpenRouter", "GithubModels"],
-        ["VisionObjectDetection"] = ["Gemini", "AzureFoundry", "GithubCopilot"],
-        ["Creative"]              = ["OpenRouter", "AzureFoundry", "GithubCopilot"],
-        ["DataAnalysis"]          = ["AzureFoundry", "Gemini", "OpenRouter"],
-        ["General"]               = ["AzureFoundry", "GithubModels", "OllamaLocal"],
+        ["Reasoning"]             = ["AzureFoundry", "GithubModels", "FoundryLocal"],
+        ["Coding"]                = ["GithubModels", "AzureFoundry", "FoundryLocal"],
+        ["Research"]              = ["AzureFoundry", "GithubModels", "FoundryLocal"],
+        ["VisionObjectDetection"] = ["AzureFoundry", "GithubModels", "FoundryLocal"],
+        ["Creative"]              = ["AzureFoundry", "GithubModels", "FoundryLocal"],
+        ["DataAnalysis"]          = ["AzureFoundry", "GithubModels", "FoundryLocal"],
+        ["General"]               = ["AzureFoundry", "GithubModels", "FoundryLocal"],
     };
 }
