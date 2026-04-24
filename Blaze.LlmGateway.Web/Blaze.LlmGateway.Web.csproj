@@ -6,8 +6,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Syncfusion.Blazor.InteractiveChat" Version="33.1.47" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="33.1.47" />
+    <PackageReference Include="Syncfusion.Blazor.InteractiveChat" Version="33.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="33.2.3" />
   </ItemGroup>
 
   <PropertyGroup>
