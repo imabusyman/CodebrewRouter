@@ -89,19 +89,19 @@ SDK mappings (must be followed exactly):
 
 ## Known Incomplete Areas
 
-**Phase 1 (Stop the Bleeding) — PARTIALLY COMPLETE:**
+**Phase 1 (Stop the Bleeding) — ✅ COMPLETE:**
 - ✅ Bug 1: GithubModels registration — **DONE**
-- ✅ Bug 2: OpenAI wire format — **DONE** (chat.completion.chunk + role/finish_reason)
-- ✅ Bug 3: Function calling forward — **SCAFFOLDED** (parsed, awaits AIFunctionFactory.Create translation)
-- ⏳ Bug 4: Vision support — **NOT STARTED** (polymorphic content parts in DTO)
-- ⏳ Bug 5: Streaming failover — **NOT STARTED** (first-chunk probe pattern)
+- ✅ Bug 2: OpenAI wire format — **DONE** (chat.completion.chunk + role/finish_reason + proper chunk sequencing)
+- ✅ Bug 3: Function calling forward — **DONE** (tools translated to AIFunctions via AIFunctionFactory.Create)
+- ✅ Bug 4: Vision support — **DONE** (multimodal content via ChatMessageContentConverter)
+- ✅ Bug 5: Streaming failover — **DONE** (first-chunk probe pattern with fallback chain)
 
 **Other Known Gaps:**
 - `McpConnectionManager.StartAsync()` — placeholder; MCP tool connections not fully wired.
 - `McpToolDelegatingClient.AppendMcpTools` — needs mapping to `HostedMcpServerTool` instances.
-- `LlmRoutingChatClient.GetStreamingResponseAsyncImpl` — still direct forwarding; failover probe not yet wired (same pattern as `CodebrewRouterChatClient:72-139` exists but not yet migrated).
-- No circuit breaker — most pressing resilience gap post-Phase 1.
-- Integration test (Tier-A) with real GitHub Models endpoint and credentials — **NOT YET CREATED**
+- No circuit breaker — high-priority resilience enhancement for Phase 2.
+- Tool invocation handlers — placeholder in TranslateTools; actual tool execution routed to MCP or external handlers (Phase 2).
+- Integration test (Tier-A) with real GitHub Models endpoint — scaffolded, awaits credentials for full E2E validation.
 
 ## Squad Orchestration
 
