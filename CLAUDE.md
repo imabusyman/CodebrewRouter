@@ -89,11 +89,19 @@ SDK mappings (must be followed exactly):
 
 ## Known Incomplete Areas
 
+**Phase 1 (Stop the Bleeding) — PARTIALLY COMPLETE:**
+- ✅ Bug 1: GithubModels registration — **DONE**
+- ✅ Bug 2: OpenAI wire format — **DONE** (chat.completion.chunk + role/finish_reason)
+- ✅ Bug 3: Function calling forward — **SCAFFOLDED** (parsed, awaits AIFunctionFactory.Create translation)
+- ⏳ Bug 4: Vision support — **NOT STARTED** (polymorphic content parts in DTO)
+- ⏳ Bug 5: Streaming failover — **NOT STARTED** (first-chunk probe pattern)
+
+**Other Known Gaps:**
 - `McpConnectionManager.StartAsync()` — placeholder; MCP tool connections not fully wired.
 - `McpToolDelegatingClient.AppendMcpTools` — needs mapping to `HostedMcpServerTool` instances.
-- `LlmRoutingChatClient` and `McpToolDelegatingClient` — should inherit `DelegatingChatClient` (currently implement `IChatClient` directly).
-- No circuit breaker — most pressing resilience gap.
-- Streaming failover — mid-stream failure handling not yet implemented.
+- `LlmRoutingChatClient.GetStreamingResponseAsyncImpl` — still direct forwarding; failover probe not yet wired (same pattern as `CodebrewRouterChatClient:72-139` exists but not yet migrated).
+- No circuit breaker — most pressing resilience gap post-Phase 1.
+- Integration test (Tier-A) with real GitHub Models endpoint and credentials — **NOT YET CREATED**
 
 ## Squad Orchestration
 
