@@ -116,10 +116,12 @@ public class ChatCompletionsIntegrationTests : IAsyncLifetime
         {
             var jsonStr = line.Replace("data: ", "");
             var json = JsonDocument.Parse(jsonStr);
+            // Verify the JSON has the expected structure
+            Assert.True(json.RootElement.TryGetProperty("object", out var obj));
+            Assert.Equal("chat.completion.chunk", obj.GetString());
             Assert.True(json.RootElement.TryGetProperty("choices", out var choices));
             var choice = choices.EnumerateArray().First();
             Assert.True(choice.TryGetProperty("delta", out var delta));
-            Assert.True(delta.TryGetProperty("content", out _));
         }
     }
 
@@ -142,7 +144,7 @@ public class ChatCompletionsIntegrationTests : IAsyncLifetime
         
         Assert.True(json.RootElement.TryGetProperty("id", out _));
         Assert.True(json.RootElement.TryGetProperty("object", out var obj));
-        Assert.Equal("text_completion", obj.GetString());
+        Assert.Equal("chat.completion", obj.GetString());
         Assert.True(json.RootElement.TryGetProperty("choices", out var choices));
         Assert.True(choices.GetArrayLength() > 0);
     }

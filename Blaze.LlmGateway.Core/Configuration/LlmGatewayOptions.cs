@@ -14,6 +14,7 @@ public class ProvidersOptions
     public AzureFoundryOptions AzureFoundry { get; set; } = new();
     public FoundryLocalOptions FoundryLocal { get; set; } = new();
     public OllamaLocalOptions OllamaLocal { get; set; } = new();
+    public GithubModelsOptions GithubModels { get; set; } = new();
 }
 
 public class AzureFoundryOptions
@@ -36,6 +37,14 @@ public class OllamaLocalOptions
 {
     public string BaseUrl { get; set; } = "http://localhost:11434";
     public string Model { get; set; } = "llama3.2";
+}
+
+public class GithubModelsOptions
+{
+    public string Endpoint { get; set; } = "https://models.inference.ai.azure.com";
+    public string Model { get; set; } = "gpt-4o-mini";
+    /// <summary>GitHub Models API key (personal access token with model access).</summary>
+    public string? ApiKey { get; set; }
 }
 
 public class RoutingOptions

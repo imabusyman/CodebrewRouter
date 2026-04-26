@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OllamaSharp;
-using OpenAI;
 using System.ClientModel;
 
 namespace Blaze.LlmGateway.Infrastructure;
@@ -47,6 +46,22 @@ public static class InfrastructureServiceExtensions
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaLocal;
             return ((IChatClient)new OllamaApiClient(new Uri(opts.BaseUrl), opts.Model))
+                .AsBuilder().UseFunctionInvocation().Build();
+        });
+
+        // GithubModels — GitHub Models API (OpenAI-compatible endpoint)
+        services.AddKeyedSingleton<IChatClient>("GithubModels", (sp, _) =>
+        {
+            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.GithubModels;
+            if (string.IsNullOrWhiteSpace(opts.ApiKey))
+            {
+                throw new InvalidOperationException("GithubModels requires API key in LlmGateway:Providers:GithubModels:ApiKey");
+            }
+            // GitHub Models uses OpenAI-compatible API; use AzureOpenAIClient with custom endpoint
+            var client = new AzureOpenAIClient(
+                new Uri(opts.Endpoint),
+                new AzureKeyCredential(opts.ApiKey));
+            return client.GetChatClient(opts.Model).AsIChatClient()
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 

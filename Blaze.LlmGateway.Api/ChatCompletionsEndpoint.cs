@@ -85,13 +85,13 @@ public static class ChatCompletionsEndpoint
         {
             logger?.LogInformation("  └─ Using STREAMING mode");
             // Streaming response via SSE
-            return await HandleStreamingAsync(httpContext, messages, options, req.Model, chatClient, modelSelectionResolver, logger, ct);
+            return await HandleStreamingAsync(httpContext, messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, logger, ct);
         }
         else
         {
             logger?.LogInformation("  └─ Using NON-STREAMING mode");
             // Non-streaming response
-            return await HandleNonStreamingAsync(messages, options, req.Model, chatClient, modelSelectionResolver, logger, ct);
+            return await HandleNonStreamingAsync(messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, logger, ct);
         }
     }
 
@@ -100,6 +100,7 @@ public static class ChatCompletionsEndpoint
         List<ChatMessage> messages,
         ChatOptions options,
         string model,
+        IList<Tool>? tools,
         IChatClient chatClient,
         IModelSelectionResolver modelSelectionResolver,
         ILogger<ChatCompletionRequest>? logger,
@@ -117,20 +118,53 @@ public static class ChatCompletionsEndpoint
 
         try
         {
+            // Add tools to options if provided
+            if (tools != null && tools.Count > 0)
+            {
+                logger?.LogDebug("  ├─ {ToolCount} tools requested (not yet translated to MEAI functions)", tools.Count);
+                // TODO Phase 1.8: Translate Tool objects to AIFunction declarations via AIFunctionFactory.Create
+                // For now, we parse them to log but don't yet execute tool-calling flows.
+                // The FunctionInvokingChatClient won't have actual tool definitions, but the parse is validated.
+            }
+
             var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
             var chunkCount = 0;
+            var firstChunkSent = false;
+
             await foreach (var update in selectedClient.GetStreamingResponseAsync(messages, options, ct))
             {
                 chunkCount++;
+                
+                // Emit first chunk with role
+                if (!firstChunkSent)
+                {
+                    var firstChoice = new { index = 0, delta = new { role = "assistant", content = "" }, finish_reason = (string?)null };
+                    var firstChunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { firstChoice } };
+                    var json = JsonSerializer.Serialize(firstChunk);
+                    await httpContext.Response.WriteAsync($"data: {json}\n\n", ct);
+                    await httpContext.Response.Body.FlushAsync(ct);
+                    firstChunkSent = true;
+                    logger?.LogDebug("  ├─ First chunk with role sent");
+                }
+
+                // Emit content chunk
                 var choice = new { index = 0, delta = new { content = update.Text }, finish_reason = (string?)null };
-                var chunk = new { id, @object = "text_completion.chunk", created, model, choices = new[] { choice } };
-                var json = JsonSerializer.Serialize(chunk);
-                await httpContext.Response.WriteAsync($"data: {json}\n\n", ct);
+                var chunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { choice } };
+                var contentJson = JsonSerializer.Serialize(chunk);
+                await httpContext.Response.WriteAsync($"data: {contentJson}\n\n", ct);
                 await httpContext.Response.Body.FlushAsync(ct);
                 
                 if (chunkCount % 10 == 0)
                     logger?.LogDebug("  ├─ Streamed {ChunkCount} chunks so far", chunkCount);
             }
+
+            // Emit final chunk with finish_reason
+            var finalChoice = new { index = 0, delta = new { }, finish_reason = "stop" };
+            var finalChunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { finalChoice } };
+            var finalJson = JsonSerializer.Serialize(finalChunk);
+            await httpContext.Response.WriteAsync($"data: {finalJson}\n\n", ct);
+            await httpContext.Response.Body.FlushAsync(ct);
+            
             logger?.LogInformation("✅ Stream completed - Total chunks: {ChunkCount}", chunkCount);
         }
         catch (Exception ex)
@@ -152,6 +186,7 @@ public static class ChatCompletionsEndpoint
         List<ChatMessage> messages,
         ChatOptions options,
         string model,
+        IList<Tool>? tools,
         IChatClient chatClient,
         IModelSelectionResolver modelSelectionResolver,
         ILogger<ChatCompletionRequest>? logger,
@@ -159,6 +194,14 @@ public static class ChatCompletionsEndpoint
     {
         try
         {
+            // Add tools to options if provided
+            if (tools != null && tools.Count > 0)
+            {
+                logger?.LogDebug("  ├─ {ToolCount} tools requested (not yet translated to MEAI functions)", tools.Count);
+                // TODO Phase 1.8: Translate Tool objects to AIFunction declarations via AIFunctionFactory.Create
+                // For now, we parse them to log but don't yet execute tool-calling flows.
+            }
+
             logger?.LogInformation("⏳ Getting non-streaming response from chat client");
             var sw = System.Diagnostics.Stopwatch.StartNew();
             var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
@@ -183,7 +226,7 @@ public static class ChatCompletionsEndpoint
 
             var result = new ChatCompletionResponse(
                 Id: id,
-                Object: "text_completion",
+                Object: "chat.completion",
                 Created: created,
                 Model: model,
                 Choices: choices,
