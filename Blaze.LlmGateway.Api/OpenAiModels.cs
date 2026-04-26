@@ -45,6 +45,7 @@ public record ChatCompletionRequest(
     IList<Tool>? Tools = null);
 
 /// <summary>Chat message DTO for requests</summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(ChatMessageContentConverter))]
 public record ChatMessageDto(
     string Role,
     string Content);

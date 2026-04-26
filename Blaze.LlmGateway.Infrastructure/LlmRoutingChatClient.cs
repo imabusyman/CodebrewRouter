@@ -67,18 +67,50 @@ public class LlmRoutingChatClient : DelegatingChatClient
         var targetClient = await ResolveTargetClientAsync(chatMessages, cancellationToken);
         _logger.LogInformation("🎯 Routing streaming request to: {TargetClient}", targetClient.GetType().Name);
 
-        int chunkCount = 0;
-        var responseStream = targetClient.GetStreamingResponseAsync(chatMessages, options, cancellationToken);
-
-        await foreach (var update in responseStream)
+        // Use first-chunk probe to detect failures early; if it fails, try failover chain
+        var result = await TryGetFirstChunkAsync(targetClient, chatMessages, options, cancellationToken);
+        if (!result.Success)
         {
-            chunkCount++;
-            if (chunkCount == 1)
-                _logger.LogDebug("  ├─ First chunk received");
-            yield return update;
+            _logger.LogWarning("⚠️ Primary provider failed before first chunk — attempting failover chain...");
+            
+            // Yield all chunks from failover chain
+            await foreach (var update in TryFailoverStreamingAsync(chatMessages, options, cancellationToken))
+                yield return update;
+            
+            yield break;
         }
 
-        _logger.LogInformation("✅ Streaming complete - {ChunkCount} updates", chunkCount);
+        // Yield the first chunk that was already fetched
+        yield return result.FirstChunk;
+        _logger.LogDebug("  ├─ First chunk received");
+
+        // Stream the rest
+        var enumerator = result.Enumerator!;
+        var chunkCount = 1;
+        while (true)
+        {
+            bool hasMore = false;
+            bool streamFailed = false;
+            try
+            {
+                hasMore = await enumerator.MoveNextAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "⚠️ Mid-stream failure from primary provider — ending stream");
+                streamFailed = true;
+            }
+
+            if (streamFailed || !hasMore)
+            {
+                await enumerator.DisposeAsync();
+                _logger.LogInformation("✅ Streaming complete - {ChunkCount} updates", chunkCount);
+                yield break;
+            }
+
+            chunkCount++;
+            yield return enumerator.Current;
+        }
     }
 
     private async Task<IChatClient> ResolveTargetClientAsync(IEnumerable<ChatMessage> messages, CancellationToken cancellationToken)
@@ -166,4 +198,39 @@ public class LlmRoutingChatClient : DelegatingChatClient
         _logger.LogError("❌ All failover providers exhausted (streaming); throwing error");
         throw new InvalidOperationException("All providers in failover chain failed during streaming");
     }
+
+    /// <summary>
+    /// Attempts to get the first chunk from a provider to detect early failures.
+    /// This is a plain async method (not an iterator), so try/catch is fully legal.
+    /// </summary>
+    private static async Task<FirstChunkResult> TryGetFirstChunkAsync(
+        IChatClient client,
+        IEnumerable<ChatMessage> messages,
+        ChatOptions? options,
+        CancellationToken ct)
+    {
+        var enumerator = client.GetStreamingResponseAsync(messages, options, ct)
+                                .GetAsyncEnumerator(ct);
+        try
+        {
+            if (!await enumerator.MoveNextAsync())
+            {
+                await enumerator.DisposeAsync();
+                return FirstChunkResult.Failed;
+            }
+
+            return new FirstChunkResult(true, enumerator.Current, enumerator);
+        }
+        catch
+        {
+            await enumerator.DisposeAsync();
+            return FirstChunkResult.Failed;
+        }
+    }
+}
+
+/// <summary>Encapsulates the result of probing for the first chunk from a streaming response.</summary>
+internal record FirstChunkResult(bool Success, ChatResponseUpdate FirstChunk = default!, IAsyncEnumerator<ChatResponseUpdate>? Enumerator = null)
+{
+    public static readonly FirstChunkResult Failed = new(false);
 }

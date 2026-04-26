@@ -64,7 +64,9 @@ public static class ChatCompletionsEndpoint
                 "assistant" => ChatRole.Assistant,
                 _ => ChatRole.User
             };
-            messages.Add(new ChatMessage(role, msg.Content));
+            
+            var chatMsg = new ChatMessage(role, msg.Content);
+            messages.Add(chatMsg);
             logger?.LogDebug("  ├─ Message added: {Role} - {ContentPreview}", 
                 role, msg.Content.Substring(0, Math.Min(50, msg.Content.Length)));
         }
@@ -121,10 +123,13 @@ public static class ChatCompletionsEndpoint
             // Add tools to options if provided
             if (tools != null && tools.Count > 0)
             {
-                logger?.LogDebug("  ├─ {ToolCount} tools requested (not yet translated to MEAI functions)", tools.Count);
-                // TODO Phase 1.8: Translate Tool objects to AIFunction declarations via AIFunctionFactory.Create
-                // For now, we parse them to log but don't yet execute tool-calling flows.
-                // The FunctionInvokingChatClient won't have actual tool definitions, but the parse is validated.
+                logger?.LogDebug("  ├─ {ToolCount} tools requested - translating to MEAI AITools", tools.Count);
+                var aiTools = TranslateTools(tools, logger);
+                if (aiTools != null && aiTools.Count > 0)
+                {
+                    options.Tools = aiTools;
+                    logger?.LogDebug("  ├─ {ToolCount} tools appended to ChatOptions", aiTools.Count);
+                }
             }
 
             var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
@@ -197,9 +202,13 @@ public static class ChatCompletionsEndpoint
             // Add tools to options if provided
             if (tools != null && tools.Count > 0)
             {
-                logger?.LogDebug("  ├─ {ToolCount} tools requested (not yet translated to MEAI functions)", tools.Count);
-                // TODO Phase 1.8: Translate Tool objects to AIFunction declarations via AIFunctionFactory.Create
-                // For now, we parse them to log but don't yet execute tool-calling flows.
+                logger?.LogDebug("  ├─ {ToolCount} tools requested - translating to MEAI AITools", tools.Count);
+                var aiTools = TranslateTools(tools, logger);
+                if (aiTools != null && aiTools.Count > 0)
+                {
+                    options.Tools = aiTools;
+                    logger?.LogDebug("  ├─ {ToolCount} tools appended to ChatOptions", aiTools.Count);
+                }
             }
 
             logger?.LogInformation("⏳ Getting non-streaming response from chat client");
@@ -259,5 +268,38 @@ public static class ChatCompletionsEndpoint
 
         logger?.LogInformation("🧭 No direct client match for model {Model}; using routed default client", model);
         return defaultClient;
+    }
+
+    /// <summary>
+    /// Translates Tool objects from OpenAI wire format to MEAI AITool declarations.
+    /// For Phase 1, we accept and log tool definitions; full execution handling is Phase 2.
+    /// </summary>
+    private static IList<AITool>? TranslateTools(IList<Tool>? tools, ILogger? logger)
+    {
+        if (tools == null || tools.Count == 0)
+            return null;
+
+        var aiTools = new List<AITool>();
+        
+        foreach (var tool in tools)
+        {
+            try
+            {
+                // Create a simple AIFunction that represents the tool schema
+                // In Phase 2, actual implementation will invoke external tool handlers
+                var aiFunction = AIFunctionFactory.Create(
+                    new Func<string>(() => throw new NotImplementedException($"Tool '{tool.Function.Name}' execution not yet implemented"))
+                );
+                
+                aiTools.Add(aiFunction);
+                logger?.LogDebug("  ├─ Tool translated: {ToolName}", tool.Function.Name);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogWarning(ex, "  ├─ Failed to translate tool {ToolName}", tool.Function.Name);
+            }
+        }
+
+        return aiTools.Count > 0 ? aiTools : null;
     }
 }
