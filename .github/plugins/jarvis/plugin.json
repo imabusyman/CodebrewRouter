@@ -1,0 +1,42 @@
+{
+  "name": "jarvis",
+  "displayName": "JARVIS Personal Developer Agent Fleet",
+  "description": "Phase-driven 6-agent fleet that executes the analysis.md roadmap for Blaze.LlmGateway. JARVIS Conductor reads the roadmap, picks the next priority task, and dispatches the right specialist (gateway-bugfix, memory-architect, tools-architect, agent-architect, vision-architect). Specialists delegate C# implementation to the underlying Squad plugin.",
+  "version": "1.0.0",
+  "agents": [
+    {
+      "name": "jarvis.conductor",
+      "path": "agents/jarvis.conductor.agent.md"
+    },
+    {
+      "name": "jarvis.gateway-bugfix",
+      "path": "agents/jarvis.gateway-bugfix.agent.md"
+    },
+    {
+      "name": "jarvis.memory-architect",
+      "path": "agents/jarvis.memory-architect.agent.md"
+    },
+    {
+      "name": "jarvis.tools-architect",
+      "path": "agents/jarvis.tools-architect.agent.md"
+    },
+    {
+      "name": "jarvis.agent-architect",
+      "path": "agents/jarvis.agent-architect.agent.md"
+    },
+    {
+      "name": "jarvis.vision-architect",
+      "path": "agents/jarvis.vision-architect.agent.md"
+    }
+  ],
+  "commands": [
+    {
+      "name": "jarvis",
+      "path": "commands/jarvis.md"
+    },
+    {
+      "name": "jarvis-status",
+      "path": "commands/jarvis-status.md"
+    }
+  ]
+}
