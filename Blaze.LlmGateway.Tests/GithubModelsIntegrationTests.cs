@@ -276,7 +276,7 @@ public class GithubModelsIntegrationTests : IAsyncLifetime
     /// Prerequisites:
     ///   1. Create a GitHub PAT with Models scope at https://github.com/settings/tokens
     ///   2. Store the token:
-    ///      dotnet user-secrets set "Parameters:github-models-api-key" "&lt;your-PAT&gt;" --project Blaze.LlmGateway.AppHost
+    ///      dotnet user-secrets set "Parameters:github-models-api-key" "<your-PAT>" --project Blaze.LlmGateway.AppHost
     ///   3. Remove the [Fact(Skip = ...)] attribute and use [Fact].
     /// </summary>
     [Fact(Skip = "Requires a GitHub PAT with model access. See instructions in the XML doc comment.")]
