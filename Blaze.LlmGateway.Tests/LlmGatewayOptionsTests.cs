@@ -89,6 +89,28 @@ public class LlmGatewayOptionsTests
     }
 
     [Fact]
+    public void FoundryConfigurationAliases_MapsFoundryLocalConnectionString_WhenGatewayKeysAreMissing()
+    {
+        const string connectionString = "Endpoint=http://127.0.0.1:60123/;DeploymentId=foundryLocalChat;ApiKey=notneeded";
+
+        Environment.SetEnvironmentVariable("ConnectionStrings__foundryLocalChat", connectionString);
+
+        try
+        {
+            var configuration = new ConfigurationManager();
+
+            Blaze.LlmGateway.Api.FoundryConfigurationAliases.AddFoundryEnvironmentAliases(configuration);
+
+            Assert.Equal("http://127.0.0.1:60123/", configuration["LlmGateway:Providers:FoundryLocal:Endpoint"]);
+            Assert.Equal("notneeded", configuration["LlmGateway:Providers:FoundryLocal:ApiKey"]);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("ConnectionStrings__foundryLocalChat", null);
+        }
+    }
+
+    [Fact]
     public async Task ModelCatalogService_IncludesConfiguredCodebrewBackingProviders()
     {
         var options = new LlmGatewayOptions

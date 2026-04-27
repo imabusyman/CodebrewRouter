@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using System.Data.Common;
 
 namespace Blaze.LlmGateway.Api;
 
@@ -33,6 +34,8 @@ public static class FoundryConfigurationAliases
             "COPILOT_FOUNDRY_DEFAULT_MODEL",
             "COPILOT_FOUNDRY_GENERAL_MODEL");
 
+        AddFoundryLocalConnectionStringAliases(configuration, aliases);
+
         if (aliases.Count > 0)
         {
             configuration.AddInMemoryCollection(aliases);
@@ -60,6 +63,74 @@ public static class FoundryConfigurationAliases
 
             aliases[targetKey] = value;
             return;
+        }
+    }
+
+    private static void AddFoundryLocalConnectionStringAliases(
+        IConfiguration configuration,
+        IDictionary<string, string?> aliases)
+    {
+        var connectionString = GetFirstConnectionString(configuration, "foundryLocalChat", "foundryLocal");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return;
+        }
+
+        var builder = new DbConnectionStringBuilder
+        {
+            ConnectionString = connectionString
+        };
+
+        AddConnectionStringAliasIfMissing(
+            configuration,
+            aliases,
+            builder,
+            "LlmGateway:Providers:FoundryLocal:Endpoint",
+            "Endpoint");
+
+        AddConnectionStringAliasIfMissing(
+            configuration,
+            aliases,
+            builder,
+            "LlmGateway:Providers:FoundryLocal:ApiKey",
+            "ApiKey");
+    }
+
+    private static string? GetFirstConnectionString(IConfiguration configuration, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            var value =
+                configuration.GetConnectionString(name) ??
+                configuration[$"ConnectionStrings:{name}"] ??
+                Environment.GetEnvironmentVariable($"ConnectionStrings__{name}");
+
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private static void AddConnectionStringAliasIfMissing(
+        IConfiguration configuration,
+        IDictionary<string, string?> aliases,
+        DbConnectionStringBuilder connectionString,
+        string targetKey,
+        string connectionStringKey)
+    {
+        if (!string.IsNullOrWhiteSpace(configuration[targetKey]))
+        {
+            return;
+        }
+
+        if (connectionString.TryGetValue(connectionStringKey, out var value) &&
+            value is string stringValue &&
+            !string.IsNullOrWhiteSpace(stringValue))
+        {
+            aliases[targetKey] = stringValue;
         }
     }
 }

@@ -250,12 +250,14 @@ public class FoundryLocalIntegrationTests : IAsyncLifetime
     /// REAL INTEGRATION TEST — requires a running Foundry Local instance.
     /// Prerequisites:
     ///   1. Install Foundry Local: winget install Microsoft.FoundryLocal
-    ///   2. Start Foundry Local and load the model:
+    ///   2. Preferred: run `dotnet run --project Blaze.LlmGateway.AppHost` so Aspire injects
+    ///      the Foundry Local connection string into the API automatically.
+    ///   3. Standalone fallback: start Foundry Local yourself and load the model:
     ///      foundrylocal start phi-4-mini
-    ///   3. Configure the endpoint (default: http://127.0.0.1:58484):
+    ///   4. If you run the API directly instead of AppHost, configure the endpoint:
     ///      dotnet user-secrets set "LlmGateway:Providers:FoundryLocal:Endpoint" "http://127.0.0.1:58484" --project Blaze.LlmGateway.Api
     ///      dotnet user-secrets set "LlmGateway:Providers:FoundryLocal:Model" "Phi-4-mini-instruct-cuda-gpu:5" --project Blaze.LlmGateway.Api
-    ///   4. Remove the [Fact(Skip = ...)] attribute and use [Fact].
+    ///   5. Remove the [Fact(Skip = ...)] attribute and use [Fact].
     /// </summary>
     [Fact(Skip = "Requires a running Foundry Local instance with Phi-4-mini loaded. See instructions in the XML doc comment.")]
     public async Task FoundryLocal_RealIntegration_ChatCompletions_Succeeds()
