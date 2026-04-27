@@ -20,6 +20,7 @@ public class ProvidersOptions
 public class AzureFoundryOptions
 {
     public string Endpoint { get; set; } = "";
+    public string ResponsesEndpoint { get; set; } = "";
     public string Model { get; set; } = "gpt-4o";
     /// <summary>Optional. If absent, DefaultAzureCredential is used.</summary>
     public string? ApiKey { get; set; }

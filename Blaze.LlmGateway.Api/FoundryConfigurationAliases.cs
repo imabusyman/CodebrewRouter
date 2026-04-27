@@ -17,6 +17,12 @@ public static class FoundryConfigurationAliases
         AddAliasIfMissing(
             configuration,
             aliases,
+            "LlmGateway:Providers:AzureFoundry:ResponsesEndpoint",
+            "COPILOT_FOUNDRY_RESPONSES_ENDPOINT");
+
+        AddAliasIfMissing(
+            configuration,
+            aliases,
             "LlmGateway:Providers:AzureFoundry:ApiKey",
             "COPILOT_AZURE_API_KEY");
 

@@ -1,10 +1,13 @@
 using System.Text;
 using System.Text.Json;
+using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Infrastructure;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -308,11 +311,97 @@ public class ChatCompletionsIntegrationTests : IAsyncLifetime
         Assert.NotEqual(id1, id2);
     }
 
+    [Fact]
+    public async Task StreamingChatCompletion_WhenProviderFailsBeforeFirstChunk_ReturnsProviderErrorJson()
+    {
+        var failingClient = new Mock<IChatClient>();
+        failingClient
+            .Setup(c => c.GetStreamingResponseAsync(
+                It.IsAny<IEnumerable<ChatMessage>>(),
+                It.IsAny<ChatOptions>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(ThrowingStreamingResponse());
+        var context = CreateHttpContext();
+        var request = new ChatCompletionRequest(
+            Model: "gpt-5.4",
+            Messages: [new ChatMessageDto("user", "Hello")],
+            Stream: true);
+
+        var result = await ChatCompletionsEndpoint.HandleAsync(
+            request,
+            failingClient.Object,
+            new FakeModelSelectionResolver(failingClient.Object),
+            context,
+            CancellationToken.None);
+        await result.ExecuteAsync(context);
+
+        context.Response.Body.Position = 0;
+        var body = await new StreamReader(context.Response.Body).ReadToEndAsync();
+
+        Assert.Equal(StatusCodes.Status502BadGateway, context.Response.StatusCode);
+        Assert.StartsWith("application/json", context.Response.ContentType);
+        Assert.Contains("provider_error", body);
+        Assert.DoesNotContain("[DONE]", body);
+    }
+
+    [Fact]
+    public async Task NonStreamingChatCompletion_WhenProviderFails_ReturnsProviderErrorJson()
+    {
+        var failingClient = new Mock<IChatClient>();
+        failingClient
+            .Setup(c => c.GetResponseAsync(
+                It.IsAny<IEnumerable<ChatMessage>>(),
+                It.IsAny<ChatOptions>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("provider down"));
+        var context = CreateHttpContext();
+        var request = new ChatCompletionRequest(
+            Model: "gpt-5.4",
+            Messages: [new ChatMessageDto("user", "Hello")]);
+
+        var result = await ChatCompletionsEndpoint.HandleAsync(
+            request,
+            failingClient.Object,
+            new FakeModelSelectionResolver(failingClient.Object),
+            context,
+            CancellationToken.None);
+        await result.ExecuteAsync(context);
+
+        context.Response.Body.Position = 0;
+        var body = await new StreamReader(context.Response.Body).ReadToEndAsync();
+
+        Assert.Equal(StatusCodes.Status502BadGateway, context.Response.StatusCode);
+        Assert.Contains("provider_error", body);
+    }
+
     private static async IAsyncEnumerable<ChatResponseUpdate> StreamingResponse()
     {
         yield return new ChatResponseUpdate(ChatRole.Assistant, "Hello ");
         yield return new ChatResponseUpdate(ChatRole.Assistant, "from ");
         yield return new ChatResponseUpdate(ChatRole.Assistant, "test");
+    }
+
+    private static async IAsyncEnumerable<ChatResponseUpdate> ThrowingStreamingResponse()
+    {
+        await Task.Yield();
+        if (ShouldThrowProviderError())
+        {
+            throw new InvalidOperationException("provider down");
+        }
+
+        yield return new ChatResponseUpdate(ChatRole.Assistant, "");
+    }
+
+    private static bool ShouldThrowProviderError() => true;
+
+    private static DefaultHttpContext CreateHttpContext()
+    {
+        var context = new DefaultHttpContext();
+        context.RequestServices = new ServiceCollection()
+            .AddLogging()
+            .BuildServiceProvider();
+        context.Response.Body = new MemoryStream();
+        return context;
     }
 
     private sealed class FakeModelSelectionResolver(IChatClient client) : IModelSelectionResolver

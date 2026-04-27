@@ -23,6 +23,16 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("AzureFoundry", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.AzureFoundry;
+            if (!string.IsNullOrWhiteSpace(opts.ResponsesEndpoint))
+            {
+                return new FoundryResponsesChatClient(
+                        opts,
+                        sp.GetRequiredService<ILogger<FoundryResponsesChatClient>>())
+                    .AsBuilder()
+                    .UseFunctionInvocation()
+                    .Build();
+            }
+
             AzureOpenAIClient azureClient = string.IsNullOrWhiteSpace(opts.ApiKey)
                 ? new AzureOpenAIClient(new Uri(opts.Endpoint), new DefaultAzureCredential())
                 : new AzureOpenAIClient(new Uri(opts.Endpoint), new AzureKeyCredential(opts.ApiKey));
@@ -101,10 +111,12 @@ public static class InfrastructureServiceExtensions
 
         services.AddSingleton<IChatClient>(sp =>
         {
-            // Get the first available provider as fallback (for InnerClient wrapper)
-            var fallback = sp.GetKeyedService<IChatClient>("GithubModels")
-                          ?? sp.GetKeyedService<IChatClient>("AzureFoundry")
-                          ?? sp.GetRequiredKeyedService<IChatClient>("FoundryLocal");
+            var providerOptions = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers;
+            var fallback =
+                GetConfiguredKeyedClient(sp, "GithubModels", IsGithubModelsConfigured(providerOptions.GithubModels))
+                ?? GetConfiguredKeyedClient(sp, "AzureFoundry", IsAzureFoundryConfigured(providerOptions.AzureFoundry))
+                ?? GetConfiguredKeyedClient(sp, "FoundryLocal", IsFoundryLocalConfigured(providerOptions.FoundryLocal))
+                ?? throw new InvalidOperationException("No configured LLM provider is available for the default chat client.");
             
             var strategy = sp.GetRequiredService<IRoutingStrategy>();
             var failoverStrategy = sp.GetRequiredService<IFailoverStrategy>();
@@ -149,4 +161,20 @@ public static class InfrastructureServiceExtensions
 
         return services;
     }
+
+    private static IChatClient? GetConfiguredKeyedClient(IServiceProvider sp, string key, bool isConfigured)
+        => isConfigured ? sp.GetKeyedService<IChatClient>(key) : null;
+
+    private static bool IsAzureFoundryConfigured(AzureFoundryOptions options)
+        => HasValue(options.Model) &&
+           (HasValue(options.ResponsesEndpoint) ||
+            (HasValue(options.Endpoint) && HasValue(options.ApiKey)));
+
+    private static bool IsFoundryLocalConfigured(FoundryLocalOptions options)
+        => HasValue(options.Endpoint) && HasValue(options.Model);
+
+    private static bool IsGithubModelsConfigured(GithubModelsOptions options)
+        => HasValue(options.Endpoint) && HasValue(options.Model) && HasValue(options.ApiKey);
+
+    private static bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
 }

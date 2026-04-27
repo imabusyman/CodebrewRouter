@@ -35,6 +35,10 @@ var azureFoundryEndpoint = builder.AddParameter("azure-foundry-endpoint");
 var azureFoundryApiKey   = builder.AddParameter("azure-foundry-api-key", secret: true);
 var githubModelsApiKey   = builder.AddParameter("github-models-api-key", secret: true);
 var azureFoundryEndpointAlias = builder.Configuration["COPILOT_FOUNDRY_AZURE_BASE_URL"];
+var azureFoundryResponsesEndpoint = builder.Configuration.GetValue(
+    "LlmGateway:Providers:AzureFoundry:ResponsesEndpoint",
+    "https://codebrew-resource.services.ai.azure.com/api/projects/codebrew/openai/v1/responses");
+var azureFoundryResponsesEndpointAlias = builder.Configuration["COPILOT_FOUNDRY_RESPONSES_ENDPOINT"];
 var azureFoundryApiKeyAlias = builder.Configuration["COPILOT_AZURE_API_KEY"];
 var azureFoundryModelAlias = builder.Configuration["COPILOT_FOUNDRY_DEFAULT_MODEL"]
     ?? builder.Configuration["COPILOT_FOUNDRY_GENERAL_MODEL"];
@@ -82,6 +86,12 @@ else
     api.WithEnvironment("LlmGateway__Providers__AzureFoundry__Endpoint", azureFoundryEndpointAlias);
 }
 
+api.WithEnvironment(
+    "LlmGateway__Providers__AzureFoundry__ResponsesEndpoint",
+    string.IsNullOrWhiteSpace(azureFoundryResponsesEndpointAlias)
+        ? azureFoundryResponsesEndpoint
+        : azureFoundryResponsesEndpointAlias);
+
 if (string.IsNullOrWhiteSpace(azureFoundryApiKeyAlias))
 {
     api.WithEnvironment("LlmGateway__Providers__AzureFoundry__ApiKey", azureFoundryApiKey);
@@ -116,7 +126,7 @@ if (enableOpenWebUi)
 {
     aspireLogger.LogInformation("  ├─ Open WebUI: enabled (requires Docker Desktop)");
 
-    var openWebUi = builder.AddContainer("openwebui", "ghcr.io/open-webui/open-webui", "main")
+    var openWebUi = builder.AddContainer("openwebui", "ghcr.io/open-webui/open-webui", "v0.9.2")
         .WithHttpEndpoint(port: 8080, targetPort: 8080, name: "http")
         .WithVolume("blaze-openwebui-data", "/app/backend/data")
         .WithEnvironment("WEBUI_AUTH", "False")

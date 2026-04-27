@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using System.ClientModel;
 using System.Text.Json;
 using Blaze.LlmGateway.Infrastructure;
 
@@ -108,15 +109,9 @@ public static class ChatCompletionsEndpoint
         ILogger<ChatCompletionRequest>? logger,
         CancellationToken ct)
     {
-        httpContext.Response.ContentType = "text/event-stream";
-        httpContext.Response.Headers.Append("Cache-Control", "no-cache");
-        httpContext.Response.Headers.Append("Connection", "keep-alive");
-        // Disable proxy/nginx buffering so each SSE chunk reaches the client immediately.
-        httpContext.Response.Headers.Append("X-Accel-Buffering", "no");
-
         var id = $"chatcmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
         var created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        logger?.LogInformation("⏳ Starting streaming response - ID: {RequestId}", id);
+        IAsyncEnumerator<ChatResponseUpdate>? enumerator = null;
 
         try
         {
@@ -133,34 +128,61 @@ public static class ChatCompletionsEndpoint
             }
 
             var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
-            var chunkCount = 0;
-            var firstChunkSent = false;
-
-            await foreach (var update in selectedClient.GetStreamingResponseAsync(messages, options, ct))
+            var firstChunk = await TryGetFirstStreamingUpdateAsync(selectedClient, messages, options, ct);
+            if (!firstChunk.Success)
             {
+                logger?.LogWarning(firstChunk.Exception, "Provider failed before streaming started for model {Model}", model);
+                return CreateProviderErrorResult(model, firstChunk.Exception);
+            }
+
+            enumerator = firstChunk.Enumerator;
+            var chunkCount = 0;
+            logger?.LogInformation("⏳ Starting streaming response - ID: {RequestId}", id);
+
+            httpContext.Response.ContentType = "text/event-stream";
+            httpContext.Response.Headers.Append("Cache-Control", "no-cache");
+            httpContext.Response.Headers.Append("Connection", "keep-alive");
+            // Disable proxy/nginx buffering so each SSE chunk reaches the client immediately.
+            httpContext.Response.Headers.Append("X-Accel-Buffering", "no");
+
+            var firstChoice = new { index = 0, delta = new { role = "assistant", content = "" }, finish_reason = (string?)null };
+            var firstRoleChunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { firstChoice } };
+            var firstRoleJson = JsonSerializer.Serialize(firstRoleChunk);
+            await httpContext.Response.WriteAsync($"data: {firstRoleJson}\n\n", ct);
+            await httpContext.Response.Body.FlushAsync(ct);
+            logger?.LogDebug("  ├─ First chunk with role sent");
+
+            if (firstChunk.Update is not null)
+            {
+                await WriteStreamingContentChunkAsync(httpContext, id, created, model, firstChunk.Update, ct);
                 chunkCount++;
-                
-                // Emit first chunk with role
-                if (!firstChunkSent)
+            }
+
+            while (enumerator is not null)
+            {
+                bool hasMore;
+                try
                 {
-                    var firstChoice = new { index = 0, delta = new { role = "assistant", content = "" }, finish_reason = (string?)null };
-                    var firstChunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { firstChoice } };
-                    var json = JsonSerializer.Serialize(firstChunk);
-                    await httpContext.Response.WriteAsync($"data: {json}\n\n", ct);
-                    await httpContext.Response.Body.FlushAsync(ct);
-                    firstChunkSent = true;
-                    logger?.LogDebug("  ├─ First chunk with role sent");
+                    hasMore = await enumerator.MoveNextAsync();
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogWarning(ex, "Provider stream failed after {ChunkCount} chunks for model {Model}", chunkCount, model);
+                    break;
                 }
 
-                // Emit content chunk
-                var choice = new { index = 0, delta = new { content = update.Text }, finish_reason = (string?)null };
-                var chunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { choice } };
-                var contentJson = JsonSerializer.Serialize(chunk);
-                await httpContext.Response.WriteAsync($"data: {contentJson}\n\n", ct);
-                await httpContext.Response.Body.FlushAsync(ct);
-                
+                if (!hasMore)
+                {
+                    break;
+                }
+
+                await WriteStreamingContentChunkAsync(httpContext, id, created, model, enumerator.Current, ct);
+                chunkCount++;
+
                 if (chunkCount % 10 == 0)
+                {
                     logger?.LogDebug("  ├─ Streamed {ChunkCount} chunks so far", chunkCount);
+                }
             }
 
             // Emit final chunk with finish_reason
@@ -176,11 +198,24 @@ public static class ChatCompletionsEndpoint
         {
             logger?.LogError(ex, "❌ Streaming error after {ChunkCount} chunks", 
                 httpContext.Response.HasStarted ? "headers sent" : "headers not sent");
+            if (!httpContext.Response.HasStarted)
+            {
+                return CreateProviderErrorResult(model, ex);
+            }
         }
         finally
         {
-            await httpContext.Response.WriteAsync("data: [DONE]\n\n", ct);
-            await httpContext.Response.Body.FlushAsync(ct);
+            if (enumerator is not null)
+            {
+                await enumerator.DisposeAsync();
+            }
+
+            if (httpContext.Response.HasStarted)
+            {
+                await httpContext.Response.WriteAsync("data: [DONE]\n\n", ct);
+                await httpContext.Response.Body.FlushAsync(ct);
+            }
+
             logger?.LogDebug("  └─ [DONE] marker sent");
         }
 
@@ -248,8 +283,73 @@ public static class ChatCompletionsEndpoint
         catch (Exception ex)
         {
             logger?.LogError(ex, "❌ Error in non-streaming handler");
-            return Results.StatusCode(500);
+            return CreateProviderErrorResult(model, ex);
         }
+    }
+
+    private static async Task<StreamingProbeResult> TryGetFirstStreamingUpdateAsync(
+        IChatClient selectedClient,
+        IEnumerable<ChatMessage> messages,
+        ChatOptions options,
+        CancellationToken cancellationToken)
+    {
+        var enumerator = selectedClient.GetStreamingResponseAsync(messages, options, cancellationToken)
+            .GetAsyncEnumerator(cancellationToken);
+
+        try
+        {
+            if (!await enumerator.MoveNextAsync())
+            {
+                await enumerator.DisposeAsync();
+                return StreamingProbeResult.Empty;
+            }
+
+            return new StreamingProbeResult(true, enumerator.Current, enumerator, null);
+        }
+        catch (Exception ex)
+        {
+            await enumerator.DisposeAsync();
+            return new StreamingProbeResult(false, null, null, ex);
+        }
+    }
+
+    private static async Task WriteStreamingContentChunkAsync(
+        HttpContext httpContext,
+        string id,
+        long created,
+        string model,
+        ChatResponseUpdate update,
+        CancellationToken cancellationToken)
+    {
+        var choice = new { index = 0, delta = new { content = update.Text }, finish_reason = (string?)null };
+        var chunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { choice } };
+        var contentJson = JsonSerializer.Serialize(chunk);
+        await httpContext.Response.WriteAsync($"data: {contentJson}\n\n", cancellationToken);
+        await httpContext.Response.Body.FlushAsync(cancellationToken);
+    }
+
+    private static IResult CreateProviderErrorResult(string model, Exception? exception)
+    {
+        var statusCode = exception is ClientResultException { Status: 404 }
+            ? StatusCodes.Status404NotFound
+            : StatusCodes.Status502BadGateway;
+        var code = statusCode == StatusCodes.Status404NotFound ? "model_not_found" : "provider_error";
+        var message = statusCode == StatusCodes.Status404NotFound
+            ? $"Model or deployment '{model}' was not found by the configured provider."
+            : $"The configured provider failed while processing model '{model}'.";
+
+        return Results.Json(
+            new ErrorResponse(new ErrorDetail(message, "provider_error", code)),
+            statusCode: statusCode);
+    }
+
+    private sealed record StreamingProbeResult(
+        bool Success,
+        ChatResponseUpdate? Update,
+        IAsyncEnumerator<ChatResponseUpdate>? Enumerator,
+        Exception? Exception)
+    {
+        public static readonly StreamingProbeResult Empty = new(true, null, null, null);
     }
 
     private static async Task<IChatClient> ResolveClientAsync(

@@ -1,6 +1,9 @@
 using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -32,10 +35,12 @@ public class LlmGatewayOptionsTests
     public void FoundryConfigurationAliases_MapsCopilotEnvironmentVariables_WhenGatewayKeysAreMissing()
     {
         const string endpoint = "https://example-foundry.openai.azure.com/";
+        const string responsesEndpoint = "https://example-foundry.services.ai.azure.com/api/projects/example/openai/v1/responses";
         const string apiKey = "test-api-key";
         const string model = "gpt-4o-test";
 
         Environment.SetEnvironmentVariable("COPILOT_FOUNDRY_AZURE_BASE_URL", endpoint);
+        Environment.SetEnvironmentVariable("COPILOT_FOUNDRY_RESPONSES_ENDPOINT", responsesEndpoint);
         Environment.SetEnvironmentVariable("COPILOT_AZURE_API_KEY", apiKey);
         Environment.SetEnvironmentVariable("COPILOT_FOUNDRY_DEFAULT_MODEL", model);
 
@@ -46,12 +51,14 @@ public class LlmGatewayOptionsTests
             Blaze.LlmGateway.Api.FoundryConfigurationAliases.AddFoundryEnvironmentAliases(configuration);
 
             Assert.Equal(endpoint, configuration["LlmGateway:Providers:AzureFoundry:Endpoint"]);
+            Assert.Equal(responsesEndpoint, configuration["LlmGateway:Providers:AzureFoundry:ResponsesEndpoint"]);
             Assert.Equal(apiKey, configuration["LlmGateway:Providers:AzureFoundry:ApiKey"]);
             Assert.Equal(model, configuration["LlmGateway:Providers:AzureFoundry:Model"]);
         }
         finally
         {
             Environment.SetEnvironmentVariable("COPILOT_FOUNDRY_AZURE_BASE_URL", null);
+            Environment.SetEnvironmentVariable("COPILOT_FOUNDRY_RESPONSES_ENDPOINT", null);
             Environment.SetEnvironmentVariable("COPILOT_AZURE_API_KEY", null);
             Environment.SetEnvironmentVariable("COPILOT_FOUNDRY_DEFAULT_MODEL", null);
         }
@@ -108,6 +115,33 @@ public class LlmGatewayOptionsTests
         var models = await service.GetAvailableModelsAsync();
 
         Assert.DoesNotContain(models, model => model.Provider == "GithubModels");
+    }
+
+    [Fact]
+    public void AddLlmProviders_UsesFoundryResponsesClient_WhenResponsesEndpointIsConfigured()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(Options.Create(new LlmGatewayOptions
+        {
+            Providers =
+            {
+                AzureFoundry =
+                {
+                    ApiKey = "test-key",
+                    Model = "gpt-5.4",
+                    ResponsesEndpoint = "https://example-foundry.services.ai.azure.com/api/projects/example/openai/v1/responses"
+                },
+                GithubModels = { ApiKey = "test-key" }
+            }
+        }));
+        services.AddLlmProviders();
+
+        using var provider = services.BuildServiceProvider();
+
+        var chatClient = provider.GetRequiredKeyedService<IChatClient>("AzureFoundry");
+
+        Assert.NotNull(chatClient);
     }
 
     private static ModelCatalogService CreateModelCatalogService(LlmGatewayOptions options)
