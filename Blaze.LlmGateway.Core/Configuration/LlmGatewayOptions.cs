@@ -27,16 +27,16 @@ public class AzureFoundryOptions
 
 public class FoundryLocalOptions
 {
-    public string Endpoint { get; set; } = "http://localhost:5273";
-    public string Model { get; set; } = "";
+    public string Endpoint { get; set; } = "http://127.0.0.1:58484";
+    public string Model { get; set; } = "Phi-4-mini-instruct-cuda-gpu:5";
     /// <summary>Foundry Local uses "notneeded" as the API key.</summary>
     public string ApiKey { get; set; } = "notneeded";
 }
 
 public class OllamaLocalOptions
 {
-    public string BaseUrl { get; set; } = "http://localhost:11434";
-    public string Model { get; set; } = "llama3.2";
+    public string BaseUrl { get; set; } = "http://192.168.16.12:11434";
+    public string Model { get; set; } = "gemma4:e4b";
 }
 
 public class GithubModelsOptions

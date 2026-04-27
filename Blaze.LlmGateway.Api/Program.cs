@@ -13,6 +13,8 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+FoundryConfigurationAliases.AddFoundryEnvironmentAliases(builder.Configuration);
+
 builder.AddServiceDefaults();
 
 // Detect if running under Aspire and configure logging appropriately

@@ -307,6 +307,59 @@ public class ModelsIntegrationTests : IAsyncLifetime
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
+    [Fact]
+    public async Task CodebrewRouterModelDetails_ReturnsVirtualModelMetadata()
+    {
+        var response = await _client!.GetAsync("/v1/models/codebrewRouter");
+        var body = await response.Content.ReadAsStringAsync();
+        using var json = JsonDocument.Parse(body);
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("codebrewRouter", json.RootElement.GetProperty("id").GetString());
+        Assert.Equal("model", json.RootElement.GetProperty("object").GetString());
+        Assert.Equal("CodebrewRouter", json.RootElement.GetProperty("provider").GetString());
+        Assert.True(json.RootElement.GetProperty("enabled").GetBoolean());
+    }
+
+    [Fact]
+    public async Task CodebrewRouterModelDetails_ReturnsConfiguredFallbackRules()
+    {
+        var response = await _client!.GetAsync("/v1/models/codebrewRouter");
+        var body = await response.Content.ReadAsStringAsync();
+        using var json = JsonDocument.Parse(body);
+
+        var fallbackRules = json.RootElement.GetProperty("fallbackRules");
+        Assert.True(fallbackRules.GetArrayLength() > 0);
+
+        var generalRule = fallbackRules.EnumerateArray()
+            .Single(rule => string.Equals(rule.GetProperty("taskType").GetString(), "General", StringComparison.OrdinalIgnoreCase));
+        var providers = generalRule.GetProperty("providers")
+            .EnumerateArray()
+            .Select(provider => provider.GetString())
+            .ToArray();
+
+        Assert.Contains("AzureFoundry", providers);
+        Assert.Contains("FoundryLocal", providers);
+    }
+
+    [Fact]
+    public async Task CodebrewRouterModelDetails_ReturnsBackingProviderModels()
+    {
+        var response = await _client!.GetAsync("/v1/models/codebrewRouter");
+        var body = await response.Content.ReadAsStringAsync();
+        using var json = JsonDocument.Parse(body);
+
+        var backingModels = json.RootElement.GetProperty("backingModels");
+        Assert.True(backingModels.GetArrayLength() > 0);
+
+        var providers = backingModels.EnumerateArray()
+            .Select(model => model.GetProperty("provider").GetString())
+            .ToHashSet();
+
+        Assert.Contains("AzureFoundry", providers);
+        Assert.Contains("FoundryLocal", providers);
+    }
+
     private static void RemoveServicesByType(IServiceCollection services, Type serviceType)
     {
         var descriptors = services.Where(d => d.ServiceType == serviceType).ToList();
@@ -327,6 +380,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
         public Task<IReadOnlyList<AvailableModel>> GetAvailableModelsAsync(CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<AvailableModel>>([
                 new AvailableModel("gpt-4o", "AzureFoundry", "openai", "configured"),
+                new AvailableModel("Phi-4-mini-instruct-cuda-gpu:5", "FoundryLocal", "openai", "configured"),
                 new AvailableModel("gemma4:e4b", "OllamaLocal", "ollama", "live")
             ]);
 

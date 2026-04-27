@@ -69,5 +69,19 @@ public static class LiteLlmEndpoints
         .Produces<ModelsResponse>(StatusCodes.Status200OK, "application/json")
         .Produces(StatusCodes.Status500InternalServerError)
         .WithMetadata(new EndpointNameMetadata("list-models"));
+
+        app.MapGet("/v1/models/codebrewRouter", (
+            IModelCatalog modelCatalog,
+            IOptions<LlmGatewayOptions> options,
+            CancellationToken ct) =>
+            ModelsEndpoint.HandleCodebrewRouterAsync(modelCatalog, options, ct))
+        .WithName("GetCodebrewRouterModel")
+        .WithTags(DiscoveryTag)
+        .WithSummary("Get CodebrewRouter model details")
+        .WithDescription("Returns the virtual CodebrewRouter model, backing provider models currently visible to the gateway, and the configured provider fallback order by task type.")
+        .Produces<CodebrewRouterModelsResponse>(StatusCodes.Status200OK, "application/json")
+        .Produces<ErrorResponse>(StatusCodes.Status404NotFound, "application/json")
+        .Produces(StatusCodes.Status500InternalServerError)
+        .WithMetadata(new EndpointNameMetadata("get-codebrewrouter-model"));
     }
 }

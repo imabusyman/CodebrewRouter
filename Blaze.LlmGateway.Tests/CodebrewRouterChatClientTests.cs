@@ -60,11 +60,13 @@ public class CodebrewRouterChatClientTests
         IChatClient innerClient,
         ITaskClassifier classifier,
         IServiceProvider serviceProvider,
-        CodebrewRouterOptions? options = null)
+        CodebrewRouterOptions? options = null,
+        LlmGatewayOptions? gatewayOptions = null)
     {
         var opts = Options.Create(options ?? new CodebrewRouterOptions());
+        var gatewayOpts = Options.Create(gatewayOptions ?? new LlmGatewayOptions());
         var logger = new Mock<ILogger<CodebrewRouterChatClient>>().Object;
-        return new CodebrewRouterChatClient(innerClient, classifier, opts, serviceProvider, logger);
+        return new CodebrewRouterChatClient(innerClient, classifier, opts, gatewayOpts, serviceProvider, logger);
     }
 
     // Streaming helpers — static async iterators for test streams
@@ -199,6 +201,33 @@ public class CodebrewRouterChatClientTests
         var result = await router.GetResponseAsync(UserMessages("hello"));
 
         Assert.Equal("Secondary", result.Text);
+    }
+
+    [Fact]
+    public async Task SkipsIncompleteKnownProviderConfiguration_AndTriesConfiguredProvider()
+    {
+        var foundryLocal = ClientReturning("FoundryLocal");
+
+        var sp = new ServiceCollection()
+            .AddKeyedSingleton<IChatClient>("AzureFoundry", ClientReturning("AzureFoundry").Object)
+            .AddKeyedSingleton<IChatClient>("FoundryLocal", foundryLocal.Object)
+            .BuildServiceProvider();
+
+        var opts = new CodebrewRouterOptions
+        {
+            FallbackRules = new(StringComparer.OrdinalIgnoreCase) { ["General"] = ["AzureFoundry", "FoundryLocal"] }
+        };
+
+        var gatewayOptions = new LlmGatewayOptions();
+        gatewayOptions.Providers.AzureFoundry.Endpoint = "";
+        gatewayOptions.Providers.FoundryLocal.Endpoint = "http://127.0.0.1:58484";
+        gatewayOptions.Providers.FoundryLocal.Model = "Phi-4-mini-instruct-cuda-gpu:5";
+
+        var router = CreateRouter(new Mock<IChatClient>().Object, ClassifierFor(TaskType.General).Object, sp, opts, gatewayOptions);
+        var result = await router.GetResponseAsync(UserMessages("hello"));
+
+        Assert.Equal("FoundryLocal", result.Text);
+        foundryLocal.Verify(c => c.GetResponseAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

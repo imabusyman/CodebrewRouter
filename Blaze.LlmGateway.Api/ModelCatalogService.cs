@@ -52,7 +52,7 @@ public sealed class ModelCatalogService(
             models.AddRange(discoveredModels);
         }
 
-        // Add configured models (Foundry Local, CodebrewRouter virtual model)
+        // Add configured models that are available without live discovery.
         var configuredModels = GetConfiguredModels();
         models.AddRange(configuredModels);
 
@@ -66,7 +66,30 @@ public sealed class ModelCatalogService(
 
         AvailableModel?[] configuredModels =
         [
-            CreateConfiguredModel(providers.FoundryLocal.Model, "FoundryLocal", "openai", providers.FoundryLocal.Endpoint),
+            CreateConfiguredModel(
+                providers.AzureFoundry.Model,
+                "AzureFoundry",
+                "openai",
+                providers.AzureFoundry.Endpoint,
+                HasValue(providers.AzureFoundry.Endpoint) && HasValue(providers.AzureFoundry.Model)),
+            CreateConfiguredModel(
+                providers.FoundryLocal.Model,
+                "FoundryLocal",
+                "openai",
+                providers.FoundryLocal.Endpoint,
+                HasValue(providers.FoundryLocal.Endpoint) && HasValue(providers.FoundryLocal.Model)),
+            CreateConfiguredModel(
+                providers.GithubModels.Model,
+                "GithubModels",
+                "github",
+                providers.GithubModels.Endpoint,
+                HasValue(providers.GithubModels.Endpoint) && HasValue(providers.GithubModels.Model) && HasValue(providers.GithubModels.ApiKey)),
+            CreateConfiguredModel(
+                providers.OllamaLocal.Model,
+                "OllamaLocal",
+                "ollama",
+                providers.OllamaLocal.BaseUrl,
+                HasValue(providers.OllamaLocal.BaseUrl) && HasValue(providers.OllamaLocal.Model)),
             cbr.Enabled && !string.IsNullOrWhiteSpace(cbr.ModelId)
                 ? new AvailableModel(cbr.ModelId, "CodebrewRouter", "codebrew", "virtual")
                 : null
@@ -75,8 +98,15 @@ public sealed class ModelCatalogService(
         return configuredModels.Where(model => model is not null).Cast<AvailableModel>().ToArray();
     }
 
-    private static AvailableModel? CreateConfiguredModel(string model, string provider, string ownedBy, string? endpoint = null)
-        => string.IsNullOrWhiteSpace(model)
+    private static AvailableModel? CreateConfiguredModel(
+        string model,
+        string provider,
+        string ownedBy,
+        string? endpoint = null,
+        bool isConfigured = true)
+        => !isConfigured || string.IsNullOrWhiteSpace(model)
             ? null
             : new AvailableModel(model, provider, ownedBy, "configured", endpoint);
+
+    private static bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
 }

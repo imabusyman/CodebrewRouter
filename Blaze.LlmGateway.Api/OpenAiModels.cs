@@ -126,3 +126,27 @@ public record ModelInfo(
     string Provider,
     string? OwnedBy = null,
     string? Source = null);
+
+/// <summary>Detailed model information for the CodebrewRouter virtual model.</summary>
+public record CodebrewRouterModelsResponse(
+    string Id,
+    string Object,
+    string Provider,
+    string OwnedBy,
+    string Source,
+    bool Enabled,
+    IList<CodebrewRouterBackingModel> BackingModels,
+    IList<CodebrewRouterFallbackRule> FallbackRules);
+
+/// <summary>Concrete provider model that can back the CodebrewRouter virtual model.</summary>
+public record CodebrewRouterBackingModel(
+    string Id,
+    string Object,
+    string Provider,
+    string? OwnedBy = null,
+    string? Source = null);
+
+/// <summary>Ordered provider chain used by CodebrewRouter for a classified task type.</summary>
+public record CodebrewRouterFallbackRule(
+    string TaskType,
+    IList<string> Providers);

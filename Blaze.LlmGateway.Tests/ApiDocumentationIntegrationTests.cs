@@ -112,6 +112,7 @@ public sealed class ApiDocumentationIntegrationTests : IAsyncLifetime
         Assert.True(paths.TryGetProperty("/v1/chat/completions", out _));
         Assert.True(paths.TryGetProperty("/v1/completions", out _));
         Assert.True(paths.TryGetProperty("/v1/models", out _));
+        Assert.True(paths.TryGetProperty("/v1/models/codebrewRouter", out _));
     }
 
     [Fact]

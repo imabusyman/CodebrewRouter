@@ -24,10 +24,12 @@ public sealed class CodebrewRouterChatClient(
     IChatClient innerClient,
     ITaskClassifier taskClassifier,
     IOptions<CodebrewRouterOptions> options,
+    IOptions<LlmGatewayOptions> gatewayOptions,
     IServiceProvider serviceProvider,
     ILogger<CodebrewRouterChatClient> logger) : DelegatingChatClient(innerClient)
 {
     private CodebrewRouterOptions Options => options.Value;
+    private LlmGatewayOptions GatewayOptions => gatewayOptions.Value;
 
     // ── Non-streaming ─────────────────────────────────────────────────────────
 
@@ -153,8 +155,26 @@ public sealed class CodebrewRouterChatClient(
             : Options.FallbackRules.TryGetValue("General", out var general) ? general
             : [];
 
-        return (taskType, providers);
+        var configuredProviders = providers.Where(IsProviderConfigured).ToArray();
+
+        return (taskType, configuredProviders);
     }
+
+    private bool IsProviderConfigured(string providerKey)
+    {
+        var providers = GatewayOptions.Providers;
+
+        return providerKey switch
+        {
+            "AzureFoundry" => HasValue(providers.AzureFoundry.Endpoint) && HasValue(providers.AzureFoundry.Model),
+            "FoundryLocal" => HasValue(providers.FoundryLocal.Endpoint) && HasValue(providers.FoundryLocal.Model),
+            "GithubModels" => HasValue(providers.GithubModels.Endpoint) && HasValue(providers.GithubModels.Model) && HasValue(providers.GithubModels.ApiKey),
+            "OllamaLocal" => HasValue(providers.OllamaLocal.BaseUrl) && HasValue(providers.OllamaLocal.Model),
+            _ => true
+        };
+    }
+
+    private static bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
 
     /// <summary>
     /// Regular async method (NOT an iterator) that tries to obtain the first chunk of a

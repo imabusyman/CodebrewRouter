@@ -1,10 +1,11 @@
 // ============================================================
 // Blaze.LlmGateway AppHost — dev-time orchestration
 //
-// Dev providers (3 only):
+// Dev providers:
 //   • AzureFoundry   — Azure-hosted Foundry / Azure OpenAI
 //   • FoundryLocal   — on-device Foundry Local (OpenAI-compatible at localhost:5273)
 //   • GithubModels   — GitHub Models inference API
+//   • OllamaLocal    — LAN Ollama router/classifier at 192.168.16.12:11434
 //
 // Set these via user-secrets on the AppHost project:
 //
@@ -29,10 +30,26 @@ aspireLogger.LogInformation("🔵 Aspire Orchestration starting...");
 aspireLogger.LogDebug("  ├─ Environment: {Environment}", builder.Environment.EnvironmentName);
 aspireLogger.LogDebug("  ├─ Wiring resources and dependencies");
 
-// ── Parameter-based secrets (3 provider set) ──
+// ── Parameter-based secrets and non-secret provider settings ──
 var azureFoundryEndpoint = builder.AddParameter("azure-foundry-endpoint");
 var azureFoundryApiKey   = builder.AddParameter("azure-foundry-api-key", secret: true);
 var githubModelsApiKey   = builder.AddParameter("github-models-api-key", secret: true);
+var azureFoundryEndpointAlias = builder.Configuration["COPILOT_FOUNDRY_AZURE_BASE_URL"];
+var azureFoundryApiKeyAlias = builder.Configuration["COPILOT_AZURE_API_KEY"];
+var azureFoundryModelAlias = builder.Configuration["COPILOT_FOUNDRY_DEFAULT_MODEL"]
+    ?? builder.Configuration["COPILOT_FOUNDRY_GENERAL_MODEL"];
+var foundryLocalEndpoint = builder.Configuration.GetValue(
+    "LlmGateway:Providers:FoundryLocal:Endpoint",
+    "http://127.0.0.1:58484");
+var foundryLocalModel = builder.Configuration.GetValue(
+    "LlmGateway:Providers:FoundryLocal:Model",
+    "Phi-4-mini-instruct-cuda-gpu:5");
+var ollamaLocalBaseUrl = builder.Configuration.GetValue(
+    "LlmGateway:Providers:OllamaLocal:BaseUrl",
+    "http://192.168.16.12:11434");
+var ollamaLocalModel = builder.Configuration.GetValue(
+    "LlmGateway:Providers:OllamaLocal:Model",
+    "gemma4:e4b");
 
 // ── Azure Foundry Local (optional: requires Docker) ──
 // Uncomment once Docker Desktop + IContainerRuntime are available.
@@ -50,9 +67,34 @@ var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
     // .WithReference(foundryChat)  // Foundry Local requires Docker
     .WithReference(ghGpt4oMini)
     .WithReference(ghPhi4Mini)
-    .WithEnvironment("LlmGateway__Providers__AzureFoundry__Endpoint", azureFoundryEndpoint)
-    .WithEnvironment("LlmGateway__Providers__AzureFoundry__ApiKey",   azureFoundryApiKey)
-    .WithEnvironment("LlmGateway__Providers__GithubModels__ApiKey",   githubModelsApiKey);
+    .WithEnvironment("LlmGateway__Providers__GithubModels__ApiKey",   githubModelsApiKey)
+    .WithEnvironment("LlmGateway__Providers__FoundryLocal__Endpoint", foundryLocalEndpoint)
+    .WithEnvironment("LlmGateway__Providers__FoundryLocal__Model",    foundryLocalModel)
+    .WithEnvironment("LlmGateway__Providers__OllamaLocal__BaseUrl",   ollamaLocalBaseUrl)
+    .WithEnvironment("LlmGateway__Providers__OllamaLocal__Model",     ollamaLocalModel);
+
+if (string.IsNullOrWhiteSpace(azureFoundryEndpointAlias))
+{
+    api.WithEnvironment("LlmGateway__Providers__AzureFoundry__Endpoint", azureFoundryEndpoint);
+}
+else
+{
+    api.WithEnvironment("LlmGateway__Providers__AzureFoundry__Endpoint", azureFoundryEndpointAlias);
+}
+
+if (string.IsNullOrWhiteSpace(azureFoundryApiKeyAlias))
+{
+    api.WithEnvironment("LlmGateway__Providers__AzureFoundry__ApiKey", azureFoundryApiKey);
+}
+else
+{
+    api.WithEnvironment("LlmGateway__Providers__AzureFoundry__ApiKey", azureFoundryApiKeyAlias);
+}
+
+if (!string.IsNullOrWhiteSpace(azureFoundryModelAlias))
+{
+    api.WithEnvironment("LlmGateway__Providers__AzureFoundry__Model", azureFoundryModelAlias);
+}
 
 api.WithUrl("/", "Gateway Home")
    .WithUrls(ctx =>

@@ -143,6 +143,7 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredKeyedService<IChatClient>("AzureFoundry"),  // InnerClient hard fallback
                 sp.GetRequiredService<ITaskClassifier>(),
                 sp.GetRequiredService<IOptions<CodebrewRouterOptions>>(),
+                sp.GetRequiredService<IOptions<LlmGatewayOptions>>(),
                 sp,
                 sp.GetRequiredService<ILogger<CodebrewRouterChatClient>>()));
 
