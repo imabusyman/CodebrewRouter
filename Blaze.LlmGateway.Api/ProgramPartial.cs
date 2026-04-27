@@ -72,9 +72,10 @@ public static class LiteLlmEndpoints
 
         app.MapGet("/v1/models/codebrewRouter", (
             IModelCatalog modelCatalog,
+            IModelAvailabilityRegistry availabilityRegistry,
             IOptions<LlmGatewayOptions> options,
             CancellationToken ct) =>
-            ModelsEndpoint.HandleCodebrewRouterAsync(modelCatalog, options, ct))
+            ModelsEndpoint.HandleCodebrewRouterAsync(modelCatalog, availabilityRegistry, options, ct))
         .WithName("GetCodebrewRouterModel")
         .WithTags(DiscoveryTag)
         .WithSummary("Get CodebrewRouter model details")

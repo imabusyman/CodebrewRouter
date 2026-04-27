@@ -125,7 +125,9 @@ public record ModelInfo(
     string Object,
     string Provider,
     string? OwnedBy = null,
-    string? Source = null);
+    string? Source = null,
+    bool Enabled = true,
+    string? ErrorMessage = null);
 
 /// <summary>Detailed model information for the CodebrewRouter virtual model.</summary>
 public record CodebrewRouterModelsResponse(
@@ -135,6 +137,7 @@ public record CodebrewRouterModelsResponse(
     string OwnedBy,
     string Source,
     bool Enabled,
+    string? ErrorMessage,
     IList<CodebrewRouterBackingModel> BackingModels,
     IList<CodebrewRouterFallbackRule> FallbackRules);
 

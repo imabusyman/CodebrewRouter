@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Blaze.LlmGateway.Core;
 using Blaze.LlmGateway.Infrastructure.RoutingStrategies;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ public class LlmRoutingChatClient : DelegatingChatClient
     private readonly IServiceProvider _serviceProvider;
     private readonly IRoutingStrategy _routingStrategy;
     private readonly IFailoverStrategy _failoverStrategy;
+    private readonly IModelAvailabilityRegistry _availabilityRegistry;
     private readonly ILogger<LlmRoutingChatClient> _logger;
 
     public LlmRoutingChatClient(
@@ -23,11 +25,13 @@ public class LlmRoutingChatClient : DelegatingChatClient
         IServiceProvider serviceProvider,
         IRoutingStrategy routingStrategy,
         IFailoverStrategy failoverStrategy,
+        IModelAvailabilityRegistry availabilityRegistry,
         ILogger<LlmRoutingChatClient> logger) : base(innerClient)
     {
         _serviceProvider = serviceProvider;
         _routingStrategy = routingStrategy;
         _failoverStrategy = failoverStrategy;
+        _availabilityRegistry = availabilityRegistry;
         _logger = logger;
     }
     
@@ -118,6 +122,12 @@ public class LlmRoutingChatClient : DelegatingChatClient
         _logger.LogDebug("🔀 Routing strategy resolving...");
         var destination = await _routingStrategy.ResolveAsync(messages, cancellationToken);
         _logger.LogDebug("  ├─ Routing strategy decided: {Destination}", destination);
+
+        if (!_availabilityRegistry.IsProviderAvailable(destination.ToString()))
+        {
+            _logger.LogWarning("❌ Destination '{Destination}' is currently unavailable. Deferring to failover chain.", destination);
+            return new UnavailableChatClient($"Provider '{destination}' is currently unavailable.");
+        }
         
         var client = _serviceProvider.GetKeyedService<IChatClient>(destination.ToString());
 
@@ -140,6 +150,12 @@ public class LlmRoutingChatClient : DelegatingChatClient
         {
             try
             {
+                if (!_availabilityRegistry.IsProviderAvailable(fallback.ToString()))
+                {
+                    _logger.LogDebug("  ├─ Failover provider {Fallback} is marked unavailable; skipping", fallback);
+                    continue;
+                }
+
                 _logger.LogInformation("🔄 Trying failover provider: {Fallback}", fallback);
                 var fallbackClient = _serviceProvider.GetKeyedService<IChatClient>(fallback.ToString());
                 if (fallbackClient is null)
@@ -174,6 +190,12 @@ public class LlmRoutingChatClient : DelegatingChatClient
 
         foreach (var fallback in fallbackChain)
         {
+            if (!_availabilityRegistry.IsProviderAvailable(fallback.ToString()))
+            {
+                _logger.LogDebug("  ├─ Failover provider {Fallback} is marked unavailable; skipping", fallback);
+                continue;
+            }
+
             _logger.LogInformation("🔄 Trying failover provider (streaming): {Fallback}", fallback);
             var fallbackClient = _serviceProvider.GetKeyedService<IChatClient>(fallback.ToString());
             if (fallbackClient is null)
@@ -182,17 +204,46 @@ public class LlmRoutingChatClient : DelegatingChatClient
                 continue;
             }
 
-            int chunkCount = 0;
-            var responseStream = fallbackClient.GetStreamingResponseAsync(chatMessages, options, cancellationToken);
-
-            await foreach (var update in responseStream)
+            // First-chunk probe: catches connection-refused / retry-exhausted failures
+            // (e.g. System.ClientModel AggregateException from FoundryLocal at 127.0.0.1)
+            // before we commit to this provider. Without this probe, a raw AggregateException
+            // propagates through the async-iterator chain to the caller.
+            var probe = await TryGetFirstChunkAsync(fallbackClient, chatMessages, options, cancellationToken);
+            if (!probe.Success)
             {
-                chunkCount++;
-                yield return update;
+                _logger.LogWarning("  ├─ Failover provider {Fallback} failed before first chunk; trying next", fallback);
+                continue;
             }
 
-            _logger.LogInformation("✅ Failover streaming succeeded with {Fallback} ({ChunkCount} chunks)", fallback, chunkCount);
-            yield break;
+            _logger.LogInformation("✅ Failover streaming: first chunk received from {Fallback}", fallback);
+            yield return probe.FirstChunk;
+
+            var enumerator = probe.Enumerator!;
+            int chunkCount = 1;
+            while (true)
+            {
+                bool hasMore = false;
+                bool midStreamFailed = false;
+                try
+                {
+                    hasMore = await enumerator.MoveNextAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "  ├─ Failover provider {Fallback} failed mid-stream after {ChunkCount} chunks; ending", fallback, chunkCount);
+                    midStreamFailed = true;
+                }
+
+                if (midStreamFailed || !hasMore)
+                {
+                    await enumerator.DisposeAsync();
+                    _logger.LogInformation("✅ Failover streaming complete with {Fallback} ({ChunkCount} chunks)", fallback, chunkCount);
+                    yield break;
+                }
+
+                chunkCount++;
+                yield return enumerator.Current;
+            }
         }
 
         _logger.LogError("❌ All failover providers exhausted (streaming); throwing error");

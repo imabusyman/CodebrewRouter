@@ -6,4 +6,7 @@ public sealed record AvailableModel(
     string OwnedBy,
     string Source,
     string? Endpoint = null,
-    bool SupportsChat = true);
+    bool SupportsChat = true,
+    bool Enabled = true,
+    string? ErrorMessage = null,
+    DateTimeOffset? LastCheckedUtc = null);

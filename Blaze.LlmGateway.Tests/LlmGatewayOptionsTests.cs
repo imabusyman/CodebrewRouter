@@ -1,5 +1,6 @@
 using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.AI;
@@ -118,6 +119,32 @@ public class LlmGatewayOptionsTests
     }
 
     [Fact]
+    public async Task ModelCatalogService_SkipsUnavailableModels_FromAvailabilityRegistry()
+    {
+        var registry = new ModelAvailabilityRegistry();
+        var checkedAt = DateTimeOffset.UtcNow;
+        registry.UpdateSnapshot(
+            [
+                new AvailableModel("gpt-4o", "AzureFoundry", "openai", "configured", Enabled: true, LastCheckedUtc: checkedAt),
+                new AvailableModel("Phi-4-mini-instruct-cuda-gpu:5", "FoundryLocal", "openai", "configured", Enabled: false, ErrorMessage: "Connection refused", LastCheckedUtc: checkedAt),
+                new AvailableModel("codebrewRouter", "CodebrewRouter", "codebrew", "virtual", Enabled: true, LastCheckedUtc: checkedAt)
+            ],
+            [
+                new ProviderAvailabilitySnapshot("AzureFoundry", true, null, checkedAt),
+                new ProviderAvailabilitySnapshot("FoundryLocal", false, "Connection refused", checkedAt),
+                new ProviderAvailabilitySnapshot("CodebrewRouter", true, null, checkedAt)
+            ]);
+
+        var service = CreateModelCatalogService(new LlmGatewayOptions(), registry);
+
+        var models = await service.GetAvailableModelsAsync();
+
+        Assert.Contains(models, model => model.Provider == "AzureFoundry");
+        Assert.Contains(models, model => model.Provider == "CodebrewRouter");
+        Assert.DoesNotContain(models, model => model.Provider == "FoundryLocal");
+    }
+
+    [Fact]
     public void AddLlmProviders_UsesFoundryResponsesClient_WhenResponsesEndpointIsConfigured()
     {
         var services = new ServiceCollection();
@@ -144,15 +171,56 @@ public class LlmGatewayOptionsTests
         Assert.NotNull(chatClient);
     }
 
-    private static ModelCatalogService CreateModelCatalogService(LlmGatewayOptions options)
+    private static ModelCatalogService CreateModelCatalogService(LlmGatewayOptions options, ModelAvailabilityRegistry? registry = null)
     {
-        var discovery = new AzureFoundryModelDiscovery(
-            new HttpClient(),
-            new Mock<ILogger<AzureFoundryModelDiscovery>>().Object);
-
         return new ModelCatalogService(
-            Options.Create(options),
-            discovery,
+            registry ?? CreateRegistryFromOptions(options),
             new Mock<ILogger<ModelCatalogService>>().Object);
+    }
+
+    private static ModelAvailabilityRegistry CreateRegistryFromOptions(LlmGatewayOptions options)
+    {
+        var registry = new ModelAvailabilityRegistry();
+        var checkedAt = DateTimeOffset.UtcNow;
+        var models = new List<AvailableModel>();
+        var providers = new List<ProviderAvailabilitySnapshot>();
+
+        if (!string.IsNullOrWhiteSpace(options.Providers.AzureFoundry.Endpoint) &&
+            !string.IsNullOrWhiteSpace(options.Providers.AzureFoundry.Model))
+        {
+            models.Add(new AvailableModel(options.Providers.AzureFoundry.Model, "AzureFoundry", "openai", "configured", options.Providers.AzureFoundry.Endpoint, Enabled: true, LastCheckedUtc: checkedAt));
+            providers.Add(new ProviderAvailabilitySnapshot("AzureFoundry", true, null, checkedAt));
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.Providers.FoundryLocal.Endpoint) &&
+            !string.IsNullOrWhiteSpace(options.Providers.FoundryLocal.Model))
+        {
+            models.Add(new AvailableModel(options.Providers.FoundryLocal.Model, "FoundryLocal", "openai", "configured", options.Providers.FoundryLocal.Endpoint, Enabled: true, LastCheckedUtc: checkedAt));
+            providers.Add(new ProviderAvailabilitySnapshot("FoundryLocal", true, null, checkedAt));
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.Providers.GithubModels.Endpoint) &&
+            !string.IsNullOrWhiteSpace(options.Providers.GithubModels.Model) &&
+            !string.IsNullOrWhiteSpace(options.Providers.GithubModels.ApiKey))
+        {
+            models.Add(new AvailableModel(options.Providers.GithubModels.Model, "GithubModels", "github", "configured", options.Providers.GithubModels.Endpoint, Enabled: true, LastCheckedUtc: checkedAt));
+            providers.Add(new ProviderAvailabilitySnapshot("GithubModels", true, null, checkedAt));
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.Providers.OllamaLocal.BaseUrl) &&
+            !string.IsNullOrWhiteSpace(options.Providers.OllamaLocal.Model))
+        {
+            models.Add(new AvailableModel(options.Providers.OllamaLocal.Model, "OllamaLocal", "ollama", "configured", options.Providers.OllamaLocal.BaseUrl, Enabled: true, LastCheckedUtc: checkedAt));
+            providers.Add(new ProviderAvailabilitySnapshot("OllamaLocal", true, null, checkedAt));
+        }
+
+        if (options.CodebrewRouter.Enabled && !string.IsNullOrWhiteSpace(options.CodebrewRouter.ModelId))
+        {
+            models.Add(new AvailableModel(options.CodebrewRouter.ModelId, "CodebrewRouter", "codebrew", "virtual", Enabled: true, LastCheckedUtc: checkedAt));
+            providers.Add(new ProviderAvailabilitySnapshot("CodebrewRouter", true, null, checkedAt));
+        }
+
+        registry.UpdateSnapshot(models, providers);
+        return registry;
     }
 }

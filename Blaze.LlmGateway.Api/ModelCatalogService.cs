@@ -6,15 +6,14 @@ using Microsoft.Extensions.Options;
 namespace Blaze.LlmGateway.Api;
 
 public sealed class ModelCatalogService(
-    IOptions<LlmGatewayOptions> options,
-    AzureFoundryModelDiscovery modelDiscovery,
+    IModelAvailabilityRegistry availabilityRegistry,
     ILogger<ModelCatalogService> logger) : IModelCatalog
 {
     public async Task<IReadOnlyList<AvailableModel>> GetAvailableModelsAsync(CancellationToken cancellationToken = default)
     {
-        var configured = await GetDiscoveredAndConfiguredModelsAsync(cancellationToken);
+        await Task.CompletedTask;
 
-        IReadOnlyList<AvailableModel> result = configured
+        IReadOnlyList<AvailableModel> result = availabilityRegistry.GetModels()
             .GroupBy(model => model.Id, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .OrderBy(model => model.Provider, StringComparer.OrdinalIgnoreCase)
@@ -31,82 +30,12 @@ public sealed class ModelCatalogService(
             return null;
         }
 
-        var models = await GetAvailableModelsAsync(cancellationToken);
-        return models.FirstOrDefault(model => string.Equals(model.Id, modelId, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private async Task<IReadOnlyList<AvailableModel>> GetDiscoveredAndConfiguredModelsAsync(CancellationToken cancellationToken)
-    {
-        var models = new List<AvailableModel>();
-
-        // Query Azure Foundry for dynamically available models
-        var providers = options.Value.Providers;
-        var azureFoundryOpts = providers.AzureFoundry;
-        if (!string.IsNullOrWhiteSpace(azureFoundryOpts.Endpoint))
+        var model = availabilityRegistry.FindModel(modelId);
+        if (model is not null)
         {
-            logger.LogDebug("Querying Azure Foundry for available models");
-            var discoveredModels = await modelDiscovery.DiscoverModelsAsync(
-                azureFoundryOpts.Endpoint,
-                azureFoundryOpts.ApiKey,
-                cancellationToken);
-            models.AddRange(discoveredModels);
+            logger.LogDebug("Resolved available model {ModelId} from availability registry", modelId);
         }
 
-        // Add configured models that are available without live discovery.
-        var configuredModels = GetConfiguredModels();
-        models.AddRange(configuredModels);
-
-        return models;
+        return model;
     }
-
-    private IReadOnlyList<AvailableModel> GetConfiguredModels()
-    {
-        var providers = options.Value.Providers;
-        var cbr = options.Value.CodebrewRouter;
-
-        AvailableModel?[] configuredModels =
-        [
-            CreateConfiguredModel(
-                providers.AzureFoundry.Model,
-                "AzureFoundry",
-                "openai",
-                providers.AzureFoundry.Endpoint,
-                HasValue(providers.AzureFoundry.Endpoint) && HasValue(providers.AzureFoundry.Model)),
-            CreateConfiguredModel(
-                providers.FoundryLocal.Model,
-                "FoundryLocal",
-                "openai",
-                providers.FoundryLocal.Endpoint,
-                HasValue(providers.FoundryLocal.Endpoint) && HasValue(providers.FoundryLocal.Model)),
-            CreateConfiguredModel(
-                providers.GithubModels.Model,
-                "GithubModels",
-                "github",
-                providers.GithubModels.Endpoint,
-                HasValue(providers.GithubModels.Endpoint) && HasValue(providers.GithubModels.Model) && HasValue(providers.GithubModels.ApiKey)),
-            CreateConfiguredModel(
-                providers.OllamaLocal.Model,
-                "OllamaLocal",
-                "ollama",
-                providers.OllamaLocal.BaseUrl,
-                HasValue(providers.OllamaLocal.BaseUrl) && HasValue(providers.OllamaLocal.Model)),
-            cbr.Enabled && !string.IsNullOrWhiteSpace(cbr.ModelId)
-                ? new AvailableModel(cbr.ModelId, "CodebrewRouter", "codebrew", "virtual")
-                : null
-        ];
-
-        return configuredModels.Where(model => model is not null).Cast<AvailableModel>().ToArray();
-    }
-
-    private static AvailableModel? CreateConfiguredModel(
-        string model,
-        string provider,
-        string ownedBy,
-        string? endpoint = null,
-        bool isConfigured = true)
-        => !isConfigured || string.IsNullOrWhiteSpace(model)
-            ? null
-            : new AvailableModel(model, provider, ownedBy, "configured", endpoint);
-
-    private static bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
 }

@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
+using Blaze.LlmGateway.Core.ModelCatalog;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.ClientModel;
 using System.Text.Json;
 using Blaze.LlmGateway.Infrastructure;
 
@@ -20,6 +23,8 @@ public static class CompletionsEndpoint
         HttpContext httpContext,
         CancellationToken ct)
     {
+        var availabilityRegistry = httpContext.RequestServices.GetRequiredService<IModelAvailabilityRegistry>();
+
         // Validate required fields
         if (string.IsNullOrWhiteSpace(req.Model))
             return Results.BadRequest(new
@@ -59,12 +64,12 @@ public static class CompletionsEndpoint
         if (req.Stream)
         {
             // Streaming response via SSE
-            return await HandleStreamingAsync(httpContext, messages, options, req.Model, chatClient, modelSelectionResolver, ct);
+            return await HandleStreamingAsync(httpContext, messages, options, req.Model, chatClient, modelSelectionResolver, availabilityRegistry, ct);
         }
         else
         {
             // Non-streaming response
-            return await HandleNonStreamingAsync(messages, options, req.Model, chatClient, modelSelectionResolver, ct);
+            return await HandleNonStreamingAsync(messages, options, req.Model, chatClient, modelSelectionResolver, availabilityRegistry, ct);
         }
     }
 
@@ -75,6 +80,7 @@ public static class CompletionsEndpoint
         string model,
         IChatClient chatClient,
         IModelSelectionResolver modelSelectionResolver,
+        IModelAvailabilityRegistry availabilityRegistry,
         CancellationToken ct)
     {
         httpContext.Response.ContentType = "text/event-stream";
@@ -87,7 +93,7 @@ public static class CompletionsEndpoint
 
         try
         {
-            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, ct);
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, availabilityRegistry, ct);
             await foreach (var update in selectedClient.GetStreamingResponseAsync(messages, options, ct))
             {
                 var choice = new { text = update.Text, index = 0, finish_reason = (string?)null };
@@ -112,11 +118,12 @@ public static class CompletionsEndpoint
         string model,
         IChatClient chatClient,
         IModelSelectionResolver modelSelectionResolver,
+        IModelAvailabilityRegistry availabilityRegistry,
         CancellationToken ct)
     {
         try
         {
-            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, ct);
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, availabilityRegistry, ct);
             var completion = await selectedClient.GetResponseAsync(messages, options, ct);
 
             var id = $"cmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
@@ -137,9 +144,9 @@ public static class CompletionsEndpoint
 
             return Results.Json(result);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return Results.StatusCode(500);
+            return CreateProviderErrorResult(model, ex);
         }
     }
 
@@ -147,8 +154,50 @@ public static class CompletionsEndpoint
         string model,
         IChatClient defaultClient,
         IModelSelectionResolver modelSelectionResolver,
+        IModelAvailabilityRegistry availabilityRegistry,
         CancellationToken cancellationToken)
     {
-        return await modelSelectionResolver.ResolveAsync(model, cancellationToken) ?? defaultClient;
+        var selectedClient = await modelSelectionResolver.ResolveAsync(model, cancellationToken);
+        if (selectedClient is not null)
+        {
+            return selectedClient;
+        }
+
+        var unavailableModel = availabilityRegistry.FindModel(model, includeUnavailable: true);
+        if (unavailableModel is { Enabled: false })
+        {
+            throw new InvalidOperationException(
+                string.IsNullOrWhiteSpace(unavailableModel.ErrorMessage)
+                    ? $"Model '{model}' is currently unavailable."
+                    : $"Model '{model}' is currently unavailable: {unavailableModel.ErrorMessage}");
+        }
+
+        return defaultClient;
+    }
+
+    private static IResult CreateProviderErrorResult(string model, Exception? exception)
+    {
+        var statusCode = exception is ClientResultException { Status: 404 }
+            ? StatusCodes.Status404NotFound
+            : exception is InvalidOperationException invalidOperation &&
+              invalidOperation.Message.Contains("currently unavailable", StringComparison.OrdinalIgnoreCase)
+                ? StatusCodes.Status503ServiceUnavailable
+                : StatusCodes.Status502BadGateway;
+        var code = statusCode switch
+        {
+            StatusCodes.Status404NotFound => "model_not_found",
+            StatusCodes.Status503ServiceUnavailable => "model_unavailable",
+            _ => "provider_error"
+        };
+        var message = statusCode switch
+        {
+            StatusCodes.Status404NotFound => $"Model or deployment '{model}' was not found by the configured provider.",
+            StatusCodes.Status503ServiceUnavailable => exception?.Message ?? $"Model '{model}' is currently unavailable.",
+            _ => $"The configured provider failed while processing model '{model}'."
+        };
+
+        return Results.Json(
+            new ErrorResponse(new ErrorDetail(message, "provider_error", code)),
+            statusCode: statusCode);
     }
 }

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Core.TaskRouting;
 using Blaze.LlmGateway.Infrastructure.TaskClassification;
 using Microsoft.Extensions.AI;
@@ -25,6 +26,7 @@ public sealed class CodebrewRouterChatClient(
     ITaskClassifier taskClassifier,
     IOptions<CodebrewRouterOptions> options,
     IOptions<LlmGatewayOptions> gatewayOptions,
+    IModelAvailabilityRegistry availabilityRegistry,
     IServiceProvider serviceProvider,
     ILogger<CodebrewRouterChatClient> logger) : DelegatingChatClient(innerClient)
 {
@@ -134,10 +136,43 @@ public sealed class CodebrewRouterChatClient(
             }
         }
 
-        // All providers failed — fall back to InnerClient stream.
-        logger.LogWarning("⚠️ codebrewRouter all streaming providers exhausted for {TaskType} — using InnerClient", taskType);
-        await foreach (var update in InnerClient.GetStreamingResponseAsync(messageList, options, cancellationToken))
-            yield return update;
+        // All providers failed — probe InnerClient before committing to its stream.
+        // This prevents raw System.ClientModel AggregateExceptions (e.g. FoundryLocal
+        // connection-refused on 127.0.0.1) from leaking when InnerClient is the same
+        // class of unavailable provider.
+        logger.LogWarning("⚠️ codebrewRouter all streaming providers exhausted for {TaskType} — probing InnerClient", taskType);
+        var innerResult = await TryGetFirstChunkAsync(InnerClient, messageList, options, cancellationToken);
+        if (!innerResult.Success)
+        {
+            logger.LogError("❌ codebrewRouter InnerClient also failed for {TaskType} — all providers exhausted", taskType);
+            throw new InvalidOperationException(
+                $"All streaming providers (including InnerClient fallback) failed for task {taskType}.");
+        }
+
+        yield return innerResult.FirstChunk;
+        var innerEnumerator = innerResult.Enumerator!;
+        while (true)
+        {
+            bool hasMore = false;
+            bool streamFailed = false;
+            try
+            {
+                hasMore = await innerEnumerator.MoveNextAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "⚠️ codebrewRouter InnerClient mid-stream failure for {TaskType} — ending stream", taskType);
+                streamFailed = true;
+            }
+
+            if (streamFailed || !hasMore)
+            {
+                await innerEnumerator.DisposeAsync();
+                yield break;
+            }
+
+            yield return innerEnumerator.Current;
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -166,10 +201,10 @@ public sealed class CodebrewRouterChatClient(
 
         return providerKey switch
         {
-            "AzureFoundry" => HasValue(providers.AzureFoundry.Endpoint) && HasValue(providers.AzureFoundry.Model),
-            "FoundryLocal" => HasValue(providers.FoundryLocal.Endpoint) && HasValue(providers.FoundryLocal.Model),
-            "GithubModels" => HasValue(providers.GithubModels.Endpoint) && HasValue(providers.GithubModels.Model) && HasValue(providers.GithubModels.ApiKey),
-            "OllamaLocal" => HasValue(providers.OllamaLocal.BaseUrl) && HasValue(providers.OllamaLocal.Model),
+            "AzureFoundry" => HasValue(providers.AzureFoundry.Endpoint) && HasValue(providers.AzureFoundry.Model) && availabilityRegistry.IsProviderAvailable("AzureFoundry"),
+            "FoundryLocal" => HasValue(providers.FoundryLocal.Endpoint) && HasValue(providers.FoundryLocal.Model) && availabilityRegistry.IsProviderAvailable("FoundryLocal"),
+            "GithubModels" => HasValue(providers.GithubModels.Endpoint) && HasValue(providers.GithubModels.Model) && HasValue(providers.GithubModels.ApiKey) && availabilityRegistry.IsProviderAvailable("GithubModels"),
+            "OllamaLocal" => HasValue(providers.OllamaLocal.BaseUrl) && HasValue(providers.OllamaLocal.Model) && availabilityRegistry.IsProviderAvailable("OllamaLocal"),
             _ => true
         };
     }

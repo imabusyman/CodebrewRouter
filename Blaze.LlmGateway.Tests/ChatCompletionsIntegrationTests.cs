@@ -396,9 +396,20 @@ public class ChatCompletionsIntegrationTests : IAsyncLifetime
 
     private static DefaultHttpContext CreateHttpContext()
     {
+        var registry = new ModelAvailabilityRegistry();
+        var checkedAt = DateTimeOffset.UtcNow;
+        registry.UpdateSnapshot(
+            [
+                new AvailableModel("gpt-4", "AzureFoundry", "openai", "configured", Enabled: true, LastCheckedUtc: checkedAt)
+            ],
+            [
+                new ProviderAvailabilitySnapshot("AzureFoundry", true, null, checkedAt)
+            ]);
+
         var context = new DefaultHttpContext();
         context.RequestServices = new ServiceCollection()
             .AddLogging()
+            .AddSingleton<IModelAvailabilityRegistry>(registry)
             .BuildServiceProvider();
         context.Response.Body = new MemoryStream();
         return context;

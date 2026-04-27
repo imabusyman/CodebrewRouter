@@ -7,6 +7,7 @@ public class LlmGatewayOptions
     public ProvidersOptions Providers { get; set; } = new();
     public RoutingOptions Routing { get; set; } = new();
     public CodebrewRouterOptions CodebrewRouter { get; set; } = new();
+    public ModelAvailabilityOptions Availability { get; set; } = new();
 }
 
 public class ProvidersOptions
@@ -60,4 +61,11 @@ public class RoutingOptions
         { "AzureFoundry", ["FoundryLocal"] },
         { "FoundryLocal", ["AzureFoundry"] }
     };
+}
+
+public class ModelAvailabilityOptions
+{
+    public bool Enabled { get; set; } = true;
+    public int StartupProbeTimeoutSeconds { get; set; } = 5;
+    public int RefreshIntervalSeconds { get; set; } = 60;
 }

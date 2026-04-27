@@ -56,6 +56,7 @@ public class AzureFoundryIntegrationTests : IAsyncLifetime
                             [new ChatMessage(ChatRole.Assistant, "Azure gpt-4o response: This is a powerful model optimized for complex reasoning.")]));
 
                     services.AddSingleton(mockChatClient.Object);
+                    services.AddKeyedSingleton<IChatClient>("AzureFoundry", mockChatClient.Object);
                 });
             });
 

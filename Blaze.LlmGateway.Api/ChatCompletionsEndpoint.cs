@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.ClientModel;
 using System.Text.Json;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Infrastructure;
 
 namespace Blaze.LlmGateway.Api;
@@ -22,6 +24,7 @@ public static class ChatCompletionsEndpoint
         CancellationToken ct)
     {
         var logger = httpContext.RequestServices.GetService(typeof(ILogger<ChatCompletionRequest>)) as ILogger<ChatCompletionRequest>;
+        var availabilityRegistry = httpContext.RequestServices.GetRequiredService<IModelAvailabilityRegistry>();
         
         logger?.LogInformation("📨 Chat completion request received - Model: {Model}, Stream: {Stream}, Messages: {MessageCount}", 
             req.Model, req.Stream, req.Messages?.Count ?? 0);
@@ -88,13 +91,13 @@ public static class ChatCompletionsEndpoint
         {
             logger?.LogInformation("  └─ Using STREAMING mode");
             // Streaming response via SSE
-            return await HandleStreamingAsync(httpContext, messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, logger, ct);
+            return await HandleStreamingAsync(httpContext, messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
         }
         else
         {
             logger?.LogInformation("  └─ Using NON-STREAMING mode");
             // Non-streaming response
-            return await HandleNonStreamingAsync(messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, logger, ct);
+            return await HandleNonStreamingAsync(messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
         }
     }
 
@@ -106,6 +109,7 @@ public static class ChatCompletionsEndpoint
         IList<Tool>? tools,
         IChatClient chatClient,
         IModelSelectionResolver modelSelectionResolver,
+        IModelAvailabilityRegistry availabilityRegistry,
         ILogger<ChatCompletionRequest>? logger,
         CancellationToken ct)
     {
@@ -127,7 +131,7 @@ public static class ChatCompletionsEndpoint
                 }
             }
 
-            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
             var firstChunk = await TryGetFirstStreamingUpdateAsync(selectedClient, messages, options, ct);
             if (!firstChunk.Success)
             {
@@ -229,6 +233,7 @@ public static class ChatCompletionsEndpoint
         IList<Tool>? tools,
         IChatClient chatClient,
         IModelSelectionResolver modelSelectionResolver,
+        IModelAvailabilityRegistry availabilityRegistry,
         ILogger<ChatCompletionRequest>? logger,
         CancellationToken ct)
     {
@@ -248,7 +253,7 @@ public static class ChatCompletionsEndpoint
 
             logger?.LogInformation("⏳ Getting non-streaming response from chat client");
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, logger, ct);
+            var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
             
             var completion = await selectedClient.GetResponseAsync(messages, options, ct);
             
@@ -332,11 +337,22 @@ public static class ChatCompletionsEndpoint
     {
         var statusCode = exception is ClientResultException { Status: 404 }
             ? StatusCodes.Status404NotFound
-            : StatusCodes.Status502BadGateway;
-        var code = statusCode == StatusCodes.Status404NotFound ? "model_not_found" : "provider_error";
-        var message = statusCode == StatusCodes.Status404NotFound
-            ? $"Model or deployment '{model}' was not found by the configured provider."
-            : $"The configured provider failed while processing model '{model}'.";
+            : exception is InvalidOperationException invalidOperation &&
+              invalidOperation.Message.Contains("currently unavailable", StringComparison.OrdinalIgnoreCase)
+                ? StatusCodes.Status503ServiceUnavailable
+                : StatusCodes.Status502BadGateway;
+        var code = statusCode switch
+        {
+            StatusCodes.Status404NotFound => "model_not_found",
+            StatusCodes.Status503ServiceUnavailable => "model_unavailable",
+            _ => "provider_error"
+        };
+        var message = statusCode switch
+        {
+            StatusCodes.Status404NotFound => $"Model or deployment '{model}' was not found by the configured provider.",
+            StatusCodes.Status503ServiceUnavailable => exception?.Message ?? $"Model '{model}' is currently unavailable.",
+            _ => $"The configured provider failed while processing model '{model}'."
+        };
 
         return Results.Json(
             new ErrorResponse(new ErrorDetail(message, "provider_error", code)),
@@ -356,6 +372,7 @@ public static class ChatCompletionsEndpoint
         string model,
         IChatClient defaultClient,
         IModelSelectionResolver modelSelectionResolver,
+        IModelAvailabilityRegistry availabilityRegistry,
         ILogger<ChatCompletionRequest>? logger,
         CancellationToken cancellationToken)
     {
@@ -364,6 +381,15 @@ public static class ChatCompletionsEndpoint
         {
             logger?.LogInformation("🎛️ Honoring selected model {Model}", model);
             return selectedClient;
+        }
+
+        var unavailableModel = availabilityRegistry.FindModel(model, includeUnavailable: true);
+        if (unavailableModel is { Enabled: false })
+        {
+            throw new InvalidOperationException(
+                string.IsNullOrWhiteSpace(unavailableModel.ErrorMessage)
+                    ? $"Model '{model}' is currently unavailable."
+                    : $"Model '{model}' is currently unavailable: {unavailableModel.ErrorMessage}");
         }
 
         logger?.LogInformation("🧭 No direct client match for model {Model}; using routed default client", model);

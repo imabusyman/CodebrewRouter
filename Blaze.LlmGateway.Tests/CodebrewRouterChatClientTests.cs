@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Core.TaskRouting;
 using Blaze.LlmGateway.Infrastructure;
 using Blaze.LlmGateway.Infrastructure.TaskClassification;
@@ -61,12 +64,34 @@ public class CodebrewRouterChatClientTests
         ITaskClassifier classifier,
         IServiceProvider serviceProvider,
         CodebrewRouterOptions? options = null,
-        LlmGatewayOptions? gatewayOptions = null)
+        LlmGatewayOptions? gatewayOptions = null,
+        IModelAvailabilityRegistry? availabilityRegistry = null)
     {
         var opts = Options.Create(options ?? new CodebrewRouterOptions());
         var gatewayOpts = Options.Create(gatewayOptions ?? new LlmGatewayOptions());
         var logger = new Mock<ILogger<CodebrewRouterChatClient>>().Object;
-        return new CodebrewRouterChatClient(innerClient, classifier, opts, gatewayOpts, serviceProvider, logger);
+        return new CodebrewRouterChatClient(innerClient, classifier, opts, gatewayOpts, availabilityRegistry ?? CreateAvailabilityRegistry(), serviceProvider, logger);
+    }
+
+    private static IModelAvailabilityRegistry CreateAvailabilityRegistry(params (string Provider, bool Enabled, string? Error)[] providers)
+    {
+        var checkedAt = DateTimeOffset.UtcNow;
+        var registry = new ModelAvailabilityRegistry();
+        var providerStates = providers.Length == 0
+            ? new[]
+            {
+                ("AzureFoundry", true, (string?)null),
+                ("FoundryLocal", true, (string?)null),
+                ("GithubModels", true, (string?)null),
+                ("OllamaLocal", true, (string?)null),
+                ("CodebrewRouter", true, (string?)null)
+            }
+            : providers;
+
+        registry.UpdateSnapshot(
+            [],
+            providerStates.Select(provider => new ProviderAvailabilitySnapshot(provider.Item1, provider.Item2, provider.Item3, checkedAt)));
+        return registry;
     }
 
     // Streaming helpers — static async iterators for test streams
@@ -86,6 +111,32 @@ public class CodebrewRouterChatClientTests
 #pragma warning disable CS0162
         yield break;
 #pragma warning restore CS0162
+    }
+
+    /// <summary>
+    /// Simulates the AggregateException thrown by System.ClientModel retry policy
+    /// when a provider (e.g. FoundryLocal at 127.0.0.1:58484) is unreachable.
+    /// </summary>
+    private static async IAsyncEnumerable<ChatResponseUpdate> FoundryLocalConnectionRefusedStream()
+    {
+        await Task.Yield();
+        throw new AggregateException(
+            "One or more errors occurred. (Connection refused (127.0.0.1:58484))",
+            new System.Net.Http.HttpRequestException("Connection refused (127.0.0.1:58484)"));
+#pragma warning disable CS0162
+        yield break;
+#pragma warning restore CS0162
+    }
+
+    private static Mock<IChatClient> ClientStreamingThrowsAggregateException()
+    {
+        var mock = new Mock<IChatClient>();
+        mock.Setup(c => c.GetStreamingResponseAsync(
+                It.IsAny<IEnumerable<ChatMessage>>(),
+                It.IsAny<ChatOptions>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(FoundryLocalConnectionRefusedStream());
+        return mock;
     }
 
     private static Mock<IChatClient> ClientStreaming(params ChatResponseUpdate[] updates)
@@ -349,11 +400,12 @@ public class CodebrewRouterChatClientTests
             It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    // ── Streaming: all providers fail → InnerClient ───────────────────────────
+    // ── Streaming: all providers fail → InnerClient (probe-first) ────────────
 
     [Fact]
     public async Task Streaming_FallsBackToInnerClient_WhenAllProvidersFail()
     {
+        // InnerClient returns a valid stream — probe succeeds, chunks are yielded normally
         var innerUpdate = new ChatResponseUpdate(ChatRole.Assistant, "InnerStream");
 
         var failingProvider = ClientStreamingThrows();
@@ -385,5 +437,79 @@ public class CodebrewRouterChatClientTests
             It.IsAny<IEnumerable<ChatMessage>>(),
             It.IsAny<ChatOptions>(),
             It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // ── Streaming: InnerClient fallback probed, not blindly streamed ─────────
+
+    /// <summary>
+    /// Regression test: when ALL providers in the fallback chain fail AND InnerClient also
+    /// throws a raw AggregateException (e.g. FoundryLocal connection-refused from
+    /// System.ClientModel retry policy), the router must surface a controlled
+    /// InvalidOperationException — not leak the raw AggregateException to the caller.
+    /// </summary>
+    [Fact]
+    public async Task Streaming_ThrowsControlledError_WhenAllProvidersAndInnerClientFail()
+    {
+        // P1 throws AggregateException (FoundryLocal-style connection refused)
+        var failingProvider = ClientStreamingThrowsAggregateException();
+
+        // InnerClient (AzureFoundry) also throws — simulates all endpoints down
+        var failingInnerClient = ClientStreamingThrowsAggregateException();
+
+        var sp = new ServiceCollection()
+            .AddKeyedSingleton<IChatClient>("P1", failingProvider.Object)
+            .BuildServiceProvider();
+
+        var opts = new CodebrewRouterOptions
+        {
+            FallbackRules = new(StringComparer.OrdinalIgnoreCase) { ["General"] = ["P1"] }
+        };
+
+        var router = CreateRouter(failingInnerClient.Object, ClassifierFor(TaskType.General).Object, sp, opts);
+
+        // Act & Assert — must throw controlled InvalidOperationException, not raw AggregateException
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var _ in router.GetStreamingResponseAsync(UserMessages("hello"))) { }
+        });
+
+        Assert.Contains("All streaming providers", ex.Message);
+        Assert.IsNotType<AggregateException>(ex);
+    }
+
+    [Fact]
+    public async Task SkipsUnavailableProvider_WhenAvailabilityRegistryMarksItDown()
+    {
+        var githubModels = ClientReturning("GitHub fallback");
+        var azureFoundry = ClientReturning("Azure should be skipped");
+
+        var sp = new ServiceCollection()
+            .AddKeyedSingleton<IChatClient>("AzureFoundry", azureFoundry.Object)
+            .AddKeyedSingleton<IChatClient>("GithubModels", githubModels.Object)
+            .BuildServiceProvider();
+
+        var router = CreateRouter(
+            new Mock<IChatClient>().Object,
+            ClassifierFor(TaskType.General).Object,
+            sp,
+            gatewayOptions: new LlmGatewayOptions
+            {
+                Providers =
+                {
+                    AzureFoundry = { Endpoint = "https://test.openai.azure.com/", Model = "gpt-4o", ApiKey = "test-key" },
+                    GithubModels = { Endpoint = "https://models.inference.ai.azure.com", Model = "gpt-4o-mini", ApiKey = "test-github-pat" }
+                }
+            },
+            availabilityRegistry: CreateAvailabilityRegistry(
+                ("AzureFoundry", false, "offline"),
+                ("GithubModels", true, null)));
+
+        var result = await router.GetResponseAsync(UserMessages("hello"));
+
+        Assert.Equal("GitHub fallback", result.Text);
+        azureFoundry.Verify(c => c.GetResponseAsync(
+            It.IsAny<IEnumerable<ChatMessage>>(),
+            It.IsAny<ChatOptions>(),
+            It.IsAny<CancellationToken>()), Times.Never);
     }
 }

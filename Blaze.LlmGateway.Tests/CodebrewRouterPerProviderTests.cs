@@ -1,7 +1,10 @@
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Core.TaskRouting;
+using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Infrastructure;
 using Blaze.LlmGateway.Infrastructure.TaskClassification;
+using System.Linq;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -77,12 +80,34 @@ public class CodebrewRouterPerProviderTests
         ITaskClassifier classifier,
         IServiceProvider serviceProvider,
         CodebrewRouterOptions? routerOptions = null,
-        LlmGatewayOptions? gatewayOptions = null)
+        LlmGatewayOptions? gatewayOptions = null,
+        IModelAvailabilityRegistry? availabilityRegistry = null)
     {
         var opts        = Options.Create(routerOptions ?? new CodebrewRouterOptions());
         var gatewayOpts = Options.Create(gatewayOptions ?? new LlmGatewayOptions());
         var logger      = new Mock<ILogger<CodebrewRouterChatClient>>().Object;
-        return new CodebrewRouterChatClient(innerClient, classifier, opts, gatewayOpts, serviceProvider, logger);
+        return new CodebrewRouterChatClient(innerClient, classifier, opts, gatewayOpts, availabilityRegistry ?? CreateAvailabilityRegistry(), serviceProvider, logger);
+    }
+
+    private static IModelAvailabilityRegistry CreateAvailabilityRegistry(params (string Provider, bool Enabled, string? Error)[] providers)
+    {
+        var checkedAt = DateTimeOffset.UtcNow;
+        var registry = new ModelAvailabilityRegistry();
+        var providerStates = providers.Length == 0
+            ? new[]
+            {
+                ("AzureFoundry", true, (string?)null),
+                ("FoundryLocal", true, (string?)null),
+                ("GithubModels", true, (string?)null),
+                ("OllamaLocal", true, (string?)null),
+                ("CodebrewRouter", true, (string?)null)
+            }
+            : providers;
+
+        registry.UpdateSnapshot(
+            [],
+            providerStates.Select(provider => new ProviderAvailabilitySnapshot(provider.Item1, provider.Item2, provider.Item3, checkedAt)));
+        return registry;
     }
 
     /// <summary>

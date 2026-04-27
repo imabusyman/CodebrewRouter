@@ -41,6 +41,9 @@ builder.Services.Configure<LlmGatewayOptions>(
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<AzureFoundryModelDiscovery>();
+builder.Services.AddSingleton<ModelAvailabilityRegistry>();
+builder.Services.AddSingleton<IModelAvailabilityRegistry>(sp => sp.GetRequiredService<ModelAvailabilityRegistry>());
+builder.Services.AddHostedService<ModelAvailabilityHeartbeatService>();
 builder.Services.AddSingleton<IModelCatalog, ModelCatalogService>();
 
 // MCP integration disabled (microsoft-learn server connection issues)

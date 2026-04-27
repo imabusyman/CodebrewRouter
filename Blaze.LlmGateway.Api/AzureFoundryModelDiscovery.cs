@@ -18,6 +18,12 @@ public sealed class AzureFoundryModelDiscovery(
         string endpoint,
         string? apiKey = null,
         CancellationToken cancellationToken = default)
+        => (await TryDiscoverModelsAsync(endpoint, apiKey, cancellationToken)).Models;
+
+    public async Task<ModelDiscoveryResult> TryDiscoverModelsAsync(
+        string endpoint,
+        string? apiKey = null,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -41,7 +47,7 @@ public sealed class AzureFoundryModelDiscovery(
             if (modelsData?.Data == null)
             {
                 logger.LogWarning("Azure Foundry returned empty models list");
-                return [];
+                return new ModelDiscoveryResult(true, []);
             }
 
             var models = modelsData.Data
@@ -55,14 +61,18 @@ public sealed class AzureFoundryModelDiscovery(
                 .ToList();
 
             logger.LogInformation("Discovered {Count} models from Azure Foundry", models.Count);
-            return models;
+            return new ModelDiscoveryResult(true, models);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to discover models from Azure Foundry at {Endpoint}", endpoint);
-            return [];
+            return new ModelDiscoveryResult(false, []);
         }
     }
+
+    public sealed record ModelDiscoveryResult(
+        bool Success,
+        IReadOnlyList<AvailableModel> Models);
 
     /// <summary>Internal DTO for Azure Foundry model list response</summary>
     private sealed record ModelsListResponse(

@@ -19,7 +19,9 @@ public static class ModelsEndpoint
                 Object: "model",
                 Provider: model.Provider,
                 OwnedBy: model.OwnedBy,
-                Source: model.Source))
+                Source: model.Source,
+                Enabled: model.Enabled,
+                ErrorMessage: model.ErrorMessage))
             .ToList();
 
         var response = new ModelsResponse(
@@ -33,6 +35,7 @@ public static class ModelsEndpoint
     /// <summary>Handle CodebrewRouter-specific model listing requests.</summary>
     public static async Task<IResult> HandleCodebrewRouterAsync(
         IModelCatalog modelCatalog,
+        IModelAvailabilityRegistry availabilityRegistry,
         IOptions<LlmGatewayOptions> options,
         CancellationToken cancellationToken)
     {
@@ -49,6 +52,7 @@ public static class ModelsEndpoint
         var providerKeys = codebrewRouter.FallbackRules.Values
             .SelectMany(providers => providers)
             .Where(provider => !string.IsNullOrWhiteSpace(provider))
+            .Where(availabilityRegistry.IsProviderAvailable)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -64,12 +68,14 @@ public static class ModelsEndpoint
             .ThenBy(model => model.Id, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+        var availability = availabilityRegistry.FindModel(codebrewRouter.ModelId, includeUnavailable: true);
         var fallbackRules = codebrewRouter.FallbackRules
             .OrderBy(rule => rule.Key, StringComparer.OrdinalIgnoreCase)
             .Select(rule => new CodebrewRouterFallbackRule(
                 TaskType: rule.Key,
                 Providers: rule.Value
                     .Where(provider => !string.IsNullOrWhiteSpace(provider))
+                    .Where(availabilityRegistry.IsProviderAvailable)
                     .ToArray()))
             .ToList();
 
@@ -79,7 +85,8 @@ public static class ModelsEndpoint
             Provider: "CodebrewRouter",
             OwnedBy: "codebrew",
             Source: "virtual",
-            Enabled: true,
+            Enabled: availability?.Enabled ?? false,
+            ErrorMessage: availability?.ErrorMessage,
             BackingModels: backingModels,
             FallbackRules: fallbackRules);
 

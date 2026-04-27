@@ -3,7 +3,7 @@
 //
 // Dev providers:
 //   • AzureFoundry   — Azure-hosted Foundry / Azure OpenAI
-//   • FoundryLocal   — on-device Foundry Local (OpenAI-compatible at localhost:5273)
+//   • FoundryLocal   — on-device Foundry Local (OpenAI-compatible at localhost:58484)
 //   • GithubModels   — GitHub Models inference API
 //   • OllamaLocal    — LAN Ollama router/classifier at 192.168.16.12:11434
 //
@@ -12,6 +12,19 @@
 //   dotnet user-secrets set "Parameters:azure-foundry-endpoint" "<https://your-resource.openai.azure.com/>" --project Blaze.LlmGateway.AppHost
 //   dotnet user-secrets set "Parameters:azure-foundry-api-key"  "<key>" --project Blaze.LlmGateway.AppHost
 //   dotnet user-secrets set "Parameters:github-models-api-key"  "<PAT with models:read>" --project Blaze.LlmGateway.AppHost
+//
+// FoundryLocal endpoint override:
+//   dotnet user-secrets set "LlmGateway:Providers:FoundryLocal:Endpoint" "http://<host-or-lan-ip>:58484" --project Blaze.LlmGateway.AppHost
+//   The Foundry Local SDK binds via WebService.Urls (default "127.0.0.1:0" = random port).
+//   For LAN access, start/bind Foundry Local on a non-loopback URL such as http://0.0.0.0:58484,
+//   then point the gateway endpoint at the reachable host/IP.
+//
+// Gateway API network binding (LAN access):
+//   By default the gateway listens only on localhost (http://localhost:5022).
+//   To expose the gateway to your local network (e.g. for OpenWebUI on another machine):
+//   dotnet user-secrets set "Gateway:ListenUrls" "http://0.0.0.0:5022" --project Blaze.LlmGateway.AppHost
+//   or in appsettings.Development.json: { "Gateway": { "ListenUrls": "http://0.0.0.0:5022" } }
+//   This sets ASPNETCORE_URLS on the API project — do NOT hardcode a private LAN IP.
 //
 // Dev playgrounds (toggle via appsettings / env):
 //   DevUI:OpenWebUI        (default true)  — generic OpenAI-compatible chat UI (requires Docker)
@@ -54,6 +67,11 @@ var ollamaLocalBaseUrl = builder.Configuration.GetValue(
 var ollamaLocalModel = builder.Configuration.GetValue(
     "LlmGateway:Providers:OllamaLocal:Model",
     "gemma4:e4b");
+
+// Gateway API listen URLs — controls which interfaces/ports Kestrel binds to.
+// Leave empty to use Kestrel defaults (localhost only from launchSettings.json).
+// Set to "http://0.0.0.0:5022" to expose the gateway on all LAN interfaces.
+var gatewayListenUrls = builder.Configuration.GetValue<string?>("Gateway:ListenUrls");
 
 // ── Azure Foundry Local (optional: requires Docker) ──
 // Uncomment once Docker Desktop + IContainerRuntime are available.
@@ -104,6 +122,13 @@ else
 if (!string.IsNullOrWhiteSpace(azureFoundryModelAlias))
 {
     api.WithEnvironment("LlmGateway__Providers__AzureFoundry__Model", azureFoundryModelAlias);
+}
+
+// Override Kestrel bind URLs when Gateway:ListenUrls is set (e.g. for LAN exposure)
+if (!string.IsNullOrWhiteSpace(gatewayListenUrls))
+{
+    api.WithEnvironment("ASPNETCORE_URLS", gatewayListenUrls);
+    aspireLogger.LogInformation("  ├─ Gateway listen URLs overridden: {Urls}", gatewayListenUrls);
 }
 
 api.WithUrl("/", "Gateway Home")
