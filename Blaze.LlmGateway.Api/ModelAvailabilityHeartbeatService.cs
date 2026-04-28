@@ -306,7 +306,18 @@ public sealed class ModelAvailabilityHeartbeatService(
         catch (Exception ex)
         {
             var error = GetErrorMessage(ex);
-            logger.LogWarning(ex, "Availability probe failed for {Provider}: {Error}", providerKey, error);
+            if (IsOptionalLocalProvider(providerKey))
+            {
+                logger.LogInformation(
+                    "Availability probe failed for optional local provider {Provider}: {Error}",
+                    providerKey,
+                    error);
+            }
+            else
+            {
+                logger.LogWarning(ex, "Availability probe failed for {Provider}: {Error}", providerKey, error);
+            }
+
             providers.Add(new ProviderAvailabilitySnapshot(providerKey, false, error, checkedAt));
             models.Add(new AvailableModel(
                 modelId,
@@ -399,4 +410,7 @@ public sealed class ModelAvailabilityHeartbeatService(
     private static bool IsOllamaLocalConfigured(OllamaLocalOptions options)
         => !string.IsNullOrWhiteSpace(options.BaseUrl) &&
            !string.IsNullOrWhiteSpace(options.Model);
+
+    private static bool IsOptionalLocalProvider(string providerKey)
+        => string.Equals(providerKey, "FoundryLocal", StringComparison.OrdinalIgnoreCase);
 }

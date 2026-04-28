@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using System.Data.Common;
 
 namespace Blaze.LlmGateway.Api;
 
@@ -76,24 +75,53 @@ public static class FoundryConfigurationAliases
             return;
         }
 
-        var builder = new DbConnectionStringBuilder
-        {
-            ConnectionString = connectionString
-        };
+        // Aspire's Foundry deployment connection string is "Endpoint=...;Key=...;Deployment=...;Model=...".
+        // DbConnectionStringBuilder cannot parse this because the URI contains colons; parse manually.
+        var properties = ParseConnectionString(connectionString);
 
-        AddConnectionStringAliasIfMissing(
-            configuration,
+        // When the AppHost emits an Aspire-managed connection string, it always wins
+        // over any stale value in appsettings.json — the Foundry Local port is dynamic
+        // and only the AppHost knows the correct value for the current run.
+        AddConnectionStringAliasOverride(
             aliases,
-            builder,
+            properties,
             "LlmGateway:Providers:FoundryLocal:Endpoint",
             "Endpoint");
 
-        AddConnectionStringAliasIfMissing(
-            configuration,
+        AddConnectionStringAliasOverride(
             aliases,
-            builder,
+            properties,
             "LlmGateway:Providers:FoundryLocal:ApiKey",
-            "ApiKey");
+            "ApiKey",
+            "Key");
+
+        AddConnectionStringAliasOverride(
+            aliases,
+            properties,
+            "LlmGateway:Providers:FoundryLocal:Model",
+            "Model",
+            "DeploymentId");
+    }
+
+    private static Dictionary<string, string> ParseConnectionString(string connectionString)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var segment in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var equalsIndex = segment.IndexOf('=');
+            if (equalsIndex <= 0)
+            {
+                continue;
+            }
+
+            var key = segment[..equalsIndex].Trim();
+            var value = segment[(equalsIndex + 1)..].Trim();
+            if (key.Length > 0 && value.Length > 0)
+            {
+                result[key] = value;
+            }
+        }
+        return result;
     }
 
     private static string? GetFirstConnectionString(IConfiguration configuration, params string[] names)
@@ -117,20 +145,40 @@ public static class FoundryConfigurationAliases
     private static void AddConnectionStringAliasIfMissing(
         IConfiguration configuration,
         IDictionary<string, string?> aliases,
-        DbConnectionStringBuilder connectionString,
+        Dictionary<string, string> connectionString,
         string targetKey,
-        string connectionStringKey)
+        params string[] connectionStringKeys)
     {
         if (!string.IsNullOrWhiteSpace(configuration[targetKey]))
         {
             return;
         }
 
-        if (connectionString.TryGetValue(connectionStringKey, out var value) &&
-            value is string stringValue &&
-            !string.IsNullOrWhiteSpace(stringValue))
+        foreach (var connectionStringKey in connectionStringKeys)
         {
-            aliases[targetKey] = stringValue;
+            if (connectionString.TryGetValue(connectionStringKey, out var value) &&
+                !string.IsNullOrWhiteSpace(value))
+            {
+                aliases[targetKey] = value;
+                return;
+            }
+        }
+    }
+
+    private static void AddConnectionStringAliasOverride(
+        IDictionary<string, string?> aliases,
+        Dictionary<string, string> connectionString,
+        string targetKey,
+        params string[] connectionStringKeys)
+    {
+        foreach (var connectionStringKey in connectionStringKeys)
+        {
+            if (connectionString.TryGetValue(connectionStringKey, out var value) &&
+                !string.IsNullOrWhiteSpace(value))
+            {
+                aliases[targetKey] = value;
+                return;
+            }
         }
     }
 }

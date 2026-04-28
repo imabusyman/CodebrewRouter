@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OllamaSharp;
+using OpenAI;
 using System.ClientModel;
 
 namespace Blaze.LlmGateway.Infrastructure;
@@ -40,13 +41,15 @@ public static class InfrastructureServiceExtensions
                 .AsBuilder().UseFunctionInvocation().Build();
         });
 
-        // FoundryLocal — Azure Foundry Local (OpenAI-compatible at localhost)
+        // FoundryLocal — Azure Foundry Local exposes an OpenAI-compatible endpoint at /v1.
+        // Use OpenAIClient (NOT AzureOpenAIClient) so request paths stay OpenAI-shaped.
         services.AddKeyedSingleton<IChatClient>("FoundryLocal", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.FoundryLocal;
-            var client = new AzureOpenAIClient(
-                new Uri(opts.Endpoint),
-                new AzureKeyCredential(opts.ApiKey));
+            var apiKey = string.IsNullOrWhiteSpace(opts.ApiKey) ? "notneeded" : opts.ApiKey;
+            var client = new OpenAIClient(
+                new ApiKeyCredential(apiKey),
+                new OpenAIClientOptions { Endpoint = new Uri(opts.Endpoint) });
             return client.GetChatClient(opts.Model).AsIChatClient()
                 .AsBuilder().UseFunctionInvocation().Build();
         });

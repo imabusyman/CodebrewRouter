@@ -1,4 +1,6 @@
 using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Foundry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,12 +32,15 @@ public static class AppHostComposition
         var azureFoundryApiKeyAlias = builder.Configuration["COPILOT_AZURE_API_KEY"];
         var azureFoundryModelAlias = builder.Configuration["COPILOT_FOUNDRY_DEFAULT_MODEL"]
             ?? builder.Configuration["COPILOT_FOUNDRY_GENERAL_MODEL"];
-        var foundryLocalEndpoint = builder.Configuration.GetValue(
-            "LlmGateway:Providers:FoundryLocal:Endpoint",
-            "http://127.0.0.1:58484");
-        var foundryLocalApiKey = builder.Configuration.GetValue(
-            "LlmGateway:Providers:FoundryLocal:ApiKey",
-            "notneeded");
+        var foundryLocalModel = builder.Configuration.GetValue(
+            "LlmGateway:Providers:FoundryLocal:Model",
+            "phi-4-mini");
+        var foundryLocalModelVersion = builder.Configuration.GetValue(
+            "LlmGateway:Providers:FoundryLocal:ModelVersion",
+            "1");
+        var foundryLocalModelFormat = builder.Configuration.GetValue(
+            "LlmGateway:Providers:FoundryLocal:ModelFormat",
+            "Microsoft");
         var ollamaLocalBaseUrl = builder.Configuration.GetValue(
             "LlmGateway:Providers:OllamaLocal:BaseUrl",
             "http://192.168.16.12:11434");
@@ -48,13 +53,36 @@ public static class AppHostComposition
         // Set to "http://0.0.0.0:5022" to expose the gateway on all LAN interfaces.
         var gatewayListenUrls = builder.Configuration.GetValue<string?>("Gateway:ListenUrls");
 
-        // ── Foundry Local — connection resource injected into the API ─────────
-        // The currently available Aspire Foundry hosting preview breaks AppHost startup
-        // in this repo's package train. Keep the AppHost-driven reference/injection model
-        // by exposing Foundry Local as a connection-string resource instead.
-        var foundryLocalChat = builder.AddConnectionString(
+        // ── Foundry Local — Aspire-managed dev-only resource ──
+        // Uses Aspire.Hosting.Foundry's RunAsFoundryLocal() to start Foundry Local
+        // (https://aspire.dev/integrations/cloud/azure/azure-ai-foundry/azure-ai-foundry-get-started/).
+        // Requires the Foundry Local CLI installed on the dev machine.
+        var foundry = builder.AddFoundry("foundryLocal")
+            .RunAsFoundryLocal();
+
+        var foundryLocalChat = foundry.AddDeployment(
             "foundryLocalChat",
-            ReferenceExpression.Create($"Endpoint={foundryLocalEndpoint};ApiKey={foundryLocalApiKey}"));
+            foundryLocalModel,
+            foundryLocalModelVersion,
+            foundryLocalModelFormat);
+
+        // Aspire.Hosting.Foundry 13.3.0-preview.1 has a race in RunAsFoundryLocal()'s
+        // WithInitializer: it samples FoundryLocalManager.IsServiceRunning immediately after
+        // StartServiceAsync(), which can return false while the service is still warming up.
+        // The parent foundryLocal resource then sticks in FailedToStart even though the
+        // service comes up moments later and the deployment downloads + loads the model
+        // successfully. Promote the parent to Running once the deployment reports Running.
+        builder.Eventing.Subscribe<ResourceReadyEvent>(
+            foundryLocalChat.Resource,
+            async (evt, ct) =>
+            {
+                var rns = evt.Services.GetRequiredService<ResourceNotificationService>();
+                await rns.PublishUpdateAsync(
+                    foundry.Resource,
+                    state => state.State?.Text == KnownResourceStates.FailedToStart
+                        ? state with { State = new ResourceStateSnapshot(KnownResourceStates.Running, KnownResourceStateStyles.Success) }
+                        : state).ConfigureAwait(false);
+            });
 
         // ── GitHub Models ──
         var ghGpt4oMini = builder.AddGitHubModel("gh-gpt4o-mini", "openai/gpt-4o-mini")
@@ -64,6 +92,7 @@ public static class AppHostComposition
 
         // ── API project — wire all resources ──
         var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
+            .WaitFor(foundryLocalChat)
             .WithReference(foundryLocalChat)
             .WithReference(ghGpt4oMini)
             .WithReference(ghPhi4Mini)

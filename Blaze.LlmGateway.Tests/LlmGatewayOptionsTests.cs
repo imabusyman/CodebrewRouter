@@ -111,6 +111,36 @@ public class LlmGatewayOptionsTests
     }
 
     [Fact]
+    public void FoundryConfigurationAliases_MapsAspireFoundryLocalConnectionString_OverridesAppsettings()
+    {
+        // Exact format Aspire's Foundry Local resource emits.
+        const string connectionString = "Endpoint=http://127.0.0.1:55428/v1;Key=OPENAI_API_KEY;Deployment=foundryLocalChat;Model=Phi-4-mini-instruct-cuda-gpu:5";
+
+        Environment.SetEnvironmentVariable("ConnectionStrings__foundryLocalChat", connectionString);
+
+        try
+        {
+            var configuration = new ConfigurationManager();
+            // Pre-populate stale appsettings-like values; Aspire connection string must override them.
+            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["LlmGateway:Providers:FoundryLocal:Endpoint"] = "http://127.0.0.1:58484",
+                ["LlmGateway:Providers:FoundryLocal:Model"] = "stale-model",
+            });
+
+            Blaze.LlmGateway.Api.FoundryConfigurationAliases.AddFoundryEnvironmentAliases(configuration);
+
+            Assert.Equal("http://127.0.0.1:55428/v1", configuration["LlmGateway:Providers:FoundryLocal:Endpoint"]);
+            Assert.Equal("OPENAI_API_KEY", configuration["LlmGateway:Providers:FoundryLocal:ApiKey"]);
+            Assert.Equal("Phi-4-mini-instruct-cuda-gpu:5", configuration["LlmGateway:Providers:FoundryLocal:Model"]);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("ConnectionStrings__foundryLocalChat", null);
+        }
+    }
+
+    [Fact]
     public async Task ModelCatalogService_IncludesConfiguredCodebrewBackingProviders()
     {
         var options = new LlmGatewayOptions

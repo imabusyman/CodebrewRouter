@@ -12,6 +12,7 @@ namespace Blaze.LlmGateway.Tests;
 /// <summary>
 /// Integration tests for the FoundryLocal (Phi-4-mini-instruct) provider.
 /// All tests are mocked — no running Foundry Local instance is required.
+/// In the main local-dev path, AppHost starts the dev-only Foundry Local helper automatically.
 /// Real integration tests are included as [Fact(Skip = ...)] stubs with setup instructions.
 /// </summary>
 public class FoundryLocalIntegrationTests : IAsyncLifetime
