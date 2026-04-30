@@ -120,7 +120,15 @@ public static class InfrastructureServiceExtensions
 
     public static IServiceCollection AddLlmInfrastructure(this IServiceCollection services)
     {
-        services.AddSingleton<IModelSelectionResolver, ModelSelectionResolver>();
+        services.AddSingleton<IModelSelectionResolver>(sp => new ModelSelectionResolver(
+            sp,
+            sp.GetRequiredService<IModelCatalog>(),
+            sp.GetRequiredService<IOptions<LlmGatewayOptions>>(),
+            sp.GetRequiredService<TokenCounting.ITokenCounter>(),
+            sp.GetRequiredService<IContextCompactor>(),
+            sp.GetRequiredService<IOptions<ContextSizingOptions>>(),
+            sp.GetRequiredService<ILogger<ModelSelectionResolver>>(),
+            sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>()));
         services.AddSingleton<KeywordRoutingStrategy>();
         services.AddSingleton<IRoutingStrategy>(sp =>
         {

@@ -1,7 +1,12 @@
+using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
+using Blaze.LlmGateway.Infrastructure.ContextHandling;
+using Blaze.LlmGateway.Infrastructure.ModelCatalog;
+using Blaze.LlmGateway.Infrastructure.TokenCounting;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OllamaSharp;
 
 namespace Blaze.LlmGateway.Infrastructure;
@@ -9,7 +14,12 @@ namespace Blaze.LlmGateway.Infrastructure;
 public sealed class ModelSelectionResolver(
     IServiceProvider serviceProvider,
     IModelCatalog modelCatalog,
-    ILogger<ModelSelectionResolver> logger) : IModelSelectionResolver
+    IOptions<LlmGatewayOptions> gatewayOptions,
+    ITokenCounter tokenCounter,
+    IContextCompactor compactor,
+    IOptions<ContextSizingOptions> sizingOptions,
+    ILogger<ModelSelectionResolver> logger,
+    ILogger<ContextSizingChatClient> sizingLogger) : IModelSelectionResolver
 {
     public async Task<IChatClient?> ResolveAsync(string modelId, CancellationToken cancellationToken = default)
     {
@@ -23,9 +33,18 @@ public sealed class ModelSelectionResolver(
             !string.IsNullOrWhiteSpace(model.Endpoint))
         {
             logger.LogDebug("Resolving dynamic Ollama client for model {ModelId}", modelId);
+
+            // Resolve context window: curated table → provider config fallback
+            var ollamaOpts = gatewayOptions.Value.Providers.OllamaLocal;
+            var (curatedWindow, _) = ModelContextLimits.Lookup(modelId);
+            var contextWindow  = curatedWindow ?? ollamaOpts.MaxContextTokens;
+            var reservedOutput = ollamaOpts.ReservedOutputTokens;
+
             return ((IChatClient)new OllamaApiClient(new Uri(model.Endpoint), model.Id))
                 .AsBuilder()
                 .UseFunctionInvocation()
+                .UseContextSizing(tokenCounter, compactor, sizingOptions,
+                    contextWindow, reservedOutput, modelId, sizingLogger)
                 .Build();
         }
 
