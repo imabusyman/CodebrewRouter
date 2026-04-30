@@ -9,6 +9,7 @@ public class LlmGatewayOptions
     public CodebrewRouterOptions CodebrewRouter { get; set; } = new();
     public ModelAvailabilityOptions Availability { get; set; } = new();
     public PromptCleanupOptions PromptCleanup { get; set; } = new();
+    public ContextSizingOptions ContextSizing { get; set; } = new();
 }
 
 public class ProvidersOptions
