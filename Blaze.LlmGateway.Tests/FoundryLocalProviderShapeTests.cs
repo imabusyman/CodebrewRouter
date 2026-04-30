@@ -2,9 +2,13 @@ using System.Net;
 using System.Text;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Infrastructure;
+using Blaze.LlmGateway.Infrastructure.ContextHandling;
+using Blaze.LlmGateway.Infrastructure.TokenCounting;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Moq;
 using Xunit;
 
 namespace Blaze.LlmGateway.Tests;
@@ -70,6 +74,9 @@ public sealed class FoundryLocalProviderShapeTests
         services.Configure<LlmGatewayOptions>(config.GetSection("LlmGateway"));
         services.AddLogging();
         services.AddLlmProviders();
+        services.AddSingleton(new Mock<ITokenCounter>().Object);
+        services.AddSingleton(new Mock<IContextCompactor>().Object);
+        services.AddSingleton(Options.Create(new ContextSizingOptions()));
 
         await using var provider = services.BuildServiceProvider();
         var client = provider.GetRequiredKeyedService<IChatClient>("FoundryLocal");

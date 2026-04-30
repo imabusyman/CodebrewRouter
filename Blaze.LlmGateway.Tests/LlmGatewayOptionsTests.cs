@@ -2,6 +2,8 @@ using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Infrastructure;
+using Blaze.LlmGateway.Infrastructure.ContextHandling;
+using Blaze.LlmGateway.Infrastructure.TokenCounting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -215,6 +217,9 @@ public class LlmGatewayOptionsTests
             }
         }));
         services.AddLlmProviders();
+        services.AddSingleton(new Mock<ITokenCounter>().Object);
+        services.AddSingleton(new Mock<IContextCompactor>().Object);
+        services.AddSingleton(Options.Create(new ContextSizingOptions()));
 
         using var provider = services.BuildServiceProvider();
 

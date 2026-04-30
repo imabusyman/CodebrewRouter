@@ -26,6 +26,11 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("AzureFoundry", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.AzureFoundry;
+            var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
+            var compactor     = sp.GetRequiredService<IContextCompactor>();
+            var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();
+            var sizingLogger  = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
+
             if (!string.IsNullOrWhiteSpace(opts.ResponsesEndpoint))
             {
                 return new FoundryResponsesChatClient(
@@ -33,6 +38,8 @@ public static class InfrastructureServiceExtensions
                         sp.GetRequiredService<ILogger<FoundryResponsesChatClient>>())
                     .AsBuilder()
                     .UseFunctionInvocation()
+                    .UseContextSizing(tokenCounter, compactor, sizingOptions,
+                        opts.MaxContextTokens, opts.ReservedOutputTokens, opts.Model, sizingLogger)
                     .Build();
             }
 
@@ -40,7 +47,11 @@ public static class InfrastructureServiceExtensions
                 ? new AzureOpenAIClient(new Uri(opts.Endpoint), new DefaultAzureCredential())
                 : new AzureOpenAIClient(new Uri(opts.Endpoint), new AzureKeyCredential(opts.ApiKey));
             return azureClient.GetChatClient(opts.Model).AsIChatClient()
-                .AsBuilder().UseFunctionInvocation().Build();
+                .AsBuilder()
+                .UseFunctionInvocation()
+                .UseContextSizing(tokenCounter, compactor, sizingOptions,
+                    opts.MaxContextTokens, opts.ReservedOutputTokens, opts.Model, sizingLogger)
+                .Build();
         });
 
         // FoundryLocal — Azure Foundry Local exposes an OpenAI-compatible endpoint at /v1.
@@ -48,20 +59,36 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("FoundryLocal", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.FoundryLocal;
+            var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
+            var compactor     = sp.GetRequiredService<IContextCompactor>();
+            var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();
+            var sizingLogger  = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
             var apiKey = string.IsNullOrWhiteSpace(opts.ApiKey) ? "notneeded" : opts.ApiKey;
             var client = new OpenAIClient(
                 new ApiKeyCredential(apiKey),
                 new OpenAIClientOptions { Endpoint = new Uri(opts.Endpoint) });
             return client.GetChatClient(opts.Model).AsIChatClient()
-                .AsBuilder().UseFunctionInvocation().Build();
+                .AsBuilder()
+                .UseFunctionInvocation()
+                .UseContextSizing(tokenCounter, compactor, sizingOptions,
+                    opts.MaxContextTokens, opts.ReservedOutputTokens, opts.Model, sizingLogger)
+                .Build();
         });
 
         // OllamaLocal — local Ollama container (backup for remote server)
         services.AddKeyedSingleton<IChatClient>("OllamaLocal", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaLocal;
+            var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
+            var compactor     = sp.GetRequiredService<IContextCompactor>();
+            var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();
+            var sizingLogger  = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
             return ((IChatClient)new OllamaApiClient(new Uri(opts.BaseUrl), opts.Model))
-                .AsBuilder().UseFunctionInvocation().Build();
+                .AsBuilder()
+                .UseFunctionInvocation()
+                .UseContextSizing(tokenCounter, compactor, sizingOptions,
+                    opts.MaxContextTokens, opts.ReservedOutputTokens, opts.Model, sizingLogger)
+                .Build();
         });
 
         // GithubModels — GitHub Models API (OpenAI-compatible endpoint)
@@ -72,12 +99,20 @@ public static class InfrastructureServiceExtensions
             {
                 throw new InvalidOperationException("GithubModels requires API key in LlmGateway:Providers:GithubModels:ApiKey");
             }
+            var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
+            var compactor     = sp.GetRequiredService<IContextCompactor>();
+            var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();
+            var sizingLogger  = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
             // GitHub Models uses OpenAI-compatible API; use AzureOpenAIClient with custom endpoint
             var client = new AzureOpenAIClient(
                 new Uri(opts.Endpoint),
                 new AzureKeyCredential(opts.ApiKey));
             return client.GetChatClient(opts.Model).AsIChatClient()
-                .AsBuilder().UseFunctionInvocation().Build();
+                .AsBuilder()
+                .UseFunctionInvocation()
+                .UseContextSizing(tokenCounter, compactor, sizingOptions,
+                    opts.MaxContextTokens, opts.ReservedOutputTokens, opts.Model, sizingLogger)
+                .Build();
         });
 
         return services;
@@ -157,6 +192,9 @@ public static class InfrastructureServiceExtensions
 
         services.AddSingleton<IOptions<ContextCompactionOptions>>(sp =>
             Options.Create(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.CodebrewRouter.ContextCompaction));
+
+        services.AddSingleton<IOptions<ContextSizingOptions>>(sp =>
+            Options.Create(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.ContextSizing));
 
         // Prompt cleaner: Gemma-backed when feature enabled AND OllamaLocal keyed client
         // is registered; otherwise no-op. The cleaner is invoked by CodebrewRouterChatClient
