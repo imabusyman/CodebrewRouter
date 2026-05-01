@@ -168,6 +168,9 @@ public static class AppHostComposition
                ctx.Urls.RemoveAll(u => !seen.Add($"{u.DisplayText ?? string.Empty}|{u.Url}"));
            });
 
+        api.WaitFor(ghGpt4oMini);
+        api.WaitFor(ghPhi4Mini);
+
         var enableOpenWebUi = builder.Configuration.GetValue("DevUI:OpenWebUI", defaultValue: true);
 
         if (enableOpenWebUi)
