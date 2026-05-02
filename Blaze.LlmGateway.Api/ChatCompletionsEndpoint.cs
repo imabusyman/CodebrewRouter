@@ -24,11 +24,12 @@ public static class ChatCompletionsEndpoint
         HttpContext httpContext,
         CancellationToken ct)
     {
+        var handler_sw = System.Diagnostics.Stopwatch.StartNew();
         var logger = httpContext.RequestServices.GetService(typeof(ILogger<ChatCompletionRequest>)) as ILogger<ChatCompletionRequest>;
         var availabilityRegistry = httpContext.RequestServices.GetRequiredService<IModelAvailabilityRegistry>();
         
-        logger?.LogInformation("📨 Chat completion request received - Model: {Model}, Stream: {Stream}, Messages: {MessageCount}", 
-            req.Model, req.Stream, req.Messages?.Count ?? 0);
+        logger?.LogInformation("📨 Chat completion request received - Model: {Model}, Stream: {Stream}, Messages: {MessageCount}, EntryMs: {EntryMs}", 
+            req.Model, req.Stream, req.Messages?.Count ?? 0, handler_sw.ElapsedMilliseconds);
 
         // Validate required fields
         if (string.IsNullOrWhiteSpace(req.Model))
@@ -76,6 +77,8 @@ public static class ChatCompletionsEndpoint
                 role, msg.Content.Substring(0, Math.Min(50, msg.Content.Length)));
         }
 
+        logger?.LogInformation("⏱️ Messages converted after {ElapsedMs}ms", handler_sw.ElapsedMilliseconds);
+
         // Build ChatOptions from request
         var options = new ChatOptions
         {
@@ -90,13 +93,13 @@ public static class ChatCompletionsEndpoint
 
         if (req.Stream)
         {
-            logger?.LogInformation("  └─ Using STREAMING mode");
+            logger?.LogInformation("  └─ Using STREAMING mode after {ElapsedMs}ms", handler_sw.ElapsedMilliseconds);
             // Streaming response via SSE
             return await HandleStreamingAsync(httpContext, messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
         }
         else
         {
-            logger?.LogInformation("  └─ Using NON-STREAMING mode");
+            logger?.LogInformation("  └─ Using NON-STREAMING mode after {ElapsedMs}ms", handler_sw.ElapsedMilliseconds);
             // Non-streaming response
             return await HandleNonStreamingAsync(messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
         }
@@ -399,14 +402,21 @@ public static class ChatCompletionsEndpoint
         ILogger<ChatCompletionRequest>? logger,
         CancellationToken cancellationToken)
     {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        logger?.LogInformation("🔍 Starting ResolveClientAsync for model '{Model}'", model);
+        
         var selectedClient = await modelSelectionResolver.ResolveAsync(model, cancellationToken);
+        logger?.LogInformation("⏱️ ResolveAsync completed in {ElapsedMs}ms", sw.ElapsedMilliseconds);
+        
         if (selectedClient is not null)
         {
-            logger?.LogInformation("🎛️ Honoring selected model {Model}", model);
+            logger?.LogInformation("🎛️ Honoring selected model {Model} after {ElapsedMs}ms", model, sw.ElapsedMilliseconds);
             return selectedClient;
         }
 
         var unavailableModel = availabilityRegistry.FindModel(model, includeUnavailable: true);
+        logger?.LogInformation("🔍 FindModel completed in {ElapsedMs}ms", sw.ElapsedMilliseconds);
+        
         if (unavailableModel is { Enabled: false })
         {
             throw new InvalidOperationException(
@@ -415,7 +425,7 @@ public static class ChatCompletionsEndpoint
                     : $"Model '{model}' is currently unavailable: {unavailableModel.ErrorMessage}");
         }
 
-        logger?.LogInformation("🧭 No direct client match for model {Model}; using routed default client", model);
+        logger?.LogInformation("🧭 No direct client match for model {Model}; using routed default client after {ElapsedMs}ms", model, sw.ElapsedMilliseconds);
         return defaultClient;
     }
 

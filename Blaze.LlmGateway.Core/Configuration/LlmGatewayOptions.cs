@@ -90,6 +90,6 @@ public class RoutingOptions
 public class ModelAvailabilityOptions
 {
     public bool Enabled { get; set; } = true;
-    public int StartupProbeTimeoutSeconds { get; set; } = 5;
+    public int StartupProbeTimeoutSeconds { get; set; } = 2;
     public int RefreshIntervalSeconds { get; set; } = 60;
 }
