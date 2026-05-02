@@ -23,19 +23,17 @@ var isRunningUnderAspire = !string.IsNullOrEmpty(Environment.GetEnvironmentVaria
                            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT")) ||
                            builder.Configuration["ASPIRE_RUNNING"] == "true";
 
-// Configure logging: when under Aspire, logs go to Aspire console; otherwise standard console
+// Configure VERBOSE logging: all providers, detailed output, scopes enabled
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-if (!isRunningUnderAspire)
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
+// Console logging with detailed formatting
+builder.Logging.AddSimpleConsole(options =>
 {
-    // Add simple formatter for standalone runs
-    builder.Logging.AddSimpleConsole(options =>
-    {
-        options.IncludeScopes = true;
-        options.SingleLine = false;
-        options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
-    });
-}
+    options.IncludeScopes = true;
+    options.SingleLine = false;
+    options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff zzz ";
+});
 
 builder.Services.Configure<LlmGatewayOptions>(
     builder.Configuration.GetSection(LlmGatewayOptions.SectionName));

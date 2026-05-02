@@ -93,6 +93,7 @@ public static class AppHostComposition
         }
 
         // ── API project — wire all resources ──
+        aspireLogger.LogInformation("  ├─ Wiring API project with environment variables...");
         var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
             .WithHttpEndpoint(port: 5022, name: "http")
             .WithEnvironment("LlmGateway__Providers__FoundryLocal__Enabled", foundryLocalEnabled.ToString())
@@ -100,6 +101,10 @@ public static class AppHostComposition
             .WithEnvironment("LlmGateway__Providers__OllamaLocal__Model", ollamaLocalModel)
             .WithEnvironment("LlmGateway__Providers__LmStudio__Endpoint", lmStudioEndpoint)
             .WithEnvironment("LlmGateway__Providers__LmStudio__Model", lmStudioModel);
+
+        aspireLogger.LogDebug("  ├─ API environment configuration:");
+        aspireLogger.LogDebug("  │  ├─ OllamaLocal: {Url} ({Model})", ollamaLocalBaseUrl, ollamaLocalModel);
+        aspireLogger.LogDebug("  │  ├─ LmStudio: {Endpoint} ({Model})", lmStudioEndpoint, lmStudioModel);
 
         if (foundryLocalConnectionString is not null)
         {

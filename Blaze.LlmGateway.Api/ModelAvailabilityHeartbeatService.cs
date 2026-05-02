@@ -93,18 +93,25 @@ public sealed class ModelAvailabilityHeartbeatService(
         var models = new List<AvailableModel>();
         var providers = new List<ProviderAvailabilitySnapshot>();
 
+        logger.LogDebug("🔄 Refreshing model availability snapshot (probeProviders: {ProbeProviders})", probeProviders);
+
         if (!probeProviders)
         {
+            logger.LogDebug("  ├─ Seeding configured models (no probe)");
             SeedConfiguredModels(models, providers, checkedAt);
             registry.UpdateSnapshot(models, providers);
             return;
         }
 
         // Seed configured models first for fallback/visibility
+        logger.LogDebug("  ├─ Seeding configured models");
         SeedConfiguredModels(models, providers, checkedAt);
 
         // Probe local models only (local-BYOK approach)
+        logger.LogDebug("  ├─ Probing LM Studio");
         await ProbeLmStudioAsync(models, providers, checkedAt, cancellationToken);
+        
+        logger.LogDebug("  ├─ Probing Ollama with failover");
         await ProbeOllamaWithFailoverAsync(
             modelId: _options.Providers.OllamaLocal.Model,
             ownedBy: "ollama",
@@ -114,15 +121,24 @@ public sealed class ModelAvailabilityHeartbeatService(
             providers,
             cancellationToken);
 
+        logger.LogDebug("  ├─ Adding CodebrewRouter virtual model");
         AddCodebrewRouterModel(models, providers, checkedAt);
+        
         registry.UpdateSnapshot(models, providers);
 
         var enabledModels = models.Count(model => model.Enabled);
         var disabledModels = models.Count - enabledModels;
         logger.LogInformation(
-            "Model availability heartbeat refreshed: {EnabledCount} enabled, {DisabledCount} disabled",
+            "✅ Model availability snapshot refreshed: {EnabledCount} enabled, {DisabledCount} disabled, Total: {TotalCount}",
             enabledModels,
-            disabledModels);
+            disabledModels,
+            models.Count);
+        
+        foreach (var model in models)
+        {
+            logger.LogDebug("  ├─ Model '{ModelId}' ({Provider}): {Status}", 
+                model.Id, model.OwnedBy, model.Enabled ? "✅ enabled" : "❌ disabled");
+        }
     }
 
     private void SeedConfiguredModels(
@@ -162,9 +178,11 @@ public sealed class ModelAvailabilityHeartbeatService(
         var lmStudioOptions = _options.Providers.LmStudio;
         if (!IsLmStudioConfigured(lmStudioOptions))
         {
+            logger.LogDebug("  ├─ LM Studio not configured, skipping probe");
             return;
         }
 
+        logger.LogInformation("🔍 Probing LM Studio at {Endpoint}", lmStudioOptions.Endpoint);
         try
         {
             var discoveredModels = new List<AvailableModel>();
@@ -172,6 +190,7 @@ public sealed class ModelAvailabilityHeartbeatService(
             if (!string.IsNullOrWhiteSpace(lmStudioOptions.Endpoint))
             {
                 using var timeoutCts = CreateTimeoutToken(cancellationToken);
+                logger.LogDebug("  ├─ Discovering models from {Endpoint}", lmStudioOptions.Endpoint);
                 var discoveryResult = await lmStudioModelDiscovery.TryDiscoverModelsAsync(
                     lmStudioOptions.Endpoint,
                     lmStudioOptions.ApiKey,
@@ -180,11 +199,16 @@ public sealed class ModelAvailabilityHeartbeatService(
                 if (discoveryResult.Success && discoveryResult.Models.Count > 0)
                 {
                     discoveredModels = discoveryResult.Models.ToList();
-                    logger.LogDebug("Discovered {Count} models from LM Studio", discoveredModels.Count);
+                    logger.LogDebug("  ├─ ✅ Discovered {Count} models from LM Studio", discoveredModels.Count);
+                }
+                else
+                {
+                    logger.LogDebug("  ├─ ⚠️ No models discovered or discovery failed");
                 }
             }
 
             // Probe chat with configured model to validate provider health
+            logger.LogDebug("  ├─ Sending probe message (ping) to LM Studio");
             using var chatTimeoutCts = CreateTimeoutToken(cancellationToken);
             using var scope = serviceProvider.CreateScope();
             var client = scope.ServiceProvider.GetRequiredKeyedService<IChatClient>("LmStudio");
@@ -194,11 +218,13 @@ public sealed class ModelAvailabilityHeartbeatService(
                 chatTimeoutCts.Token);
 
             // Chat probe succeeded — mark provider and models as enabled
+            logger.LogInformation("✅ LM Studio probe successful");
             providers.Add(new ProviderAvailabilitySnapshot("LmStudio", true, null, checkedAt));
 
             if (discoveredModels.Count > 0)
             {
                 // Add discovered models as enabled
+                logger.LogDebug("  ├─ Adding {Count} discovered models", discoveredModels.Count);
                 foreach (var discoveredModel in discoveredModels)
                 {
                     models.Add(discoveredModel with
@@ -213,6 +239,7 @@ public sealed class ModelAvailabilityHeartbeatService(
                 if (!discoveredModels.Any(m => string.Equals(m.Id, lmStudioOptions.Model, StringComparison.OrdinalIgnoreCase)) &&
                     !string.IsNullOrWhiteSpace(lmStudioOptions.Model))
                 {
+                    logger.LogDebug("  ├─ Adding configured fallback model: {Model}", lmStudioOptions.Model);
                     models.Add(new AvailableModel(
                         lmStudioOptions.Model,
                         "LmStudio",
@@ -226,6 +253,7 @@ public sealed class ModelAvailabilityHeartbeatService(
             else
             {
                 // No discovered models — fall back to configured model
+                logger.LogDebug("  ├─ No discovered models, adding configured model: {Model}", lmStudioOptions.Model);
                 models.Add(new AvailableModel(
                     lmStudioOptions.Model,
                     "LmStudio",
@@ -236,14 +264,15 @@ public sealed class ModelAvailabilityHeartbeatService(
                     LastCheckedUtc: checkedAt));
             }
 
-            logger.LogDebug(
-                "Availability probe succeeded for LmStudio with model {Model}. Response length: {Length}",
+            logger.LogInformation(
+                "✅ LM Studio availability probe succeeded - Model: {Model}, Response: {ResponseLength} bytes",
                 lmStudioOptions.Model,
                 response.Text?.Length ?? 0);
         }
         catch (Exception ex)
         {
             var error = GetErrorMessage(ex);
+            logger.LogError(ex, "❌ LM Studio availability probe failed: {Error}", error);
             if (IsOptionalLocalProvider("LmStudio"))
             {
                 logger.LogInformation(
