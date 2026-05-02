@@ -41,6 +41,9 @@ public sealed class OllamaTaskClassifier(
         // Circuit-breaker fast-path: if Ollama recently failed, skip the call entirely.
         if (_circuitOpenedAt is { } openedAt && DateTimeOffset.UtcNow - openedAt < CooldownDuration)
         {
+            var remaining = (CooldownDuration - (DateTimeOffset.UtcNow - openedAt)).TotalSeconds;
+            logger.LogDebug("OllamaTaskClassifier: circuit open for {Remaining:F1}s; using keyword fallback",
+                remaining);
             return await fallback.ClassifyAsync(messages, cancellationToken);
         }
 

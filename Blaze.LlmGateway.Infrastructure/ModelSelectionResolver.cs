@@ -26,6 +26,7 @@ public sealed class ModelSelectionResolver(
         var model = await modelCatalog.FindByIdAsync(modelId, cancellationToken);
         if (model is null)
         {
+            logger.LogWarning("Model '{ModelId}' not found in catalog", modelId);
             return null;
         }
 

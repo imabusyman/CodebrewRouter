@@ -65,6 +65,7 @@ public sealed class CodebrewRouterChatClient(
             var providerMessages = await PrepareMessagesForProviderAsync(key, cleanedMessages, options, cancellationToken);
             if (providerMessages is null)
             {
+                logger.LogDebug("codebrewRouter: PrepareMessagesForProvider({Key}) returned null — skipping", key);
                 continue;
             }
 

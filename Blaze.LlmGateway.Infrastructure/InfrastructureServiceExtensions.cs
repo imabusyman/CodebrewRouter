@@ -23,6 +23,8 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("OllamaLocal", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaLocal;
+            var log = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
+            log.LogDebug("Initializing OllamaLocal keyed client: {BaseUrl}/{Model}", opts.BaseUrl, opts.Model);
             var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
             var compactor     = sp.GetRequiredService<IContextCompactor>();
             var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();
@@ -39,6 +41,8 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedSingleton<IChatClient>("LmStudio", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.LmStudio;
+            var log = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
+            log.LogDebug("Initializing LmStudio keyed client: {Endpoint}/{Model}", opts.Endpoint, opts.Model);
             var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
             var compactor     = sp.GetRequiredService<IContextCompactor>();
             var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();

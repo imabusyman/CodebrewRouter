@@ -44,33 +44,47 @@ public sealed class LmStudioModelDiscovery(
             }
 
             var response = await httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("LM Studio /models endpoint returned {StatusCode}: {ReasonPhrase}", 
+                    response.StatusCode, response.ReasonPhrase);
+                response.EnsureSuccessStatusCode();
+            }
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
             logger.LogDebug("LM Studio response body: {ResponseBody}", content.Substring(0, Math.Min(200, content.Length)));
             
-            var modelsData = System.Text.Json.JsonSerializer.Deserialize<ModelsListResponse>(content);
-            logger.LogDebug("Deserialized modelsData: {ModelsData}", modelsData != null ? "not null" : "null");
-            logger.LogDebug("Deserialized modelsData.Data: {DataCount}", modelsData?.Data?.Count ?? 0);
-
-            if (modelsData?.Data == null)
+            try
             {
-                logger.LogWarning("LM Studio returned empty models list");
-                return new ModelDiscoveryResult(true, []);
+                var modelsData = System.Text.Json.JsonSerializer.Deserialize<ModelsListResponse>(content);
+                logger.LogDebug("Deserialized modelsData: {ModelsData}", modelsData != null ? "not null" : "null");
+                logger.LogDebug("Deserialized modelsData.Data: {DataCount}", modelsData?.Data?.Count ?? 0);
+
+                if (modelsData?.Data == null)
+                {
+                    logger.LogWarning("LM Studio returned empty models list");
+                    return new ModelDiscoveryResult(true, []);
+                }
+
+                var models = modelsData.Data
+                    .Where(m => !string.IsNullOrWhiteSpace(m.Id))
+                    .Select(m => new AvailableModel(
+                        Id: m.Id!,
+                        Provider: "LmStudio",
+                        OwnedBy: m.OwnedBy ?? "lmstudio",
+                        Source: "discovered",
+                        Endpoint: endpoint))
+                    .ToList();
+
+                logger.LogInformation("Discovered {Count} models from LM Studio", models.Count);
+                return new ModelDiscoveryResult(true, models);
             }
-
-            var models = modelsData.Data
-                .Where(m => !string.IsNullOrWhiteSpace(m.Id))
-                .Select(m => new AvailableModel(
-                    Id: m.Id!,
-                    Provider: "LmStudio",
-                    OwnedBy: m.OwnedBy ?? "lmstudio",
-                    Source: "discovered",
-                    Endpoint: endpoint))
-                .ToList();
-
-            logger.LogInformation("Discovered {Count} models from LM Studio", models.Count);
-            return new ModelDiscoveryResult(true, models);
+            catch (System.Text.Json.JsonException jex)
+            {
+                logger.LogError(jex, "Failed to deserialize LM Studio models response: {Content}", content.Substring(0, Math.Min(300, content.Length)));
+                throw;
+            }
         }
         catch (Exception ex)
         {

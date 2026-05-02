@@ -61,6 +61,9 @@ public sealed class GemmaPromptCleaner : IPromptCleaner
 
         if (_circuitOpenedAt is { } openedAt && DateTimeOffset.UtcNow - openedAt < _cooldown)
         {
+            var remaining = (_cooldown - (DateTimeOffset.UtcNow - openedAt)).TotalSeconds;
+            _logger.LogDebug("GemmaPromptCleaner: circuit open for {Remaining:F1}s; skipping cleanup",
+                remaining);
             return original;
         }
 
