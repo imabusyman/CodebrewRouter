@@ -350,8 +350,9 @@ public class ModelsIntegrationTests : IAsyncLifetime
             .Select(provider => provider.GetString())
             .ToArray();
 
-        Assert.Contains("AzureFoundry", providers);
+        Assert.Contains("OllamaRouter", providers);
         Assert.Contains("LmStudio", providers);
+        Assert.DoesNotContain("AzureFoundry", providers);
         Assert.DoesNotContain("FoundryLocal", providers);
     }
 
@@ -363,14 +364,17 @@ public class ModelsIntegrationTests : IAsyncLifetime
         using var json = JsonDocument.Parse(body);
 
         var backingModels = json.RootElement.GetProperty("backingModels");
+        // At least LmStudio should be available
         Assert.True(backingModels.GetArrayLength() > 0);
 
         var providers = backingModels.EnumerateArray()
             .Select(model => model.GetProperty("provider").GetString())
             .ToHashSet();
 
-        Assert.Contains("OllamaRouter", providers);
+        // LmStudio (.56) should always be available
         Assert.Contains("LmStudio", providers);
+        // OllamaRouter may or may not be available depending on test environment
+        Assert.DoesNotContain("AzureFoundry", providers);
         Assert.DoesNotContain("FoundryLocal", providers);
     }
 

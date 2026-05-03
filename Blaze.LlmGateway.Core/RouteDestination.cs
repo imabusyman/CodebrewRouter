@@ -2,8 +2,7 @@ namespace Blaze.LlmGateway.Core;
 
 public enum RouteDestination
 {
-    AzureFoundry,
-    FoundryLocal,
-    GithubModels,
+    OllamaRouter,
     LmStudio
 }
+

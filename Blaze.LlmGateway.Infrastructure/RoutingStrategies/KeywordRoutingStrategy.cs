@@ -15,7 +15,7 @@ namespace Blaze.LlmGateway.Infrastructure.RoutingStrategies;
 /// </summary>
 public class KeywordRoutingStrategy(
     ILogger<KeywordRoutingStrategy> logger,
-    RouteDestination defaultDestination = RouteDestination.LmStudio) : IRoutingStrategy
+    RouteDestination defaultDestination = RouteDestination.OllamaRouter) : IRoutingStrategy
 {
     public Task<RouteDestination> ResolveAsync(IEnumerable<ChatMessage> messages, CancellationToken cancellationToken = default)
     {
@@ -23,10 +23,8 @@ public class KeywordRoutingStrategy(
 
         var destination = lastUserMessage switch
         {
-            _ when lastUserMessage.Contains("foundry local") || lastUserMessage.Contains("foundrylocal") => RouteDestination.FoundryLocal,
+            _ when lastUserMessage.Contains("ollama") => RouteDestination.OllamaRouter,
             _ when lastUserMessage.Contains("lm studio") || lastUserMessage.Contains("lmstudio") => RouteDestination.LmStudio,
-            _ when lastUserMessage.Contains("github") => RouteDestination.GithubModels,
-            _ when lastUserMessage.Contains("azure") => RouteDestination.AzureFoundry,
             _ => defaultDestination
         };
 
@@ -34,3 +32,4 @@ public class KeywordRoutingStrategy(
         return Task.FromResult(destination);
     }
 }
+

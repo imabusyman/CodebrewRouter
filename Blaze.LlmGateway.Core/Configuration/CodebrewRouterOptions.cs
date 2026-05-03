@@ -20,13 +20,13 @@ public class CodebrewRouterOptions
     /// </summary>
     public Dictionary<string, string[]> FallbackRules { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Reasoning"]             = ["LmStudio"],
-        ["Coding"]                = ["LmStudio"],
-        ["Research"]              = ["LmStudio"],
+        ["Reasoning"]             = ["OllamaRouter", "LmStudio"],
+        ["Coding"]                = ["OllamaRouter", "LmStudio"],
+        ["Research"]              = ["OllamaRouter", "LmStudio"],
         ["VisionObjectDetection"] = ["LmStudio"],
-        ["Creative"]              = ["LmStudio"],
-        ["DataAnalysis"]          = ["LmStudio"],
-        ["General"]               = ["LmStudio"],
+        ["Creative"]              = ["OllamaRouter", "LmStudio"],
+        ["DataAnalysis"]          = ["OllamaRouter", "LmStudio"],
+        ["General"]               = ["OllamaRouter", "LmStudio"],
     };
 
     /// <summary>

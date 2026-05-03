@@ -1,6 +1,5 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Foundry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -21,18 +20,6 @@ public static class AppHostComposition
         aspireLogger.LogDebug("  ├─ Wiring resources and dependencies");
 
         // ── Parameter-based secrets and non-secret provider settings ──
-        var foundryLocalEnabled = builder.Configuration.GetValue(
-            "LlmGateway:Providers:FoundryLocal:Enabled",
-            false);
-        var foundryLocalModel = builder.Configuration.GetValue(
-            "LlmGateway:Providers:FoundryLocal:Model",
-            "phi-4-mini");
-        var foundryLocalModelVersion = builder.Configuration.GetValue(
-            "LlmGateway:Providers:FoundryLocal:ModelVersion",
-            "1");
-        var foundryLocalModelFormat = builder.Configuration.GetValue(
-            "LlmGateway:Providers:FoundryLocal:ModelFormat",
-            "Microsoft");
         var ollamaLocalBaseUrl = builder.Configuration.GetValue(
             "LlmGateway:Providers:OllamaLocal:BaseUrl",
             "http://localhost:11434");
@@ -51,52 +38,10 @@ public static class AppHostComposition
         // Set to "http://0.0.0.0:5022" to expose the gateway on all LAN interfaces.
         var gatewayListenUrls = builder.Configuration.GetValue<string?>("Gateway:ListenUrls");
 
-        IResourceBuilder<FoundryDeploymentResource>? foundryLocalConnectionString = null;
-        if (foundryLocalEnabled)
-        {
-            // ── Foundry Local — Aspire-managed dev-only resource ──
-            // Disabled by default because some machines auto-select a cached CUDA variant
-            // that fails to load with CUBLAS_STATUS_ALLOC_FAILED. Re-enable via
-            // LlmGateway:Providers:FoundryLocal:Enabled=true once the local runtime is stable.
-            var foundry = builder.AddFoundry("foundryLocal")
-                .RunAsFoundryLocal();
-
-            var foundryLocalChat = foundry.AddDeployment(
-                "foundryLocalChat",
-                foundryLocalModel,
-                foundryLocalModelVersion,
-                foundryLocalModelFormat);
-
-            // Aspire.Hosting.Foundry 13.3.0-preview.1 has a race in RunAsFoundryLocal()'s
-            // WithInitializer: it samples FoundryLocalManager.IsServiceRunning immediately after
-            // StartServiceAsync(), which can return false while the service is still warming up.
-            // The parent foundryLocal resource then sticks in FailedToStart even though the
-            // service comes up moments later and the deployment downloads + loads the model
-            // successfully. Promote the parent to Running once the deployment reports Running.
-            builder.Eventing.Subscribe<ResourceReadyEvent>(
-                foundryLocalChat.Resource,
-                async (evt, ct) =>
-                {
-                    var rns = evt.Services.GetRequiredService<ResourceNotificationService>();
-                    await rns.PublishUpdateAsync(
-                        foundry.Resource,
-                        state => state.State?.Text == KnownResourceStates.FailedToStart
-                            ? state with { State = new ResourceStateSnapshot(KnownResourceStates.Running, KnownResourceStateStyles.Success) }
-                            : state).ConfigureAwait(false);
-                });
-
-            foundryLocalConnectionString = foundryLocalChat;
-        }
-        else
-        {
-            aspireLogger.LogInformation("  ├─ Foundry Local: disabled (set LlmGateway:Providers:FoundryLocal:Enabled=true to enable)");
-        }
-
         // ── API project — wire all resources ──
         aspireLogger.LogInformation("  ├─ Wiring API project with environment variables...");
         var api = builder.AddProject<Projects.Blaze_LlmGateway_Api>("api")
             .WithHttpEndpoint(port: 5022, name: "http")
-            .WithEnvironment("LlmGateway__Providers__FoundryLocal__Enabled", foundryLocalEnabled.ToString())
             .WithEnvironment("LlmGateway__Providers__OllamaLocal__BaseUrl", ollamaLocalBaseUrl)
             .WithEnvironment("LlmGateway__Providers__OllamaLocal__Model", ollamaLocalModel)
             .WithEnvironment("LlmGateway__Providers__LmStudio__Endpoint", lmStudioEndpoint)
@@ -105,12 +50,6 @@ public static class AppHostComposition
         aspireLogger.LogDebug("  ├─ API environment configuration:");
         aspireLogger.LogDebug("  │  ├─ OllamaLocal: {Url} ({Model})", ollamaLocalBaseUrl, ollamaLocalModel);
         aspireLogger.LogDebug("  │  ├─ LmStudio: {Endpoint} ({Model})", lmStudioEndpoint, lmStudioModel);
-
-        if (foundryLocalConnectionString is not null)
-        {
-            api.WaitFor(foundryLocalConnectionString)
-               .WithReference(foundryLocalConnectionString);
-        }
 
         if (!string.IsNullOrWhiteSpace(gatewayListenUrls))
         {
