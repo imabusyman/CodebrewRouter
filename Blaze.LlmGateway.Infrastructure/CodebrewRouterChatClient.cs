@@ -223,7 +223,19 @@ public sealed class CodebrewRouterChatClient(
         if (string.IsNullOrEmpty(originalText))
             return messages;
 
-        var cleaned = await promptCleaner.CleanAsync(originalText, cancellationToken);
+        string cleaned;
+        try
+        {
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(3));
+            cleaned = await promptCleaner.CleanAsync(originalText, timeoutCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogWarning("⏱️ Prompt cleaner timed out after 3 seconds; using original prompt");
+            cleaned = originalText;
+        }
+
         if (ReferenceEquals(cleaned, originalText) || string.Equals(cleaned, originalText, StringComparison.Ordinal))
             return messages;
 
