@@ -77,9 +77,10 @@ public class OllamaFailoverTests
             Availability = new ModelAvailabilityOptions { Enabled = true, RefreshIntervalSeconds = 5 },
             Providers = new ProvidersOptions
             {
-                OllamaLocal = new OllamaLocalOptions
+                OllamaRouter = new OllamaRouterOptions
                 {
-                    BaseUrl = PrimaryEndpoint,
+                    PrimaryEndpoint = PrimaryEndpoint,
+                    FallbackEndpoint = "http://192.168.16.12:11434",
                     Model = DefaultModel,
                     MaxContextTokens = 32768,
                     ReservedOutputTokens = 2048
@@ -295,7 +296,7 @@ public class OllamaFailoverTests
     {
         // Arrange
         var options = CreateDefaultOptions();
-        options.Providers.OllamaLocal.BaseUrl = "";  // Unconfigure
+        options.Providers.OllamaRouter.Model = "";  // Unconfigure
         
         var ollamaMock = new Mock<IChatClient>();
         ollamaMock

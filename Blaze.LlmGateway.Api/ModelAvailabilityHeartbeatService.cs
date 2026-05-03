@@ -111,11 +111,11 @@ public sealed class ModelAvailabilityHeartbeatService(
         logger.LogDebug("  ├─ Probing LM Studio");
         await ProbeLmStudioAsync(models, providers, checkedAt, cancellationToken);
         
-        logger.LogDebug("  ├─ Probing Ollama with failover");
+        logger.LogDebug("  ├─ Probing Ollama Router with failover");
         await ProbeOllamaWithFailoverAsync(
-            modelId: _options.Providers.OllamaLocal.Model,
+            modelId: _options.Providers.OllamaRouter.Model,
             ownedBy: "ollama",
-            isConfigured: IsOllamaLocalConfigured(_options.Providers.OllamaLocal),
+            isConfigured: !string.IsNullOrWhiteSpace(_options.Providers.OllamaRouter.Model),
             checkedAt,
             models,
             providers,
@@ -150,11 +150,11 @@ public sealed class ModelAvailabilityHeartbeatService(
         AddConfiguredModel(
             models,
             providers,
-            "OllamaLocal",
-            _options.Providers.OllamaLocal.Model,
+            "OllamaRouter",
+            _options.Providers.OllamaRouter.Model,
             "ollama",
-            _options.Providers.OllamaLocal.BaseUrl,
-            IsOllamaLocalConfigured(_options.Providers.OllamaLocal),
+            _options.Providers.OllamaRouter.PrimaryEndpoint,
+            !string.IsNullOrWhiteSpace(_options.Providers.OllamaRouter.Model),
             checkedAt);
         AddConfiguredModel(
             models,
@@ -396,7 +396,7 @@ public sealed class ModelAvailabilityHeartbeatService(
             
             // Create a temporary OllamaApiClient for the specified endpoint and probe with the configured model.
             // OllamaApiClient(Uri endpoint, string model) constructor creates a client targeting that endpoint.
-            var ollamaClient = (IChatClient)new OllamaApiClient(new Uri(ollamaEndpoint), _options.Providers.OllamaLocal.Model);
+            var ollamaClient = (IChatClient)new OllamaApiClient(new Uri(ollamaEndpoint), _options.Providers.OllamaRouter.Model);
 
             var response = await ollamaClient.GetResponseAsync(
                 [new ChatMessage(ChatRole.User, "ping")],
@@ -406,7 +406,7 @@ public sealed class ModelAvailabilityHeartbeatService(
             logger.LogDebug(
                 "Ollama probe succeeded for {Endpoint} with model {Model}. Response length: {Length}",
                 ollamaEndpoint,
-                _options.Providers.OllamaLocal.Model,
+                _options.Providers.OllamaRouter.Model,
                 response.Text?.Length ?? 0);
 
             return (true, string.Empty);
@@ -488,10 +488,6 @@ public sealed class ModelAvailabilityHeartbeatService(
 
     private static string GetErrorMessage(Exception exception)
         => exception.GetBaseException().Message;
-
-    private static bool IsOllamaLocalConfigured(OllamaLocalOptions options)
-        => !string.IsNullOrWhiteSpace(options.BaseUrl) &&
-           !string.IsNullOrWhiteSpace(options.Model);
 
     private static bool IsLmStudioConfigured(LmStudioOptions options)
         => !string.IsNullOrWhiteSpace(options.Endpoint) &&

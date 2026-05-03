@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace Blaze.LlmGateway.Infrastructure.PromptCleaning;
 
 /// <summary>
-/// <see cref="IPromptCleaner"/> backed by the keyed <c>OllamaLocal</c> client (gemma4:e4b
+/// <see cref="IPromptCleaner"/> backed by the cached <c>OllamaRouter</c> client (gemma4:e4b
 /// by default). Mirrors the circuit-breaker behaviour of <c>OllamaTaskClassifier</c>:
 /// any exception opens the circuit for <see cref="PromptCleanupOptions.CooldownMinutes"/>,
 /// during which the cleaner short-circuits to passthrough.
@@ -25,7 +25,7 @@ public sealed class GemmaPromptCleaner : IPromptCleaner
         - The rewrite MUST be shorter than the original. If you cannot shorten it without losing meaning, return the original unchanged.
         """;
 
-    private readonly IChatClient _routerClient;
+    private readonly IChatClient _cachedRouterClient;  // Reused for all requests
     private readonly PromptCleanupOptions _options;
     private readonly ILogger<GemmaPromptCleaner> _logger;
     private readonly TimeSpan _cooldown;
@@ -34,11 +34,11 @@ public sealed class GemmaPromptCleaner : IPromptCleaner
     private DateTimeOffset? _circuitOpenedAt;
 
     public GemmaPromptCleaner(
-        IChatClient routerClient,
+        IChatClient cachedRouterClient,  // Injected cached client from DI ("OllamaRouter" keyed)
         IOptions<PromptCleanupOptions> options,
         ILogger<GemmaPromptCleaner> logger)
     {
-        _routerClient = routerClient;
+        _cachedRouterClient = cachedRouterClient;
         _options = options.Value;
         _logger = logger;
         _cooldown = TimeSpan.FromMinutes(Math.Max(1, _options.CooldownMinutes));
@@ -81,7 +81,8 @@ public sealed class GemmaPromptCleaner : IPromptCleaner
                 Temperature = _options.Temperature
             };
 
-            var response = await _routerClient.GetResponseAsync(messages, opts, cancellationToken);
+            // USE CACHED CLIENT (no new creation)
+            var response = await _cachedRouterClient.GetResponseAsync(messages, opts, cancellationToken);
             var cleaned = response.Text?.Trim() ?? "";
 
             if (!IsValidRewrite(original, cleaned))

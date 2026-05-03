@@ -1,114 +1,115 @@
+using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.TaskRouting;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Blaze.LlmGateway.Infrastructure.TaskClassification;
 
 /// <summary>
-/// <see cref="ITaskClassifier"/> that delegates classification to the local OllamaLocal
-/// "router" model with a tight token budget. Falls back to <see cref="KeywordTaskClassifier"/>
+/// <see cref="ITaskClassifier"/> that delegates classification to the cached OllamaRouter
+/// client with a tight token budget. Falls back to <see cref="ClassifyByKeyword"/>
 /// on any failure (Ollama unavailable, timeout, unrecognised response).
 /// </summary>
-public sealed class OllamaTaskClassifier(
-    IChatClient routerClient,
-    KeywordTaskClassifier fallback,
-    ILogger<OllamaTaskClassifier> logger) : ITaskClassifier
+public sealed class OllamaTaskClassifier : ITaskClassifier
 {
-    private static readonly string[] ValidTaskTypes = Enum.GetNames<TaskType>();
+    private readonly IChatClient _cachedRouterClient;  // Reused for all requests
+    private readonly TaskClassificationOptions _options;
+    private readonly ILogger<OllamaTaskClassifier> _logger;
+    private readonly TimeSpan _cooldown;
 
-    // Circuit breaker: once Ollama fails (404/connection refused/etc.), stop trying
-    // until the cooldown elapses. Eliminates repeat 404s on every request.
-    private static readonly TimeSpan CooldownDuration = TimeSpan.FromMinutes(5);
     private DateTimeOffset? _circuitOpenedAt;
 
-    private static readonly string SystemPrompt = $"""
-        You are a task classifier. Based on the user's message, classify the task into exactly one of these categories.
-        Respond with ONLY the single category name (no punctuation, no explanation):
-        {string.Join(", ", Enum.GetNames<TaskType>())}
-
-        Classification guide:
-        - Reasoning: math, proofs, logic, deduction, multi-step analysis
-        - Coding: code generation, debugging, refactoring, programming tasks
-        - Research: deep research, literature survey, comprehensive topic overview
-        - VisionObjectDetection: image description, object detection, visual analysis
-        - Creative: stories, poems, essays, fiction, blog posts, creative writing
-        - DataAnalysis: data/CSV/SQL analysis, statistics, charts, trends
-        - General: anything else or ambiguous
-        """;
-
-    public async Task<TaskType> ClassifyAsync(IEnumerable<ChatMessage> messages, CancellationToken cancellationToken = default)
+    public OllamaTaskClassifier(
+        IChatClient cachedRouterClient,  // Injected cached client from DI ("OllamaRouter" keyed)
+        IOptions<TaskClassificationOptions> options,
+        ILogger<OllamaTaskClassifier> logger)
     {
-        // Circuit-breaker fast-path: if Ollama recently failed, skip the call entirely.
-        if (_circuitOpenedAt is { } openedAt && DateTimeOffset.UtcNow - openedAt < CooldownDuration)
+        _cachedRouterClient = cachedRouterClient;
+        _options = options.Value;
+        _logger = logger;
+        _cooldown = TimeSpan.FromMinutes(Math.Max(1, _options.CooldownMinutes));
+    }
+
+    public async Task<TaskType> ClassifyAsync(
+        IEnumerable<ChatMessage> messages,
+        CancellationToken cancellationToken = default)
+    {
+        var messageList = messages as IList<ChatMessage> ?? messages.ToList();
+        
+        if (messageList.Count == 0)
+            return TaskType.General;
+
+        if (_circuitOpenedAt is { } openedAt && DateTimeOffset.UtcNow - openedAt < _cooldown)
         {
-            var remaining = (CooldownDuration - (DateTimeOffset.UtcNow - openedAt)).TotalSeconds;
-            logger.LogDebug("OllamaTaskClassifier: circuit open for {Remaining:F1}s; using keyword fallback",
-                remaining);
-            return await fallback.ClassifyAsync(messages, cancellationToken);
+            _logger.LogWarning("Circuit breaker open for task classifier; using keyword fallback");
+            return ClassifyByKeyword(messageList);
         }
 
         try
         {
-            var lastUserMessage = messages.LastOrDefault(m => m.Role == ChatRole.User)?.Text ?? "";
-            if (string.IsNullOrWhiteSpace(lastUserMessage))
-            {
-                logger.LogDebug("OllamaTaskClassifier: empty user message — delegating to keyword fallback");
-                return await fallback.ClassifyAsync(messages, cancellationToken);
-            }
+            var systemPrompt = @"Classify this task into ONE of: Coding, Reasoning, VisionObjectDetection, Research, Creative, DataAnalysis, General.
+Respond with ONLY the task type, nothing else.";
 
-            var classifyMessages = new[]
+            var classifyMessages = new List<ChatMessage>
             {
-                new ChatMessage(ChatRole.System, SystemPrompt),
-                new ChatMessage(ChatRole.User, lastUserMessage)
+                new ChatMessage(ChatRole.System, systemPrompt)
             };
+            classifyMessages.AddRange(messageList);
 
-            var opts = new ChatOptions { MaxOutputTokens = 5, Temperature = 0f };
+            var opts = new ChatOptions { Temperature = 0, MaxOutputTokens = 50 };
             
-            // Add timeout to prevent hanging on unreachable Ollama instances (task classifier probe)
-            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeoutCts.CancelAfter(TimeSpan.FromSeconds(3)); // 3-second timeout on classifier probe
-            
-            var response = await routerClient.GetResponseAsync(classifyMessages, opts, timeoutCts.Token);
-            var responseText = response.Text?.Trim() ?? "";
+            // USE CACHED CLIENT (no new creation)
+            var response = await _cachedRouterClient.GetResponseAsync(classifyMessages, opts, cancellationToken);
+            var classification = response.Text?.Trim() ?? "General";
 
-            // Tier 1: exact match
-            if (Enum.TryParse<TaskType>(responseText, ignoreCase: true, out var exact))
-            {
-                logger.LogInformation("OllamaTaskClassifier exact match → {TaskType}", exact);
-                return exact;
-            }
-
-            // Tier 2: substring match
-            var partial = ValidTaskTypes.FirstOrDefault(t =>
-                responseText.Contains(t, StringComparison.OrdinalIgnoreCase));
-            if (partial is not null && Enum.TryParse<TaskType>(partial, out var matched))
-            {
-                logger.LogInformation("OllamaTaskClassifier partial match → {TaskType} (response: '{Response}')", matched, responseText);
-                return matched;
-            }
-
-            logger.LogWarning("OllamaTaskClassifier unrecognised response '{Response}' — falling back to keyword classifier", responseText);
+            var taskType = ParseTaskType(classification);
+            _logger.LogInformation("🎯 Task classified as: {TaskType}", taskType);
+            return taskType;
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException)
         {
-            // Timeout or cancellation on classifier probe — open circuit and fall back
-            if (_circuitOpenedAt is null)
-            {
-                logger.LogWarning(ex, "OllamaTaskClassifier probe timed out (or was cancelled) — opening circuit for {Cooldown}; falling back to keyword classifier", CooldownDuration);
-            }
-            _circuitOpenedAt = DateTimeOffset.UtcNow;
+            _logger.LogWarning("Task classifier timed out; using keyword fallback");
+            return ClassifyByKeyword(messageList);
         }
         catch (Exception ex)
         {
-            // Open the circuit so we don't keep hitting an unavailable Ollama. Log once at warning,
-            // subsequent skips will be silent until the cooldown elapses.
-            if (_circuitOpenedAt is null)
-            {
-                logger.LogWarning(ex, "OllamaTaskClassifier call failed — opening circuit for {Cooldown}; falling back to keyword classifier", CooldownDuration);
-            }
+            _logger.LogWarning(ex, "Task classifier failed; opening circuit and using keyword fallback");
             _circuitOpenedAt = DateTimeOffset.UtcNow;
+            return ClassifyByKeyword(messageList);
         }
+    }
 
-        return await fallback.ClassifyAsync(messages, cancellationToken);
+    private TaskType ParseTaskType(string text)
+    {
+        return text.Trim().ToLowerInvariant() switch
+        {
+            "coding" => TaskType.Coding,
+            "reasoning" => TaskType.Reasoning,
+            "visionobjectdetection" => TaskType.VisionObjectDetection,
+            "research" => TaskType.Research,
+            "creative" => TaskType.Creative,
+            "dataanalysis" => TaskType.DataAnalysis,
+            _ => TaskType.General
+        };
+    }
+
+    private TaskType ClassifyByKeyword(IList<ChatMessage> messages)
+    {
+        var lastUserMessage = messages.LastOrDefault(m => m.Role == ChatRole.User)?.Text ?? "";
+        var lower = lastUserMessage.ToLowerInvariant();
+
+        if (lower.Contains("code") || lower.Contains("function") || lower.Contains("bug"))
+            return TaskType.Coding;
+        if (lower.Contains("image") || lower.Contains("vision") || lower.Contains("screenshot"))
+            return TaskType.VisionObjectDetection;
+        if (lower.Contains("research") || lower.Contains("paper") || lower.Contains("study"))
+            return TaskType.Research;
+        if (lower.Contains("creative") || lower.Contains("story") || lower.Contains("write"))
+            return TaskType.Creative;
+        if (lower.Contains("data") || lower.Contains("analyze") || lower.Contains("chart"))
+            return TaskType.DataAnalysis;
+
+        return TaskType.General;
     }
 }

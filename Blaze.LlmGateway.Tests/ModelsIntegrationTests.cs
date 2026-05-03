@@ -369,7 +369,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
             .Select(model => model.GetProperty("provider").GetString())
             .ToHashSet();
 
-        Assert.Contains("AzureFoundry", providers);
+        Assert.Contains("OllamaRouter", providers);
         Assert.Contains("LmStudio", providers);
         Assert.DoesNotContain("FoundryLocal", providers);
     }

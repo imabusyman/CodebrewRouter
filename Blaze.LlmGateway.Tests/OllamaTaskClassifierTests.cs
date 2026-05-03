@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.TaskRouting;
 using Blaze.LlmGateway.Infrastructure.TaskClassification;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -17,10 +19,9 @@ public class OllamaTaskClassifierTests
 
     private static OllamaTaskClassifier CreateClassifier(Mock<IChatClient> routerClient)
     {
-        var keywordClassifier = new KeywordTaskClassifier(
-            new Mock<ILogger<KeywordTaskClassifier>>().Object);
+        var options = Options.Create(new TaskClassificationOptions());
         var logger = new Mock<ILogger<OllamaTaskClassifier>>();
-        return new OllamaTaskClassifier(routerClient.Object, keywordClassifier, logger.Object);
+        return new OllamaTaskClassifier(routerClient.Object, options, logger.Object);
     }
 
     private static List<ChatMessage> UserMessages(string text) =>

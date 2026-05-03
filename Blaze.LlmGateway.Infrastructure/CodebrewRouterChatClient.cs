@@ -353,7 +353,6 @@ public sealed class CodebrewRouterChatClient(
         return providerKey switch
         {
             "LmStudio" => HasValue(providers.LmStudio.Endpoint) && HasValue(providers.LmStudio.Model) && availabilityRegistry.IsProviderAvailable("LmStudio"),
-            "OllamaLocal" => HasValue(providers.OllamaLocal.BaseUrl) && HasValue(providers.OllamaLocal.Model) && availabilityRegistry.IsProviderAvailable("OllamaLocal"),
             _ => true
         };
     }
@@ -370,12 +369,6 @@ public sealed class CodebrewRouterChatClient(
                     providers.LmStudio.MaxContextTokens,
                     providers.LmStudio.ReservedOutputTokens);
                 return HasValue(providers.LmStudio.Model) && providers.LmStudio.MaxContextTokens > 0;
-            case "OllamaLocal":
-                budget = new ProviderContextBudget(
-                    providers.OllamaLocal.Model,
-                    providers.OllamaLocal.MaxContextTokens,
-                    providers.OllamaLocal.ReservedOutputTokens);
-                return HasValue(providers.OllamaLocal.Model) && providers.OllamaLocal.MaxContextTokens > 0;
             default:
                 budget = default;
                 return false;

@@ -326,7 +326,7 @@ public class LlmRoutingChatClient : DelegatingChatClient
         var providers = _gatewayOptions.Value.Providers;
         var (maxContext, reservedOutput) = destination switch
         {
-            "OllamaLocal"   => (providers.OllamaLocal.MaxContextTokens,   providers.OllamaLocal.ReservedOutputTokens),
+            "OllamaRouter"  => (providers.OllamaRouter.MaxContextTokens,  providers.OllamaRouter.ReservedOutputTokens),
             "LmStudio"      => (providers.LmStudio.MaxContextTokens,      providers.LmStudio.ReservedOutputTokens),
             _ => (int.MaxValue, 0)   // unknown → optimistic
         };

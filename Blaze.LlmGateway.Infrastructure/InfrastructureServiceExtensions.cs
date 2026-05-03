@@ -1,5 +1,6 @@
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
+using Blaze.LlmGateway.Core.Routing;
 using Blaze.LlmGateway.Core.TaskRouting;
 using Blaze.LlmGateway.Infrastructure.ContextHandling;
 using Blaze.LlmGateway.Infrastructure.PromptCleaning;
@@ -68,6 +69,40 @@ public static class InfrastructureServiceExtensions
 
     public static IServiceCollection AddLlmInfrastructure(this IServiceCollection services)
     {
+        // Register thread-safe health state manager
+        services.AddSingleton<IOllamaHealthState, OllamaHealthStateManager>();
+        
+        // Register model sync validator (used during startup)
+        services.AddSingleton<OllamaModelSyncValidator>();
+
+        // Register Ollama router clients (pre-cached at DI time to prevent resource leaks)
+        services.AddKeyedSingleton<IChatClient>("OllamaRouter", (sp, _) =>
+        {
+            var ollamaRouterOptions = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaRouter;
+            var healthState = sp.GetRequiredService<IOllamaHealthState>();
+            var logger = sp.GetRequiredService<ILogger<OllamaFailoverClient>>();
+
+            // Create CACHED primary and fallback Ollama clients (REUSED for all requests)
+            var primaryOllamaClient = new OllamaApiClient(
+                new Uri(ollamaRouterOptions.PrimaryEndpoint),
+                ollamaRouterOptions.Model);
+
+            var fallbackOllamaClient = new OllamaApiClient(
+                new Uri(ollamaRouterOptions.FallbackEndpoint),
+                ollamaRouterOptions.Model);
+
+            // Create failover wrapper that uses cached clients
+            var failoverClient = new OllamaFailoverClient(
+                (IChatClient)primaryOllamaClient,
+                (IChatClient)fallbackOllamaClient,
+                healthState,
+                ollamaRouterOptions.PrimaryEndpoint,
+                ollamaRouterOptions.FallbackEndpoint,
+                logger);
+
+            return (IChatClient)failoverClient;
+        });
+
         services.AddSingleton<IModelSelectionResolver>(sp => new ModelSelectionResolver(
             sp,
             sp.GetRequiredService<IModelCatalog>(),
@@ -126,8 +161,7 @@ public static class InfrastructureServiceExtensions
             var providerOptions = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers;
             var availabilityRegistry = sp.GetRequiredService<IModelAvailabilityRegistry>();
             var fallback =
-                GetConfiguredKeyedClient(sp, "LmStudio", IsLmStudioConfigured(providerOptions.LmStudio) && availabilityRegistry.IsProviderAvailable("LmStudio"))
-                ?? GetConfiguredKeyedClient(sp, "OllamaLocal", IsOllamaLocalConfigured(providerOptions.OllamaLocal) && availabilityRegistry.IsProviderAvailable("OllamaLocal"))
+                GetConfiguredKeyedClient(sp, "LmStudio", HasValue(providerOptions.LmStudio.Model) && availabilityRegistry.IsProviderAvailable("LmStudio"))
                 ?? (IChatClient)new UnavailableChatClient("No currently available LLM provider is available for the default chat client.");
              
             var strategy = sp.GetRequiredService<IRoutingStrategy>();
@@ -165,27 +199,35 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<IOptions<PromptCleanupOptions>>(sp =>
             Options.Create(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.PromptCleanup));
 
+        // Same trick for TaskClassificationOptions so OllamaTaskClassifier can receive it directly.
+        services.AddSingleton<IOptions<TaskClassificationOptions>>(sp =>
+            Options.Create(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.TaskClassification));
+
         services.AddSingleton<IOptions<ContextCompactionOptions>>(sp =>
             Options.Create(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.CodebrewRouter.ContextCompaction));
 
         services.AddSingleton<IOptions<ContextSizingOptions>>(sp =>
             Options.Create(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.ContextSizing));
 
-        // Prompt cleaner: Gemma-backed when feature enabled AND OllamaLocal keyed client
-        // is registered; otherwise no-op. The cleaner is invoked by CodebrewRouterChatClient
-        // before classification and before the downstream LLM call.
+        // Prompt cleaner: Gemma-backed with cached OllamaRouter client
+        // The cleaner is invoked by CodebrewRouterChatClient before classification and before the downstream LLM call.
         services.AddSingleton<IPromptCleaner>(sp =>
         {
             var cleanupOptions = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.PromptCleanup;
-            var ollamaLocal = sp.GetKeyedService<IChatClient>("OllamaLocal");
+            
+            if (!cleanupOptions.Enabled)
+            {
+                return new NoopPromptCleaner();
+            }
 
-            if (!cleanupOptions.Enabled || ollamaLocal is null)
+            var ollamaRouter = sp.GetKeyedService<IChatClient>("OllamaRouter");
+            if (ollamaRouter is null)
             {
                 return new NoopPromptCleaner();
             }
 
             return new GemmaPromptCleaner(
-                ollamaLocal,
+                ollamaRouter,
                 sp.GetRequiredService<IOptions<PromptCleanupOptions>>(),
                 sp.GetRequiredService<ILogger<GemmaPromptCleaner>>());
         });
@@ -213,20 +255,19 @@ public static class InfrastructureServiceExtensions
         });
 
         // Task classifier: Ollama-backed with keyword fallback (zero-latency on Ollama outage)
-        services.AddSingleton<KeywordTaskClassifier>();
         services.AddSingleton<ITaskClassifier>(sp =>
         {
-            var ollamaLocal = sp.GetKeyedService<IChatClient>("OllamaLocal");
-            if (ollamaLocal is not null)
+            var ollamaRouter = sp.GetKeyedService<IChatClient>("OllamaRouter");
+            if (ollamaRouter is not null)
             {
                 return new OllamaTaskClassifier(
-                    ollamaLocal,
-                    sp.GetRequiredService<KeywordTaskClassifier>(),
+                    ollamaRouter,
+                    sp.GetRequiredService<IOptions<TaskClassificationOptions>>(),
                     sp.GetRequiredService<ILogger<OllamaTaskClassifier>>());
             }
             
             // Fallback: return keyword-only classifier when Ollama not available
-            return sp.GetRequiredService<KeywordTaskClassifier>();
+            return new KeywordTaskClassifier(sp.GetRequiredService<ILogger<KeywordTaskClassifier>>());
         });
 
         // codebrewRouter keyed client — resolved by ModelSelectionResolver when model = "codebrewRouter"
@@ -235,7 +276,7 @@ public static class InfrastructureServiceExtensions
                 GetConfiguredKeyedClient(
                     sp,
                     "LmStudio",
-                    IsLmStudioConfigured(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.LmStudio) &&
+                    HasValue(sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.LmStudio.Model) &&
                     sp.GetRequiredService<IModelAvailabilityRegistry>().IsProviderAvailable("LmStudio"))
                 ?? (IChatClient)new UnavailableChatClient("No currently available backing provider is available for codebrewRouter."),
                 sp.GetRequiredService<ITaskClassifier>(),
@@ -253,12 +294,6 @@ public static class InfrastructureServiceExtensions
 
     private static IChatClient? GetConfiguredKeyedClient(IServiceProvider sp, string key, bool isConfigured)
         => isConfigured ? sp.GetKeyedService<IChatClient>(key) : null;
-
-    private static bool IsOllamaLocalConfigured(OllamaLocalOptions options)
-        => !string.IsNullOrWhiteSpace(options.BaseUrl) && !string.IsNullOrWhiteSpace(options.Model);
-
-    private static bool IsLmStudioConfigured(LmStudioOptions options)
-        => HasValue(options.Endpoint) && HasValue(options.Model);
 
     private static bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
 }

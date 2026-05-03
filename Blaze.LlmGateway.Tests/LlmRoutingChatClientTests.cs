@@ -361,7 +361,7 @@ public class LlmRoutingChatClientTests
                 AzureFoundry = new AzureFoundryOptions { MaxContextTokens = 128_000, ReservedOutputTokens = 4096 },
                 FoundryLocal = new FoundryLocalOptions  { MaxContextTokens = 80_000,  ReservedOutputTokens = 4096 },
                 GithubModels = new GithubModelsOptions  { MaxContextTokens = 128_000, ReservedOutputTokens = 4096 },
-                OllamaLocal  = new OllamaLocalOptions   { MaxContextTokens = 32_768,  ReservedOutputTokens = 2048 },
+                OllamaRouter  = new OllamaRouterOptions   { MaxContextTokens = 32_768,  ReservedOutputTokens = 2048 },
             }
         });
         var sizingOptions = Options.Create(new ContextSizingOptions { DefaultReservedOutputTokens = 1024 });

@@ -9,6 +9,7 @@ public class LlmGatewayOptions
     public CodebrewRouterOptions CodebrewRouter { get; set; } = new();
     public ModelAvailabilityOptions Availability { get; set; } = new();
     public PromptCleanupOptions PromptCleanup { get; set; } = new();
+    public TaskClassificationOptions TaskClassification { get; set; } = new();
     public ContextSizingOptions ContextSizing { get; set; } = new();
 }
 
@@ -16,7 +17,7 @@ public class ProvidersOptions
 {
     public AzureFoundryOptions AzureFoundry { get; set; } = new();
     public FoundryLocalOptions FoundryLocal { get; set; } = new();
-    public OllamaLocalOptions OllamaLocal { get; set; } = new();
+    public OllamaRouterOptions OllamaRouter { get; set; } = new();
     public GithubModelsOptions GithubModels { get; set; } = new();
     public LmStudioOptions LmStudio { get; set; } = new();
 }
@@ -43,11 +44,33 @@ public class FoundryLocalOptions
     public int ReservedOutputTokens { get; set; } = 4096;
 }
 
-public class OllamaLocalOptions
+public class OllamaRouterOptions
 {
-    public string BaseUrl { get; set; } = "http://192.168.16.12:11434";
+    /// <summary>
+    /// Primary Ollama router endpoint (e.g., http://192.168.16.53:11434).
+    /// Used for prompt cleanup and task classification.
+    /// </summary>
+    public string PrimaryEndpoint { get; set; } = "http://192.168.16.53:11434";
+
+    /// <summary>
+    /// Fallback Ollama router endpoint (e.g., http://192.168.16.12:11434).
+    /// Used when primary is unhealthy.
+    /// </summary>
+    public string FallbackEndpoint { get; set; } = "http://192.168.16.12:11434";
+
+    /// <summary>
+    /// Router model name. Both primary and fallback MUST have this model installed.
+    /// </summary>
     public string Model { get; set; } = "gemma4:e4b";
+
+    /// <summary>
+    /// Maximum context tokens for router (used by prompt cleanup + classification).
+    /// </summary>
     public int MaxContextTokens { get; set; } = 32768;
+
+    /// <summary>
+    /// Reserved output tokens for router responses.
+    /// </summary>
     public int ReservedOutputTokens { get; set; } = 2048;
 }
 

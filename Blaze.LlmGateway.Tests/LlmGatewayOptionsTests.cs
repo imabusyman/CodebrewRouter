@@ -17,12 +17,12 @@ namespace Blaze.LlmGateway.Tests;
 public class LlmGatewayOptionsTests
 {
     [Fact]
-    public void OllamaLocalOptions_DefaultsToRemoteGemmaRouter()
+    public void OllamaRouterOptions_DefaultsToRemoteGemmaRouter()
     {
         var options = new LlmGatewayOptions();
 
-        Assert.Equal("http://192.168.16.12:11434", options.Providers.OllamaLocal.BaseUrl);
-        Assert.Equal("gemma4:e4b", options.Providers.OllamaLocal.Model);
+        Assert.Equal("http://192.168.16.53:11434", options.Providers.OllamaRouter.PrimaryEndpoint);
+        Assert.Equal("gemma4:e4b", options.Providers.OllamaRouter.Model);
     }
 
     [Fact]
@@ -277,11 +277,10 @@ public class LlmGatewayOptionsTests
             providers.Add(new ProviderAvailabilitySnapshot("GithubModels", true, null, checkedAt));
         }
 
-        if (!string.IsNullOrWhiteSpace(options.Providers.OllamaLocal.BaseUrl) &&
-            !string.IsNullOrWhiteSpace(options.Providers.OllamaLocal.Model))
+        if (!string.IsNullOrWhiteSpace(options.Providers.OllamaRouter.Model))
         {
-            models.Add(new AvailableModel(options.Providers.OllamaLocal.Model, "OllamaLocal", "ollama", "configured", options.Providers.OllamaLocal.BaseUrl, Enabled: true, LastCheckedUtc: checkedAt));
-            providers.Add(new ProviderAvailabilitySnapshot("OllamaLocal", true, null, checkedAt));
+            models.Add(new AvailableModel(options.Providers.OllamaRouter.Model, "OllamaRouter", "ollama", "configured", options.Providers.OllamaRouter.PrimaryEndpoint, Enabled: true, LastCheckedUtc: checkedAt));
+            providers.Add(new ProviderAvailabilitySnapshot("OllamaRouter", true, null, checkedAt));
         }
 
         if (!string.IsNullOrWhiteSpace(options.Providers.LmStudio.Endpoint) &&

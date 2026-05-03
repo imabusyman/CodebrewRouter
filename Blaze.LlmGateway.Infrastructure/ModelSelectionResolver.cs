@@ -30,13 +30,13 @@ public sealed class ModelSelectionResolver(
             return null;
         }
 
-        if (string.Equals(model.Provider, "OllamaLocal", StringComparison.OrdinalIgnoreCase) &&
+        if (string.Equals(model.Provider, "OllamaRouter", StringComparison.OrdinalIgnoreCase) &&
             !string.IsNullOrWhiteSpace(model.Endpoint))
         {
-            var configuredOllama = gatewayOptions.Value.Providers.OllamaLocal;
+            var configuredOllama = gatewayOptions.Value.Providers.OllamaRouter;
             if (string.Equals(model.Id, configuredOllama.Model, StringComparison.OrdinalIgnoreCase))
             {
-                logger.LogDebug("Resolving configured Ollama keyed client for model {ModelId}", modelId);
+                logger.LogDebug("Resolving configured Ollama router keyed client for model {ModelId}", modelId);
                 return serviceProvider.GetKeyedService<IChatClient>(model.Provider);
             }
 
