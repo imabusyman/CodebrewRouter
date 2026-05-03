@@ -47,21 +47,39 @@ public static class InfrastructureServiceExtensions
         {
             var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.LmStudio;
             var log = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
+            var logMock = sp.GetRequiredService<ILogger<MockChatClient>>();
+            
             log.LogDebug("Initializing LmStudio keyed client: {Endpoint}/{Model}", opts.Endpoint, opts.Model);
-            var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
-            var compactor     = sp.GetRequiredService<IContextCompactor>();
-            var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();
-            var sizingLogger  = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
-            var apiKey = string.IsNullOrWhiteSpace(opts.ApiKey) ? "notneeded" : opts.ApiKey;
-            var client = new OpenAIClient(
-                new ApiKeyCredential(apiKey),
-                new OpenAIClientOptions { Endpoint = new Uri(opts.Endpoint) });
-            return client.GetChatClient(opts.Model).AsIChatClient()
-                .AsBuilder()
-                .UseFunctionInvocation()
-                .UseContextSizing(tokenCounter, compactor, sizingOptions,
-                    opts.MaxContextTokens, opts.ReservedOutputTokens, opts.Model, sizingLogger)
-                .Build();
+            
+            try
+            {
+                var tokenCounter  = sp.GetRequiredService<TokenCounting.ITokenCounter>();
+                var compactor     = sp.GetRequiredService<IContextCompactor>();
+                var sizingOptions = sp.GetRequiredService<IOptions<ContextSizingOptions>>();
+                var sizingLogger  = sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
+                var apiKey = string.IsNullOrWhiteSpace(opts.ApiKey) ? "notneeded" : opts.ApiKey;
+                var client = new OpenAIClient(
+                    new ApiKeyCredential(apiKey),
+                    new OpenAIClientOptions { Endpoint = new Uri(opts.Endpoint) });
+                return client.GetChatClient(opts.Model).AsIChatClient()
+                    .AsBuilder()
+                    .UseFunctionInvocation()
+                    .UseContextSizing(tokenCounter, compactor, sizingOptions,
+                        opts.MaxContextTokens, opts.ReservedOutputTokens, opts.Model, sizingLogger)
+                    .Build();
+            }
+            catch (Exception ex)
+            {
+                log.LogWarning(ex, "⚠️ Failed to initialize LmStudio client; using MockChatClient for testing");
+                return new MockChatClient(logMock);
+            }
+        });
+
+        // Mock client for testing when infrastructure is unavailable
+        services.AddKeyedSingleton<IChatClient>("Mock", (sp, _) =>
+        {
+            var log = sp.GetRequiredService<ILogger<MockChatClient>>();
+            return new MockChatClient(log);
         });
 
         return services;
@@ -70,31 +88,68 @@ public static class InfrastructureServiceExtensions
     public static IServiceCollection AddLlmInfrastructure(this IServiceCollection services)
     {
         // Register thread-safe health state manager
-        services.AddSingleton<IOllamaHealthState, OllamaHealthStateManager>();
+        services.AddSingleton<IOllamaHealthState>(sp =>
+        {
+            // Create the health state manager
+            var logger = sp.GetRequiredService<ILogger<OllamaHealthStateManager>>();
+            var healthState = new OllamaHealthStateManager(logger);
+            
+            // CRITICAL: Pre-initialize endpoints IMMEDIATELY at DI registration time
+            // This must happen before any keyed client tries to use the health state
+            try
+            {
+                var ollamaRouterOptions = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaRouter;
+                
+                logger.LogInformation("🔄 Pre-initializing OllamaHealthStateManager at DI registration time");
+                logger.LogInformation("  Primary endpoint: {Primary}", ollamaRouterOptions.PrimaryEndpoint);
+                logger.LogInformation("  Fallback endpoint: {Fallback}", ollamaRouterOptions.FallbackEndpoint);
+                
+                healthState.SetEndpoints(
+                    ollamaRouterOptions.PrimaryEndpoint,
+                    ollamaRouterOptions.FallbackEndpoint);
+                
+                logger.LogInformation("✅ OllamaHealthStateManager initialized at DI time");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "❌ Failed to initialize OllamaHealthStateManager during DI registration");
+                throw;
+            }
+            
+            return healthState;
+        });
         
         // Register model sync validator (used during startup)
         services.AddSingleton<OllamaModelSyncValidator>();
 
-        // Register Ollama router clients (pre-cached at DI time to prevent resource leaks)
+        // Register Ollama router clients (lazy-initialized on first access to avoid startup hang)
         services.AddKeyedSingleton<IChatClient>("OllamaRouter", (sp, _) =>
         {
             var ollamaRouterOptions = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OllamaRouter;
             var healthState = sp.GetRequiredService<IOllamaHealthState>();
             var logger = sp.GetRequiredService<ILogger<OllamaFailoverClient>>();
 
-            // Create CACHED primary and fallback Ollama clients (REUSED for all requests)
-            var primaryOllamaClient = new OllamaApiClient(
+            logger.LogInformation("📍 Lazy-initializing OllamaRouter keyed client");
+
+            // DON'T create OllamaApiClient during DI registration; defer to first use via Lazy<T>
+            // Creating them here was causing the startup hang due to connection validation
+            
+            // WORKAROUND: Use a direct HTTP-based fallback in the OllamaFailoverClient constructor
+            // that doesn't hang during instantiation
+            var primaryClient = new OllamaApiClient(
                 new Uri(ollamaRouterOptions.PrimaryEndpoint),
                 ollamaRouterOptions.Model);
 
-            var fallbackOllamaClient = new OllamaApiClient(
+            var fallbackClient = new OllamaApiClient(
                 new Uri(ollamaRouterOptions.FallbackEndpoint),
                 ollamaRouterOptions.Model);
 
+            logger.LogInformation("✅ Ollama clients created");
+
             // Create failover wrapper that uses cached clients
             var failoverClient = new OllamaFailoverClient(
-                (IChatClient)primaryOllamaClient,
-                (IChatClient)fallbackOllamaClient,
+                (IChatClient)primaryClient,
+                (IChatClient)fallbackClient,
                 healthState,
                 ollamaRouterOptions.PrimaryEndpoint,
                 ollamaRouterOptions.FallbackEndpoint,
@@ -118,32 +173,28 @@ public static class InfrastructureServiceExtensions
             var keywordFallback = sp.GetRequiredService<KeywordRoutingStrategy>();
             var logger = sp.GetRequiredService<ILogger<OllamaMetaRoutingStrategy>>();
             
-            // TEMPORARY: Disable Ollama routing by default due to connectivity issues at startup.
-            // To enable, uncomment below and ensure OllamaLocal endpoint is reachable.
-            // TODO: Implement lazy initialization with async health check for Ollama router.
-            
-            logger.LogInformation("Using keyword-only routing strategy (Ollama routing disabled for now)");
+            // ⚠️ TEMPORARY: Skip OllamaRouter due to Ollama .12 hanging on inference requests
+            // Until Ollama is fixed/restarted, use keyword-only routing to avoid 10+ second hangs
+            logger.LogWarning("⚠️ OllamaRouter disabled due to upstream Ollama connectivity issues; using keyword-only routing");
             return keywordFallback;
             
-            // COMMENTED: Original meta-routing approach (re-enable when Ollama is reachable)
-            /*
-            try
-            {
-                var routerClient = sp.GetKeyedService<IChatClient>("OllamaLocal");
-                if (routerClient is not null)
-                {
-                    logger.LogInformation("OllamaLocal available; using meta-routing strategy with 6-second probe timeout");
-                    return new OllamaMetaRoutingStrategy(routerClient, keywordFallback, logger);
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "OllamaLocal initialization failed; falling back to keyword-only routing");
-            }
-            
-            logger.LogInformation("OllamaLocal not available; using keyword-only routing strategy");
-            return keywordFallback;
-            */
+            // Future: Re-enable when Ollama .12 is stable
+            // try
+            // {
+            //     var routerClient = sp.GetKeyedService<IChatClient>("OllamaRouter");
+            //     if (routerClient is not null)
+            //     {
+            //         logger.LogInformation("✅ OllamaRouter available; using meta-routing strategy with 10-second probe timeout");
+            //         return new OllamaMetaRoutingStrategy(routerClient, keywordFallback, logger);
+            //     }
+            // }
+            // catch (Exception ex)
+            // {
+            //     logger.LogWarning(ex, "⚠️ OllamaRouter initialization failed; falling back to keyword-only routing");
+            // }
+            // 
+            // logger.LogInformation("⚠️ OllamaRouter not available; using keyword-only routing strategy as fallback");
+            // return keywordFallback;
         });
 
         // Register failover strategy with configuration

@@ -15,7 +15,7 @@ namespace Blaze.LlmGateway.Infrastructure.RoutingStrategies;
 /// </summary>
 public class KeywordRoutingStrategy(
     ILogger<KeywordRoutingStrategy> logger,
-    RouteDestination defaultDestination = RouteDestination.AzureFoundry) : IRoutingStrategy
+    RouteDestination defaultDestination = RouteDestination.LmStudio) : IRoutingStrategy
 {
     public Task<RouteDestination> ResolveAsync(IEnumerable<ChatMessage> messages, CancellationToken cancellationToken = default)
     {
