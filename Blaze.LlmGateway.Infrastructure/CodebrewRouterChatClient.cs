@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Blaze.LlmGateway.Core;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
+using Blaze.LlmGateway.Core.Routing;
 using Blaze.LlmGateway.Core.TaskRouting;
 using Blaze.LlmGateway.Infrastructure.ContextHandling;
 using Blaze.LlmGateway.Infrastructure.PromptCleaning;
@@ -13,20 +14,6 @@ using Microsoft.Extensions.Options;
 
 namespace Blaze.LlmGateway.Infrastructure;
 
-/// <summary>
-/// Task-aware virtual LLM router registered under the keyed DI key <c>"CodebrewRouter"</c>.
-/// When a caller sends <c>model: "codebrewRouter"</c> the <see cref="ModelSelectionResolver"/>
-/// resolves to this client, which:
-/// <list type="number">
-///   <item>Optimizes the last user message via <see cref="IPromptCleaner"/> (gemma4:e4b).</item>
-///   <item>Classifies the (cleaned) conversation into a <see cref="TaskType"/>.</item>
-///   <item>Looks up the ordered provider fallback chain from <see cref="CodebrewRouterOptions.FallbackRules"/>.</item>
-///   <item>Tries each provider in sequence with the cleaned messages; on any exception the next is attempted.</item>
-///   <item>Falls back to <see cref="DelegatingChatClient.InnerClient"/> (AzureFoundry) when all providers fail.</item>
-/// </list>
-/// The cleaner runs once per request; the cleaned message list is shared by the classifier
-/// and every downstream provider attempt so the optimization benefit reaches the paid call.
-/// </summary>
 public sealed class CodebrewRouterChatClient(
     IChatClient innerClient,
     ITaskClassifier taskClassifier,
@@ -42,6 +29,50 @@ public sealed class CodebrewRouterChatClient(
     private CodebrewRouterOptions Options => options.Value;
     private LlmGatewayOptions GatewayOptions => gatewayOptions.Value;
 
+    private void Log<T>(T @event, LogLevel level = LogLevel.Information)
+    {
+        if (!logger.IsEnabled(level))
+            return;
+
+        var tag = @event switch
+        {
+            RouterStartEvent          => "[ROUTER-START]",
+            RouterCleanEvent          => "[ROUTER-CLEAN]",
+            RouterResolveEvent        => "[ROUTER-RESOLVE]",
+            RouterContextBudgetEvent  => "[ROUTER-CONTEXT]",
+            RouterCompactEvent        => "[ROUTER-COMPACT]",
+            RouterSkipEvent           => "[ROUTER-SKIP]",
+            RouterTryEvent            => "[ROUTER-TRY]",
+            RouterProbeEvent          => "[ROUTER-PROBE]",
+            RouterSuccessEvent        => "[ROUTER-SUCCESS]",
+            RouterFailEvent           => "[ROUTER-FAIL]",
+            RouterExhaustedEvent      => "[ROUTER-EXHAUSTED]",
+            RouterMidstreamFailEvent  => "[ROUTER-MIDSTREAM-FAIL]",
+            RouterStreamCompleteEvent => "[ROUTER-STREAM-COMPLETE]",
+            _ => "[ROUTER-UNKNOWN]"
+        };
+
+        logger.Log(level, "{Tag} {@Event}", tag, @event);
+    }
+
+    private static string ResolveModelName(string providerKey, LlmGatewayOptions gatewayOptions)
+    {
+        if (Enum.TryParse<RouteDestination>(providerKey, out var dest)
+            && OpenCodeGoModels.ModelNames.TryGetValue(dest, out var modelName))
+        {
+            return modelName;
+        }
+
+        return providerKey switch
+        {
+            "LmStudio"    => gatewayOptions.Providers.LmStudio.Model,
+            "OllamaRouter" => gatewayOptions.Providers.OllamaRouter.Model,
+            _ => providerKey
+        };
+    }
+
+    private string ModelName(string providerKey) => ResolveModelName(providerKey, GatewayOptions);
+
     // ── Non-streaming ─────────────────────────────────────────────────────────
 
     public override async Task<ChatResponse> GetResponseAsync(
@@ -49,42 +80,64 @@ public sealed class CodebrewRouterChatClient(
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         var messageList = chatMessages as IList<ChatMessage> ?? chatMessages.ToList();
+
+        Log(new RouterStartEvent(messageList.Count));
+
+        var cleanSw = System.Diagnostics.Stopwatch.StartNew();
         var cleanedMessages = await CleanMessagesAsync(messageList, cancellationToken);
+        cleanSw.Stop();
+
         var (taskType, providers, tokenCount) = await ResolveAsync(cleanedMessages, cancellationToken);
+        var chain = string.Join(", ", providers.Select(ModelName));
+
+        Log(new RouterResolveEvent(
+            taskType.ToString(), tokenCount, providers.Length, chain, sw.ElapsedMilliseconds));
 
         for (var i = 0; i < providers.Length; i++)
         {
             var key = providers[i];
+            var model = ModelName(key);
             var client = serviceProvider.GetKeyedService<IChatClient>(key);
             if (client is null)
             {
-                logger.LogDebug("⚠️ codebrewRouter provider '{Key}' not registered — skipping", key);
+                logger.LogDebug("[ROUTER-SKIP] provider '{Key}' not registered", key);
                 continue;
             }
 
             var providerMessages = await PrepareMessagesForProviderAsync(key, cleanedMessages, options, cancellationToken);
             if (providerMessages is null)
             {
-                logger.LogDebug("codebrewRouter: PrepareMessagesForProvider({Key}) returned null — skipping", key);
+                logger.LogDebug("[ROUTER-SKIP] PrepareMessagesForProvider({Key}) returned null", key);
                 continue;
             }
 
-            logger.LogInformation("🎯 codebrewRouter trying {Key} (attempt {Attempt}/{Total}) for {TaskType}",
-                key, i + 1, providers.Length, taskType);
+            var attemptSw = System.Diagnostics.Stopwatch.StartNew();
+            Log(new RouterTryEvent(i + 1, providers.Length, key, model, taskType.ToString()));
             try
             {
                 var response = await client.GetResponseAsync(providerMessages, options, cancellationToken);
-                logger.LogInformation("✅ codebrewRouter succeeded with {Key} for {TaskType}", key, taskType);
+                attemptSw.Stop();
+
+                Log(new RouterSuccessEvent(
+                    i + 1, key, model, taskType.ToString(),
+                    response.FinishReason?.ToString(),
+                    (int?)response.Usage?.InputTokenCount,
+                    (int?)response.Usage?.OutputTokenCount,
+                    attemptSw.ElapsedMilliseconds));
+
                 return response;
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "⚠️ codebrewRouter provider {Key} failed: {Message}. Trying next.", key, ex.Message);
+                attemptSw.Stop();
+                Log(new RouterFailEvent(i + 1, key, model, ex.Message), LogLevel.Warning);
             }
         }
 
-        logger.LogWarning("⚠️ codebrewRouter all providers exhausted for {TaskType} — using InnerClient", taskType);
+        Log(new RouterExhaustedEvent(providers.Length, taskType.ToString(), "LmStudio"), LogLevel.Warning);
+
         var innerMessages = await PrepareMessagesForProviderAsync("LmStudio", cleanedMessages, options, cancellationToken)
             ?? cleanedMessages;
         return await InnerClient.GetResponseAsync(innerMessages, options, cancellationToken);
@@ -98,64 +151,65 @@ public sealed class CodebrewRouterChatClient(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var globalSw = System.Diagnostics.Stopwatch.StartNew();
-        logger.LogInformation("🎬 [ROUTER-STREAM-START] GetStreamingResponseAsync entry - messages count: {Count}", 
-            (chatMessages as IList<ChatMessage>)?.Count ?? (chatMessages as IEnumerable<ChatMessage>)?.Count() ?? 0);
-        
         var messageList = chatMessages as IList<ChatMessage> ?? chatMessages.ToList();
-        
+
+        Log(new RouterStartEvent(messageList.Count));
+
         var cleanSw = System.Diagnostics.Stopwatch.StartNew();
         var cleanedMessages = await CleanMessagesAsync(messageList, cancellationToken);
         cleanSw.Stop();
-        logger.LogInformation("✅ [ROUTER-CLEAN] CleanMessagesAsync completed in {Ms}ms", cleanSw.ElapsedMilliseconds);
-        
+        Log(new RouterCleanEvent(
+            messageList.LastOrDefault(m => m.Role == ChatRole.User)?.Text?.Length ?? 0,
+            cleanedMessages.LastOrDefault(m => m.Role == ChatRole.User)?.Text?.Length ?? 0,
+            cleanSw.ElapsedMilliseconds));
+
         var resolveSw = System.Diagnostics.Stopwatch.StartNew();
         var (taskType, providers, tokenCount) = await ResolveAsync(cleanedMessages, cancellationToken);
         resolveSw.Stop();
-        logger.LogInformation("✅ [ROUTER-RESOLVE] ResolveAsync completed in {Ms}ms - TaskType: {TaskType}, Providers: {ProviderCount}", 
-            resolveSw.ElapsedMilliseconds, taskType, providers.Length);
+        var chain = string.Join(", ", providers.Select(ModelName));
+
+        Log(new RouterResolveEvent(
+            taskType.ToString(), tokenCount, providers.Length, chain, resolveSw.ElapsedMilliseconds));
 
         for (var i = 0; i < providers.Length; i++)
         {
             var key = providers[i];
-            logger.LogInformation("🔍 [ROUTER-PROVIDER-{Index}] Checking keyed service for provider: {Key}", i, key);
-            
+            var model = ModelName(key);
+
             var client = serviceProvider.GetKeyedService<IChatClient>(key);
             if (client is null)
             {
-                logger.LogDebug("⚠️ codebrewRouter provider '{Key}' not registered — skipping", key);
+                logger.LogDebug("[ROUTER-SKIP] provider '{Key}' not registered", key);
                 continue;
             }
 
-            logger.LogInformation("📨 [ROUTER-PREPARE-{Index}] PrepareMessagesForProvider for {Key}", i, key);
-            var prepSw = System.Diagnostics.Stopwatch.StartNew();
             var providerMessages = await PrepareMessagesForProviderAsync(key, cleanedMessages, options, cancellationToken);
-            prepSw.Stop();
-            logger.LogInformation("✅ [ROUTER-PREPARE-{Index}] PrepareMessagesForProvider completed in {Ms}ms", i, prepSw.ElapsedMilliseconds);
-            
             if (providerMessages is null)
             {
-                logger.LogDebug("⚠️ [ROUTER-PROVIDER-{Index}] PrepareMessagesForProvider returned null for {Key}", i, key);
+                logger.LogDebug("[ROUTER-SKIP] PrepareMessagesForProvider({Key}) returned null", key);
                 continue;
             }
 
-            logger.LogInformation("🎯 codebrewRouter streaming: trying {Key} (attempt {Attempt}/{Total}) for {TaskType}",
-                key, i + 1, providers.Length, taskType);
+            Log(new RouterTryEvent(i + 1, providers.Length, key, model, taskType.ToString()));
 
-            logger.LogInformation("📞 [ROUTER-FIRST-CHUNK-{Index}] Calling TryGetFirstChunkAsync for {Key}", i, key);
             var chunkSw = System.Diagnostics.Stopwatch.StartNew();
             var result = await TryGetFirstChunkAsync(client, providerMessages, options, cancellationToken);
             chunkSw.Stop();
-            logger.LogInformation("✅ [ROUTER-FIRST-CHUNK-{Index}] TryGetFirstChunkAsync completed in {Ms}ms - Success: {Success}", i, chunkSw.ElapsedMilliseconds, result.Success);
+
+            Log(new RouterProbeEvent(i + 1, key, model, chunkSw.ElapsedMilliseconds, result.Success));
+
             if (!result.Success)
             {
-                logger.LogWarning("⚠️ [ROUTER-FIRST-CHUNK-{Index}] codebrewRouter streaming provider {Key} failed before first chunk. Trying next.", i, key);
+                Log(new RouterFailEvent(i + 1, key, model, "First chunk probe failed"), LogLevel.Warning);
                 continue;
             }
 
-            logger.LogInformation("✅ codebrewRouter streaming succeeded with {Key} for {TaskType}", key, taskType);
+            Log(new RouterSuccessEvent(
+                i + 1, key, model, taskType.ToString(), null, null, null, chunkSw.ElapsedMilliseconds));
 
             yield return result.FirstChunk;
 
+            var chunkCount = 1;
             var enumerator = result.Enumerator!;
             while (true)
             {
@@ -165,34 +219,42 @@ public sealed class CodebrewRouterChatClient(
                 {
                     hasMore = await enumerator.MoveNextAsync();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    logger.LogWarning(ex, "⚠️ codebrewRouter mid-stream failure from {Key} — ending stream", key);
+                    Log(new RouterMidstreamFailEvent(key, model), LogLevel.Warning);
                     streamFailed = true;
                 }
 
                 if (streamFailed || !hasMore)
                 {
                     await enumerator.DisposeAsync();
+                    if (!streamFailed)
+                    {
+                        Log(new RouterStreamCompleteEvent(chunkCount, key, model, taskType.ToString(), globalSw.ElapsedMilliseconds));
+                    }
                     yield break;
                 }
 
+                chunkCount++;
                 yield return enumerator.Current;
             }
         }
 
-        logger.LogWarning("⚠️ codebrewRouter all streaming providers exhausted for {TaskType} — probing InnerClient", taskType);
+        Log(new RouterExhaustedEvent(providers.Length, taskType.ToString(), "LmStudio"), LogLevel.Warning);
+
         var innerMessages = await PrepareMessagesForProviderAsync("LmStudio", cleanedMessages, options, cancellationToken)
             ?? cleanedMessages;
         var innerResult = await TryGetFirstChunkAsync(InnerClient, innerMessages, options, cancellationToken);
         if (!innerResult.Success)
         {
-            logger.LogError("❌ codebrewRouter InnerClient also failed for {TaskType} — all providers exhausted", taskType);
+            Log(new RouterFailEvent(0, "LmStudio", "InnerClient", "InnerClient probe failed"), LogLevel.Error);
             throw new InvalidOperationException(
                 $"All streaming providers (including InnerClient fallback) failed for task {taskType}.");
         }
 
         yield return innerResult.FirstChunk;
+
+        var innerChunkCount = 1;
         var innerEnumerator = innerResult.Enumerator!;
         while (true)
         {
@@ -202,35 +264,33 @@ public sealed class CodebrewRouterChatClient(
             {
                 hasMore = await innerEnumerator.MoveNextAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                logger.LogWarning(ex, "⚠️ codebrewRouter InnerClient mid-stream failure for {TaskType} — ending stream", taskType);
+                Log(new RouterMidstreamFailEvent("LmStudio", "InnerClient"), LogLevel.Warning);
                 streamFailed = true;
             }
 
             if (streamFailed || !hasMore)
             {
                 await innerEnumerator.DisposeAsync();
+                if (!streamFailed)
+                {
+                    Log(new RouterStreamCompleteEvent(innerChunkCount, "LmStudio", "InnerClient", taskType.ToString(), globalSw.ElapsedMilliseconds));
+                }
                 yield break;
             }
 
+            innerChunkCount++;
             yield return innerEnumerator.Current;
         }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Returns a copy of <paramref name="messages"/> with the last <see cref="ChatRole.User"/>
-    /// message replaced by the cleaner-optimized text. If the cleaner returns the original
-    /// text (no-op cleaner, short prompt, validation failure, or open circuit) this returns
-    /// the input list unchanged.
-    /// </summary>
     private async Task<IList<ChatMessage>> CleanMessagesAsync(
         IList<ChatMessage> messages,
         CancellationToken cancellationToken)
     {
-        // Find the last user message — that's the only one we rewrite.
         int lastUserIdx = -1;
         for (int i = messages.Count - 1; i >= 0; i--)
         {
@@ -258,15 +318,13 @@ public sealed class CodebrewRouterChatClient(
         }
         catch (OperationCanceledException)
         {
-            logger.LogWarning("⏱️ Prompt cleaner timed out after 3 seconds; using original prompt");
+            logger.LogWarning("Prompt cleaner timed out after 3 seconds; using original prompt");
             cleaned = originalText;
         }
 
         if (ReferenceEquals(cleaned, originalText) || string.Equals(cleaned, originalText, StringComparison.Ordinal))
             return messages;
 
-        // Build a shallow copy with the rewritten message swapped in. Preserve the
-        // original ChatRole, AuthorName, and any AdditionalProperties on the user message.
         var rewritten = new ChatMessage(lastUser.Role, cleaned)
         {
             AuthorName = lastUser.AuthorName,
@@ -286,10 +344,7 @@ public sealed class CodebrewRouterChatClient(
         CancellationToken cancellationToken)
     {
         var tokenCount = tokenCounter.CountTokens(messages);
-        logger.LogInformation("📏 codebrewRouter calculated prompt context size as {TokenCount} tokens", tokenCount);
-
         var taskType = await taskClassifier.ClassifyAsync(messages, cancellationToken);
-        logger.LogInformation("🧠 codebrewRouter classified task as {TaskType} (Context: {TokenCount} tokens)", taskType, tokenCount);
 
         var typeKey = taskType.ToString();
         var providers =
@@ -315,35 +370,31 @@ public sealed class CodebrewRouterChatClient(
 
         var currentTokenCount = tokenCounter.CountTokens(messages, contextBudget.ModelId);
         var inputBudget = CalculateInputBudget(contextBudget, options);
+
         if (currentTokenCount <= inputBudget)
         {
+            logger.LogDebug("[ROUTER-CONTEXT] {Key} fits: {Current}/{Budget} of {Max} tokens",
+                providerKey, currentTokenCount, inputBudget, contextBudget.MaxContextTokens);
             return messages;
         }
 
-        logger.LogInformation(
-            "⚠️ codebrewRouter provider {ProviderKey} cannot fit current context ({CurrentTokens}/{InputBudget} input tokens)",
-            providerKey,
-            currentTokenCount,
-            inputBudget);
+        Log(new RouterContextBudgetEvent(
+            0, providerKey, ModelName(providerKey), currentTokenCount, inputBudget, contextBudget.MaxContextTokens),
+            LogLevel.Debug);
 
         var compactionRatio = Math.Clamp(Options.ContextCompaction.TargetBudgetRatio, 0.1d, 1.0d);
         var compactionTarget = Math.Max(1, (int)Math.Floor(inputBudget * compactionRatio));
         var compactionResult = await contextCompactor.CompactAsync(messages, compactionTarget, contextBudget.ModelId, cancellationToken);
         if (compactionResult.WasCompacted && compactionResult.CompactedTokenCount <= inputBudget)
         {
-            logger.LogInformation(
-                "✅ codebrewRouter compacted context for {ProviderKey} ({OriginalTokens} -> {CompactedTokens})",
-                providerKey,
-                compactionResult.OriginalTokenCount,
-                compactionResult.CompactedTokenCount);
+            Log(new RouterCompactEvent(0, providerKey, compactionResult.OriginalTokenCount, compactionResult.CompactedTokenCount));
             return compactionResult.Messages;
         }
 
-        logger.LogWarning(
-            "⚠️ codebrewRouter skipping {ProviderKey}; context still too large after compaction attempt ({CurrentTokens}/{InputBudget})",
-            providerKey,
+        Log(new RouterSkipEvent(0, providerKey, ModelName(providerKey),
             compactionResult.WasCompacted ? compactionResult.CompactedTokenCount : currentTokenCount,
-            inputBudget);
+            inputBudget), LogLevel.Warning);
+
         return null;
     }
 
@@ -396,12 +447,6 @@ public sealed class CodebrewRouterChatClient(
 
     private static bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
 
-    /// <summary>
-    /// Regular async method (NOT an iterator) that tries to obtain the first chunk of a
-    /// streaming response. Because this is not an iterator, try/catch works normally.
-    /// Returns a success flag, the first chunk, and the still-open enumerator so the
-    /// caller can continue streaming without restarting.
-    /// </summary>
     private static async Task<FirstChunkResult> TryGetFirstChunkAsync(
         IChatClient client,
         IList<ChatMessage> messages,
