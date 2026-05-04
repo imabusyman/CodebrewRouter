@@ -1,6 +1,7 @@
 using Blaze.LlmGateway.Core.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -14,6 +15,7 @@ public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Registers local inference services (LocalGemmaChatClient, RuntimeDownloadModelProvider, routing strategy).
+    /// Also registers Phase 1 health management services: availability tracking, remote discovery, and health checks.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The application configuration.</param>
@@ -24,6 +26,10 @@ public static class ServiceCollectionExtensions
     /// - RuntimeDownloadModelProvider as singleton IModelDistributionProvider
     /// - LocalGemmaChatClient as keyed "LocalGemma" IChatClient
     /// - HybridRoutingStrategyFactory for hybrid routing logic
+    /// - ILocalModelAvailability as singleton LocalModelAvailabilityService
+    /// - ICodebrewRouterDiscoveryService as singleton CodebrewRouterDiscoveryService
+    /// - ILocalInferenceHealthManager as singleton LocalInferenceHealthManager
+    /// - Health check for local inference
     /// 
     /// If LocalInferenceOptions is not bound in configuration, a default instance is used.
     /// </remarks>
@@ -78,6 +84,18 @@ public static class ServiceCollectionExtensions
             // routerClient is optional - pass null if not available
             return new HybridRoutingStrategyFactory(opts, modelProvider, null, loggerFactory, logger);
         });
+
+        // Phase 1: Register availability and health management services
+        services.AddSingleton<ILocalModelAvailability, LocalModelAvailabilityService>();
+        services.AddSingleton<ICodebrewRouterDiscoveryService, CodebrewRouterDiscoveryService>();
+        services.AddSingleton<ILocalInferenceHealthManager, LocalInferenceHealthManager>();
+
+        // Register health check for local inference
+        services.AddHealthChecks()
+            .AddCheck<LocalInferenceHealthManager>(
+                "local-inference",
+                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                tags: ["local-inference", "readiness"]);
 
         return services;
     }

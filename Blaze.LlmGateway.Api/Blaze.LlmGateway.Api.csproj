@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Blaze.LlmGateway.Infrastructure\Blaze.LlmGateway.Infrastructure.csproj" />
     <ProjectReference Include="..\Blaze.LlmGateway.Core\Blaze.LlmGateway.Core.csproj" />
     <ProjectReference Include="..\Blaze.LlmGateway.ServiceDefaults\Blaze.LlmGateway.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Blaze.LlmGateway.LocalInference\Blaze.LlmGateway.LocalInference.csproj" />
   </ItemGroup>
 
 </Project>

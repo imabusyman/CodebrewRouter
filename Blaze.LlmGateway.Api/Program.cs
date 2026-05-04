@@ -3,6 +3,7 @@ using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Infrastructure;
+using Blaze.LlmGateway.LocalInference;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
@@ -51,8 +52,12 @@ builder.Services.AddSingleton<ModelAvailabilityRegistry>();
 builder.Services.AddSingleton<IModelAvailabilityRegistry>(sp => sp.GetRequiredService<ModelAvailabilityRegistry>());
 builder.Services.AddHostedService<ModelAvailabilityHeartbeatService>();
 builder.Services.AddSingleton<IModelCatalog, ModelCatalogService>();
+
+// Phase 1: Local inference - availability tracking, remote discovery, and health management
+builder.Services.AddLocalInferenceServices(builder.Configuration);
+
 builder.Services.AddHealthChecks()
-    .AddCheck<ModelProviderHealthCheck>("model_providers", failureStatus: HealthStatus.Degraded);
+    .AddCheck<ModelProviderHealthCheck>("model_providers", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
 
 // MCP integration disabled (microsoft-learn server connection issues)
 // To re-enable: uncomment below and ensure @microsoft/mcp-server-microsoft-learn is available
