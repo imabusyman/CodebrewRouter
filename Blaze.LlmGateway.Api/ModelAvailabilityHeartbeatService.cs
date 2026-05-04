@@ -1,3 +1,4 @@
+using Blaze.LlmGateway.Core;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
 using Microsoft.Extensions.AI;
@@ -123,6 +124,10 @@ public sealed class ModelAvailabilityHeartbeatService(
 
         logger.LogDebug("  ├─ Adding CodebrewRouter virtual model");
         AddCodebrewRouterModel(models, providers, checkedAt);
+
+        // Probe OpenCode Go cloud endpoint
+        logger.LogDebug("  ├─ Probing OpenCode Go");
+        await ProbeOpenCodeGoAsync(models, providers, checkedAt, cancellationToken);
         
         registry.UpdateSnapshot(models, providers);
 
@@ -167,6 +172,24 @@ public sealed class ModelAvailabilityHeartbeatService(
             checkedAt);
 
         AddCodebrewRouterModel(models, providers, checkedAt);
+
+        // Seed all 14 OpenCodeGo models (enabled initially since API key is present;
+        // the live probe will flip them to disabled if the endpoint is unreachable)
+        if (!string.IsNullOrWhiteSpace(_options.Providers.OpenCodeGo.ApiKey))
+        {
+            foreach (var (dest, modelName) in OpenCodeGoModels.ModelNames)
+            {
+                providers.Add(new ProviderAvailabilitySnapshot(dest.ToString(), true, null, checkedAt));
+                models.Add(new AvailableModel(
+                    modelName,
+                    dest.ToString(),
+                    "opencode-go",
+                    "cloud",
+                    _options.Providers.OpenCodeGo.BaseUrl,
+                    Enabled: true,
+                    LastCheckedUtc: checkedAt));
+            }
+        }
     }
 
     private async Task ProbeLmStudioAsync(
@@ -497,4 +520,54 @@ public sealed class ModelAvailabilityHeartbeatService(
         => string.Equals(providerKey, "FoundryLocal", StringComparison.OrdinalIgnoreCase) ||
            string.Equals(providerKey, "OllamaLocal", StringComparison.OrdinalIgnoreCase) ||
            string.Equals(providerKey, "LmStudio", StringComparison.OrdinalIgnoreCase);
+
+    private async Task ProbeOpenCodeGoAsync(
+        ICollection<AvailableModel> models,
+        ICollection<ProviderAvailabilitySnapshot> providers,
+        DateTimeOffset checkedAt,
+        CancellationToken cancellationToken)
+    {
+        var opts = _options.Providers.OpenCodeGo;
+        if (string.IsNullOrWhiteSpace(opts.ApiKey))
+        {
+            logger.LogDebug("  ├─ OpenCode Go not configured (no API key); skipping probe");
+            return;
+        }
+
+        logger.LogInformation("🔍 Probing OpenCode Go at {BaseUrl}", opts.BaseUrl);
+        try
+        {
+            using var http = new HttpClient();
+            http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", opts.ApiKey);
+            using var timeoutCts = CreateTimeoutToken(cancellationToken);
+            var response = await http.GetAsync(
+                $"{opts.BaseUrl.TrimEnd('/')}/models", timeoutCts.Token);
+
+            if (response.IsSuccessStatusCode)
+            {
+                logger.LogInformation("✅ OpenCode Go probe succeeded");
+                foreach (var (dest, modelName) in OpenCodeGoModels.ModelNames)
+                {
+                    providers.Add(new ProviderAvailabilitySnapshot(dest.ToString(), true, null, checkedAt));
+                    models.Add(new AvailableModel(
+                        modelName,
+                        dest.ToString(),
+                        "opencode-go",
+                        "cloud",
+                        opts.BaseUrl,
+                        Enabled: true,
+                        LastCheckedUtc: checkedAt));
+                }
+                return;
+            }
+
+            var body = await response.Content.ReadAsStringAsync();
+            logger.LogWarning("⚠️ OpenCode Go probe returned {StatusCode}: {Body}", (int)response.StatusCode, body);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "⚠️ OpenCode Go probe failed: {Error}", GetErrorMessage(ex));
+        }
+    }
 }

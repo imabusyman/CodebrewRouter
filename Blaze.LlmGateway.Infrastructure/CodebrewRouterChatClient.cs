@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Blaze.LlmGateway.Core;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Core.TaskRouting;
@@ -353,6 +354,10 @@ public sealed class CodebrewRouterChatClient(
         return providerKey switch
         {
             "LmStudio" => HasValue(providers.LmStudio.Endpoint) && HasValue(providers.LmStudio.Model) && availabilityRegistry.IsProviderAvailable("LmStudio"),
+
+            var k when k.StartsWith("OpenCodeGo_", StringComparison.OrdinalIgnoreCase)
+                => HasValue(providers.OpenCodeGo.ApiKey) && availabilityRegistry.IsProviderAvailable(k),
+
             _ => true
         };
     }
@@ -369,6 +374,14 @@ public sealed class CodebrewRouterChatClient(
                     providers.LmStudio.MaxContextTokens,
                     providers.LmStudio.ReservedOutputTokens);
                 return HasValue(providers.LmStudio.Model) && providers.LmStudio.MaxContextTokens > 0;
+
+            case var k when k.StartsWith("OpenCodeGo_", StringComparison.OrdinalIgnoreCase):
+                budget = new ProviderContextBudget(
+                    k,
+                    providers.OpenCodeGo.MaxContextTokens,
+                    providers.OpenCodeGo.ReservedOutputTokens);
+                return HasValue(providers.OpenCodeGo.ApiKey) && providers.OpenCodeGo.MaxContextTokens > 0;
+
             default:
                 budget = default;
                 return false;

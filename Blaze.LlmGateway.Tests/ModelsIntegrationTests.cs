@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Blaze.LlmGateway.Core;
 using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Core.Configuration;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -50,15 +51,20 @@ public class ModelsIntegrationTests : IAsyncLifetime
                     services.AddKeyedSingleton<IChatClient>("GithubModels", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("LmStudio", mockChatClient.Object);
+
+                    foreach (var (dest, _) in OpenCodeGoModels.ModelNames)
+                    {
+                        services.AddKeyedSingleton<IChatClient>(dest.ToString(), mockChatClient.Object);
+                    }
+
                     services.AddSingleton<IModelCatalog>(new FakeModelCatalog());
                     
                     // Configure LM Studio with a valid endpoint for IsLmStudioConfigured check.
                     // Discovery will fail gracefully (network timeout), but the chat probe
                     // will use our mock client, so the provider ends up healthy in the registry.
-                    services.Configure<LlmGatewayOptions>(options =>
+                    services.PostConfigure<LlmGatewayOptions>(options =>
                     {
-                        // LmStudio endpoint configured in appsettings.json will be loaded,
-                        // and discovery will fail gracefully when unreachable.
+                        options.Providers.OpenCodeGo.ApiKey = "sk-test";
                     });
                 });
             });
@@ -350,10 +356,11 @@ public class ModelsIntegrationTests : IAsyncLifetime
             .Select(provider => provider.GetString())
             .ToArray();
 
-        Assert.Contains("OllamaRouter", providers);
+        Assert.Contains("OpenCodeGo_Qwen3_5Plus", providers);
         Assert.Contains("LmStudio", providers);
         Assert.DoesNotContain("AzureFoundry", providers);
         Assert.DoesNotContain("FoundryLocal", providers);
+        Assert.DoesNotContain("OllamaRouter", providers);
     }
 
     [Fact]

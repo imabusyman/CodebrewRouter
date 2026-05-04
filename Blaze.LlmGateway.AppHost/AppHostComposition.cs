@@ -32,6 +32,8 @@ public static class AppHostComposition
         var lmStudioModel = builder.Configuration.GetValue(
             "LlmGateway:Providers:LmStudio:Model",
             "local-model");
+        var openCodeGoApiKey = builder.Configuration.GetValue<string>(
+            "LlmGateway:Providers:OpenCodeGo:ApiKey") ?? "";
 
         // Gateway API listen URLs — controls which interfaces/ports Kestrel binds to.
         // Leave empty to use Kestrel defaults (localhost only from launchSettings.json).
@@ -45,7 +47,8 @@ public static class AppHostComposition
             .WithEnvironment("LlmGateway__Providers__OllamaLocal__BaseUrl", ollamaLocalBaseUrl)
             .WithEnvironment("LlmGateway__Providers__OllamaLocal__Model", ollamaLocalModel)
             .WithEnvironment("LlmGateway__Providers__LmStudio__Endpoint", lmStudioEndpoint)
-            .WithEnvironment("LlmGateway__Providers__LmStudio__Model", lmStudioModel);
+            .WithEnvironment("LlmGateway__Providers__LmStudio__Model", lmStudioModel)
+            .WithEnvironment("LlmGateway__Providers__OpenCodeGo__ApiKey", openCodeGoApiKey);
 
         aspireLogger.LogDebug("  ├─ API environment configuration:");
         aspireLogger.LogDebug("  │  ├─ OllamaLocal: {Url} ({Model})", ollamaLocalBaseUrl, ollamaLocalModel);

@@ -17,6 +17,7 @@ public class ProvidersOptions
 {
     public OllamaRouterOptions OllamaRouter { get; set; } = new();
     public LmStudioOptions LmStudio { get; set; } = new();
+    public OpenCodeGoOptions OpenCodeGo { get; set; } = new();
 }
 
 public class OllamaRouterOptions
@@ -57,6 +58,14 @@ public class LmStudioOptions
     public string ApiKey { get; set; } = "notneeded";
     public int MaxContextTokens { get; set; } = 32768;
     public int ReservedOutputTokens { get; set; } = 2048;
+}
+
+public class OpenCodeGoOptions
+{
+    public string BaseUrl { get; set; } = "https://opencode.ai/zen/go/v1";
+    public string ApiKey { get; set; } = "";
+    public int MaxContextTokens { get; set; } = 128000;
+    public int ReservedOutputTokens { get; set; } = 16384;
 }
 
 public class RoutingOptions

@@ -20,13 +20,13 @@ public class CodebrewRouterOptions
     /// </summary>
     public Dictionary<string, string[]> FallbackRules { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Reasoning"]             = ["OllamaRouter", "LmStudio"],
-        ["Coding"]                = ["OllamaRouter", "LmStudio"],
-        ["Research"]              = ["OllamaRouter", "LmStudio"],
-        ["VisionObjectDetection"] = ["LmStudio"],
-        ["Creative"]              = ["OllamaRouter", "LmStudio"],
-        ["DataAnalysis"]          = ["OllamaRouter", "LmStudio"],
-        ["General"]               = ["OllamaRouter", "LmStudio"],
+        ["Reasoning"]             = ["OpenCodeGo_KimiK2_6", "OpenCodeGo_DeepSeekV4Pro", "OpenCodeGo_KimiK2_5", "OpenCodeGo_DeepSeekV4Flash", "LmStudio"],
+        ["Coding"]                = ["OpenCodeGo_DeepSeekV4Pro", "OpenCodeGo_Qwen3_6Plus", "OpenCodeGo_MiniMaxM2_7", "OpenCodeGo_MiMoV2_5Pro", "OpenCodeGo_DeepSeekV4Flash", "LmStudio"],
+        ["Research"]              = ["OpenCodeGo_KimiK2_6", "OpenCodeGo_GLM5_1", "OpenCodeGo_MiMoV2_5", "OpenCodeGo_MiniMaxM2_7", "OpenCodeGo_DeepSeekV4Flash", "LmStudio"],
+        ["VisionObjectDetection"] = ["OpenCodeGo_MiMoV2Omni", "OpenCodeGo_GLM5_1", "OpenCodeGo_MiMoV2_5", "OpenCodeGo_DeepSeekV4Flash", "LmStudio"],
+        ["Creative"]              = ["OpenCodeGo_GLM5_1", "OpenCodeGo_MiMoV2_5", "OpenCodeGo_GLM5", "OpenCodeGo_MiniMaxM2_5", "OpenCodeGo_DeepSeekV4Flash", "LmStudio"],
+        ["DataAnalysis"]          = ["OpenCodeGo_DeepSeekV4Pro", "OpenCodeGo_Qwen3_6Plus", "OpenCodeGo_MiniMaxM2_7", "OpenCodeGo_DeepSeekV4Flash", "LmStudio"],
+        ["General"]               = ["OpenCodeGo_Qwen3_5Plus", "OpenCodeGo_MiniMaxM2_5", "OpenCodeGo_Qwen3_6Plus", "OpenCodeGo_MiMoV2_5Pro", "OpenCodeGo_DeepSeekV4Flash", "LmStudio"],
     };
 
     /// <summary>

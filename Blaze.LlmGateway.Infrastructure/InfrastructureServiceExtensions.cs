@@ -1,3 +1,4 @@
+using Blaze.LlmGateway.Core;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
 using Blaze.LlmGateway.Core.Routing;
@@ -74,6 +75,46 @@ public static class InfrastructureServiceExtensions
                 return new MockChatClient(logMock);
             }
         });
+
+        // ── OpenCode Go — cloud provider with 14 models ───────────────
+        // Register one shared OpenAIClient (single HTTP connection pool) and
+        // 14 keyed IChatClient wrappers that resolve it per-model.
+
+        services.AddKeyedSingleton<OpenAIClient>("OpenCodeGo_Client", (sp, _) =>
+        {
+            var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OpenCodeGo;
+            var apiKey = string.IsNullOrWhiteSpace(opts.ApiKey) ? "notneeded" : opts.ApiKey;
+            return new OpenAIClient(
+                new ApiKeyCredential(apiKey),
+                new OpenAIClientOptions { Endpoint = new Uri(opts.BaseUrl) });
+        });
+
+        var tokenCounterOcg = default(Blaze.LlmGateway.Infrastructure.TokenCounting.ITokenCounter);
+        var compactorOcg   = default(IContextCompactor);
+        IOptions<ContextSizingOptions>? sizingOptionsOcg = null;
+        ILogger<ContextHandling.ContextSizingChatClient>? sizingLoggerOcg = null;
+
+        foreach (var (dest, modelName) in OpenCodeGoModels.ModelNames)
+        {
+            var key = dest.ToString();
+            services.AddKeyedSingleton<IChatClient>(key, (sp, _) =>
+            {
+                var client = sp.GetRequiredKeyedService<OpenAIClient>("OpenCodeGo_Client");
+                var opts = sp.GetRequiredService<IOptions<LlmGatewayOptions>>().Value.Providers.OpenCodeGo;
+
+                tokenCounterOcg ??= sp.GetRequiredService<TokenCounting.ITokenCounter>();
+                compactorOcg   ??= sp.GetRequiredService<IContextCompactor>();
+                sizingOptionsOcg ??= sp.GetRequiredService<IOptions<ContextSizingOptions>>();
+                sizingLoggerOcg  ??= sp.GetRequiredService<ILogger<ContextHandling.ContextSizingChatClient>>();
+
+                return client.GetChatClient(modelName).AsIChatClient()
+                    .AsBuilder()
+                    .UseFunctionInvocation()
+                    .UseContextSizing(tokenCounterOcg, compactorOcg, sizingOptionsOcg,
+                        opts.MaxContextTokens, opts.ReservedOutputTokens, modelName, sizingLoggerOcg)
+                    .Build();
+            });
+        }
 
         // Mock client for testing when infrastructure is unavailable
         services.AddKeyedSingleton<IChatClient>("Mock", (sp, _) =>

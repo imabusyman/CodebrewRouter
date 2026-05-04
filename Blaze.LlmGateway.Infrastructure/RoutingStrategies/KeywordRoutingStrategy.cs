@@ -25,6 +25,8 @@ public class KeywordRoutingStrategy(
         {
             _ when lastUserMessage.Contains("ollama") => RouteDestination.OllamaRouter,
             _ when lastUserMessage.Contains("lm studio") || lastUserMessage.Contains("lmstudio") => RouteDestination.LmStudio,
+            _ when lastUserMessage.Contains("deepseek") => RouteDestination.OpenCodeGo_DeepSeekV4Pro,
+            _ when lastUserMessage.Contains("opencode") => RouteDestination.OpenCodeGo_Qwen3_6Plus,
             _ => defaultDestination
         };
 
