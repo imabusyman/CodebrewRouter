@@ -76,4 +76,11 @@ public class LocalInferenceOptions
     /// When null, a minimal default system prompt is used.
     /// </summary>
     public string? SystemPrompt { get; set; }
+
+    /// <summary>
+    /// Cache TTL in seconds for model availability checks in LocalModelAvailabilityService.
+    /// When a model is checked as available, the result is cached for this duration.
+    /// Default: 60 seconds.
+    /// </summary>
+    public int? CacheAvailabilityTtlSeconds { get; set; } = 60;
 }
