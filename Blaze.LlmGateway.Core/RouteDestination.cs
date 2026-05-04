@@ -2,6 +2,8 @@ namespace Blaze.LlmGateway.Core;
 
 public enum RouteDestination
 {
+    LocalGemma,
+    
     OllamaRouter,
     LmStudio,
 

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Blaze.LlmGateway.Core\Blaze.LlmGateway.Core.csproj" />
+    <ProjectReference Include="..\Blaze.LlmGateway.Infrastructure\Blaze.LlmGateway.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
