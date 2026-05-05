@@ -60,28 +60,56 @@ builder.Services.AddLocalInferenceServices(builder.Configuration);
 // EXAMPLE: Three ways to register CodebrewRouterProvider
 // ============================================================================
 
-// EXAMPLE 1: Mobile (MAUI) — minimal setup
+// EXAMPLE 1: Mobile (MAUI) — Minimal config, offline-first
 // var mobileOptions = new CodebrewRouterProviderOptions 
 // { 
-//     LocalEndpoint = "http://192.168.1.100:11434"
+//     LocalEndpoint = new Uri("http://127.0.0.1:11434"),
+//     TestMode = false
 // };
 // builder.Services.AddCodebrewRouterProvider(mobileOptions);
+// 
+// Result: Local Ollama chat, availability tracking, no remote discovery or health endpoint.
 
-// EXAMPLE 2: Desktop — full stack
+// EXAMPLE 2: Desktop — Full fluent chain with all Phase 1 features
 // var desktopOptions = new CodebrewRouterProviderOptions
 // {
-//     LocalEndpoint = "http://localhost:11434",
-//     RemoteDiscoveryEndpoint = "http://localhost:5273"
+//     LocalEndpoint = new Uri("http://localhost:11434"),
+//     RemoteDiscoveryEndpoint = new Uri("http://localhost:5273"),
+//     CacheAvailabilityTtlSeconds = 60,
+//     DiscoveryPollingIntervalSeconds = 30
 // };
 // builder.Services
 //     .AddCodebrewRouterProvider(desktopOptions)
+//     .WithHealthChecks(hcOptions => hcOptions.Enabled = true)
+//     .WithDiscovery(discOptions => 
+//     {
+//         discOptions.Enabled = true;
+//         discOptions.PollingIntervalSeconds = 30;
+//         discOptions.CircuitBreakerThreshold = 3;
+//     })
+//     .WithRouting(routeOptions => routeOptions.HybridRoutingEnabled = true)
+//     .Build();
+// 
+// Result: Health checks, model discovery, intelligent routing, hybrid failover.
+
+// EXAMPLE 3: Aspire — Configuration binding from appsettings.json
+// var section = builder.Configuration.GetSection("LlmGateway");
+// var aspireOptions = new CodebrewRouterProviderOptions();
+// section.Bind(aspireOptions);
+// builder.Services.AddCodebrewRouterProvider(aspireOptions)
 //     .WithHealthChecks()
 //     .WithDiscovery()
 //     .WithRouting()
 //     .Build();
-
-// EXAMPLE 3: Aspire (current, using deprecation shim)
-// Still works: AddLocalInferenceServices(configuration)
+// 
+// Requires in appsettings.json:
+// {
+//   "LlmGateway": {
+//     "LocalEndpoint": "http://ollama-local:11434",
+//     "RemoteDiscoveryEndpoint": "http://codebrewrouter-remote:5273",
+//     "DiscoveryOptions": { "PollingIntervalSeconds": 30 }
+//   }
+// }
 
 // ============================================================================
 
