@@ -5,8 +5,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <NoWarn>$(NoWarn);1591;NU1903;CA2017;SYSLIB0014</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="9.0.4" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="13.4.0-preview.1.26252.2" />

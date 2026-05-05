@@ -15,13 +15,18 @@
     <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.25" />
     <!-- Qwen model tokenizer support (MIT licensed) for native tokenization of Qwen models -->
-    <PackageReference Include="Yuniko.Software.Qwen3Tokenizer" Version="1.0.5" />
+    <PackageReference Include="Yuniko.Software.Qwen3Tokenizer" Version="1.1.0" />
   </ItemGroup>
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);NU1903;CA2017;SYSLIB0014</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="9.0.4" />
+  </ItemGroup>
 
 </Project>
