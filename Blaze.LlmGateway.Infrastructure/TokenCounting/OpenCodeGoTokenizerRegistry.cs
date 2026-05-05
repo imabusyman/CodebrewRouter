@@ -250,7 +250,7 @@ public sealed class OpenCodeGoTokenizerRegistry : ITokenizerRegistry
             // For now, fall back to default encoding with logged guidance for ops
             _logger.LogDebug("HuggingFace tokenizer for '{HfRepo}' not yet cached. " +
                 "To enable native tokenization, download tokenizer.json from HF and place at: " +
-                "%APPDATA%\\Blaze.LlmGateway\\tokenizer-cache\\{0}_tokenizer.json", 
+                "%APPDATA%\\Blaze.LlmGateway\\tokenizer-cache\\{HfRepo}_tokenizer.json", 
                 hfRepo);
             return null;
         }
