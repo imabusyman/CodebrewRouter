@@ -107,6 +107,12 @@ public sealed class ModelAvailabilityHeartbeatService(
         // Seed configured models first for fallback/visibility
         logger.LogDebug("  ├─ Seeding configured models");
         SeedConfiguredModels(models, providers, checkedAt);
+        if (_options.OfflineOnly)
+        {
+            logger.LogInformation("Offline-only mode active; skipping external provider probes.");
+            registry.UpdateSnapshot(models, providers);
+            return;
+        }
 
         // Probe local models only (local-BYOK approach)
         logger.LogDebug("  ├─ Probing LM Studio");
@@ -152,6 +158,22 @@ public sealed class ModelAvailabilityHeartbeatService(
         DateTimeOffset checkedAt)
     {
         // Seed local-only models (BYOK approach — no cloud providers)
+        AddConfiguredModel(
+            models,
+            providers,
+            "LocalGemma",
+            "local-gemma",
+            "llamasharp",
+            _options.LocalInference.ModelPath,
+            _options.LocalInference.Enabled,
+            checkedAt);
+
+        if (_options.OfflineOnly)
+        {
+            AddCodebrewRouterModel(models, providers, checkedAt);
+            return;
+        }
+
         AddConfiguredModel(
             models,
             providers,

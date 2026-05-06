@@ -1,0 +1,28 @@
+{
+  "name": "codebrewrouter-logging",
+  "version": "0.1.0",
+  "description": "Project-local CodebrewRouter logging contract command for [ROUTER-*] and [AGENT-*] checks.",
+  "author": {
+    "name": "CodebrewRouter"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "codebrewrouter",
+    "logging",
+    "router",
+    "agent"
+  ],
+  "interface": {
+    "displayName": "CodebrewRouter Logging",
+    "shortDescription": "Project-local logging contract command",
+    "longDescription": "Adds a project-local Codex command for checking CodebrewRouter runtime [ROUTER-*] telemetry and agent [AGENT-*] lifecycle logging against Docs/engineering/logging-contract.md.",
+    "developerName": "CodebrewRouter",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": "Check CodebrewRouter logging contract compliance"
+  }
+}

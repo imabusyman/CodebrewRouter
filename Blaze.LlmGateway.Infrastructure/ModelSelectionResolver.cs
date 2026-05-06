@@ -23,6 +23,13 @@ public sealed class ModelSelectionResolver(
 {
     public async Task<IChatClient?> ResolveAsync(string modelId, CancellationToken cancellationToken = default)
     {
+        if (gatewayOptions.Value.OfflineOnly)
+        {
+            logger.LogInformation("Offline-only mode active; resolving model {ModelId} to LocalGemma", modelId);
+            return serviceProvider.GetKeyedService<IChatClient>("LocalGemma")
+                ?? throw new InvalidOperationException("Offline-only mode is enabled, but the LocalGemma provider is not registered.");
+        }
+
         var model = await modelCatalog.FindByIdAsync(modelId, cancellationToken);
         if (model is null)
         {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "CodebrewRouter Logging Contract"
+  short_description: "Keep router and agent telemetry tags consistent."
+  default_prompt: "Use this skill when changing CodebrewRouter logging, routing telemetry, or agent instructions."

@@ -57,6 +57,7 @@ public class OllamaLocalIntegrationTests : IAsyncLifetime
                     services.AddKeyedSingleton<IChatClient>("FoundryLocal", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("GithubModels", mockChatClient.Object);
                     services.AddKeyedSingleton<IChatClient>("OllamaLocal", mockChatClient.Object);
+                    services.AddKeyedSingleton<IChatClient>("LocalGemma", mockChatClient.Object);
                 });
             });
 

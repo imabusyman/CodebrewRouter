@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Blaze.LlmGateway.Core.Configuration;
 using LLama;
 using LLama.Common;
 using Microsoft.Extensions.AI;
@@ -15,15 +16,35 @@ public sealed class LocalGemmaChatClient : DelegatingChatClient, IAsyncDisposabl
     private readonly LLamaWeights? _weights;
     private readonly LLamaContext? _context;
     private readonly InteractiveExecutor? _executor;
+    private readonly LocalInferenceOptions _options;
+    private readonly SemaphoreSlim _inferenceLock = new(1, 1);
     private bool _disposed;
+
+    public string? ModelPath { get; }
+
+    public bool IsModelLoaded => _executor is not null;
 
     /// <summary>
     /// Initializes a new instance of <see cref="LocalGemmaChatClient"/>.
     /// If modelPath is provided, loads the Gemma model; otherwise, uses a no-op client.
     /// </summary>
-    public LocalGemmaChatClient(string? modelPath = null)
+    public LocalGemmaChatClient()
+        : this((string?)null)
+    {
+    }
+
+    public LocalGemmaChatClient(string? modelPath)
+        : this(new LocalInferenceOptions { ModelPath = modelPath ?? string.Empty })
+    {
+    }
+
+    internal LocalGemmaChatClient(LocalInferenceOptions options)
         : base(new NoOpChatClientWithMetadata())
     {
+        _options = options;
+        ModelPath = options.ModelPath;
+
+        var modelPath = options.ModelPath;
         if (string.IsNullOrWhiteSpace(modelPath) || !File.Exists(modelPath))
         {
             _weights = null;
@@ -36,9 +57,16 @@ public sealed class LocalGemmaChatClient : DelegatingChatClient, IAsyncDisposabl
         {
             var modelParams = new ModelParams(modelPath)
             {
-                ContextSize = 2048,
+                ContextSize = (uint)Math.Max(1, options.MaxContextTokens),
                 GpuLayerCount = 0,
+                UseMemorymap = true,
             };
+
+            if (options.ThreadCount > 0)
+            {
+                modelParams.Threads = (uint)options.ThreadCount;
+                modelParams.BatchThreads = (uint)options.ThreadCount;
+            }
 
             _weights = LLamaWeights.LoadFromFile(modelParams);
             _context = new LLamaContext(_weights, modelParams);
@@ -82,16 +110,17 @@ public sealed class LocalGemmaChatClient : DelegatingChatClient, IAsyncDisposabl
 
         var inferenceParams = new InferenceParams
         {
-            Temperature = options?.Temperature ?? 0.7f,
-            TopP = 0.9f,
+            Temperature = options?.Temperature ?? _options.Temperature,
+            TopP = options?.TopP ?? _options.TopP,
             MaxTokens = options?.MaxOutputTokens ?? 512,
         };
 
+        await _inferenceLock.WaitAsync(cancellationToken);
         try
         {
             await foreach (var token in _executor.InferAsync(prompt, inferenceParams, cancellationToken))
             {
-                yield return new ChatResponseUpdate();
+                yield return new ChatResponseUpdate(ChatRole.Assistant, token);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -101,6 +130,7 @@ public sealed class LocalGemmaChatClient : DelegatingChatClient, IAsyncDisposabl
         }
         finally
         {
+            _inferenceLock.Release();
         }
     }
 
@@ -116,7 +146,7 @@ public sealed class LocalGemmaChatClient : DelegatingChatClient, IAsyncDisposabl
 
         await foreach (var update in GetStreamingResponseAsync(chatMessages, options, cancellationToken))
         {
-            // Just accumulate empty updates for now
+            accumulatedText += update.Text;
         }
 
         var message = new ChatMessage(ChatRole.Assistant, accumulatedText);
@@ -145,6 +175,7 @@ public sealed class LocalGemmaChatClient : DelegatingChatClient, IAsyncDisposabl
         try
         {
             _context?.Dispose();
+            _inferenceLock.Dispose();
         }
         catch (Exception ex)
         {

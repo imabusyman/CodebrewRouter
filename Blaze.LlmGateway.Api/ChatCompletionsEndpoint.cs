@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.ClientModel;
 using System.Text.Json;
 using Blaze.LlmGateway.Core.ModelCatalog;
+using Blaze.LlmGateway.Core.Routing;
 using Blaze.LlmGateway.Infrastructure;
 using Blaze.LlmGateway.Infrastructure.ContextHandling;
 
@@ -16,6 +17,8 @@ namespace Blaze.LlmGateway.Api;
 /// </summary>
 public static class ChatCompletionsEndpoint
 {
+    private const string DirectTaskType = "DirectModel";
+
     /// <summary>Handle chat completion requests</summary>
     public static async Task<IResult> HandleAsync(
         ChatCompletionRequest req,
@@ -24,12 +27,10 @@ public static class ChatCompletionsEndpoint
         HttpContext httpContext,
         CancellationToken ct)
     {
-        var handler_sw = System.Diagnostics.Stopwatch.StartNew();
         var logger = httpContext.RequestServices.GetService(typeof(ILogger<ChatCompletionRequest>)) as ILogger<ChatCompletionRequest>;
         var availabilityRegistry = httpContext.RequestServices.GetRequiredService<IModelAvailabilityRegistry>();
         
-        logger?.LogInformation("📨 Chat completion request received - Model: {Model}, Stream: {Stream}, Messages: {MessageCount}, EntryMs: {EntryMs}", 
-            req.Model, req.Stream, req.Messages?.Count ?? 0, handler_sw.ElapsedMilliseconds);
+        LogRouter(logger, new RouterStartEvent(req.Messages?.Count ?? 0));
 
         // Validate required fields
         if (string.IsNullOrWhiteSpace(req.Model))
@@ -77,8 +78,6 @@ public static class ChatCompletionsEndpoint
                 role, msg.Content.Substring(0, Math.Min(50, msg.Content.Length)));
         }
 
-        logger?.LogInformation("⏱️ Messages converted after {ElapsedMs}ms", handler_sw.ElapsedMilliseconds);
-
         // Build ChatOptions from request
         var options = new ChatOptions
         {
@@ -93,13 +92,11 @@ public static class ChatCompletionsEndpoint
 
         if (req.Stream)
         {
-            logger?.LogInformation("  └─ Using STREAMING mode after {ElapsedMs}ms", handler_sw.ElapsedMilliseconds);
             // Streaming response via SSE
             return await HandleStreamingAsync(httpContext, messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
         }
         else
         {
-            logger?.LogInformation("  └─ Using NON-STREAMING mode after {ElapsedMs}ms", handler_sw.ElapsedMilliseconds);
             // Non-streaming response
             return await HandleNonStreamingAsync(messages, options, req.Model, req.Tools, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
         }
@@ -136,16 +133,22 @@ public static class ChatCompletionsEndpoint
             }
 
             var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
+            LogRouter(logger, new RouterTryEvent(1, 1, model, model, DirectTaskType));
+            var probeSw = System.Diagnostics.Stopwatch.StartNew();
             var firstChunk = await TryGetFirstStreamingUpdateAsync(selectedClient, messages, options, ct);
+            probeSw.Stop();
+            LogRouter(logger, new RouterProbeEvent(1, model, model, probeSw.ElapsedMilliseconds, firstChunk.Success));
             if (!firstChunk.Success)
             {
-                logger?.LogWarning(firstChunk.Exception, "Provider failed before streaming started for model {Model}", model);
+                LogRouter(logger, new RouterFailEvent(1, model, model, firstChunk.Exception?.Message ?? "Provider failed before streaming started"));
                 return CreateProviderErrorResult(model, firstChunk.Exception);
             }
 
             enumerator = firstChunk.Enumerator;
             var chunkCount = 0;
-            logger?.LogInformation("⏳ Starting streaming response - ID: {RequestId}", id);
+            var streamSw = System.Diagnostics.Stopwatch.StartNew();
+            LogRouter(logger, new RouterSuccessEvent(
+                1, model, model, DirectTaskType, null, null, null, probeSw.ElapsedMilliseconds));
 
             httpContext.Response.ContentType = "text/event-stream";
             httpContext.Response.Headers.Append("Cache-Control", "no-cache");
@@ -173,9 +176,9 @@ public static class ChatCompletionsEndpoint
                 {
                     hasMore = await enumerator.MoveNextAsync();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    logger?.LogWarning(ex, "Provider stream failed after {ChunkCount} chunks for model {Model}", chunkCount, model);
+                    LogRouter(logger, new RouterMidstreamFailEvent(model, model));
                     break;
                 }
 
@@ -200,12 +203,12 @@ public static class ChatCompletionsEndpoint
             await httpContext.Response.WriteAsync($"data: {finalJson}\n\n", ct);
             await httpContext.Response.Body.FlushAsync(ct);
             
-            logger?.LogInformation("✅ Stream completed - Total chunks: {ChunkCount}", chunkCount);
+            streamSw.Stop();
+            LogRouter(logger, new RouterStreamCompleteEvent(chunkCount, model, model, DirectTaskType, streamSw.ElapsedMilliseconds));
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "❌ Streaming error after {ChunkCount} chunks", 
-                httpContext.Response.HasStarted ? "headers sent" : "headers not sent");
+            LogRouter(logger, new RouterFailEvent(1, model, model, ex.Message), LogLevel.Error);
             if (!httpContext.Response.HasStarted)
             {
                 return CreateProviderErrorResult(model, ex);
@@ -255,14 +258,22 @@ public static class ChatCompletionsEndpoint
                 }
             }
 
-            logger?.LogInformation("⏳ Getting non-streaming response from chat client");
             var sw = System.Diagnostics.Stopwatch.StartNew();
             var selectedClient = await ResolveClientAsync(model, chatClient, modelSelectionResolver, availabilityRegistry, logger, ct);
+            LogRouter(logger, new RouterTryEvent(1, 1, model, model, DirectTaskType));
             
             var completion = await selectedClient.GetResponseAsync(messages, options, ct);
             
             sw.Stop();
-            logger?.LogInformation("✅ Received response in {ElapsedMs}ms", sw.ElapsedMilliseconds);
+            LogRouter(logger, new RouterSuccessEvent(
+                1,
+                model,
+                model,
+                DirectTaskType,
+                completion.FinishReason?.ToString(),
+                (int?)completion.Usage?.InputTokenCount,
+                (int?)completion.Usage?.OutputTokenCount,
+                sw.ElapsedMilliseconds));
 
             var id = $"chatcmpl-{Guid.NewGuid().ToString("N").Substring(0, 24)}";
             var created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -291,7 +302,7 @@ public static class ChatCompletionsEndpoint
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "❌ Error in non-streaming handler");
+            LogRouter(logger, new RouterFailEvent(1, model, model, ex.Message), LogLevel.Error);
             return CreateProviderErrorResult(model, ex);
         }
     }
@@ -403,20 +414,21 @@ public static class ChatCompletionsEndpoint
         CancellationToken cancellationToken)
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        logger?.LogInformation("🔍 Starting ResolveClientAsync for model '{Model}'", model);
-        
+
         var selectedClient = await modelSelectionResolver.ResolveAsync(model, cancellationToken);
-        logger?.LogInformation("⏱️ ResolveAsync completed in {ElapsedMs}ms", sw.ElapsedMilliseconds);
         
         if (selectedClient is not null)
         {
-            logger?.LogInformation("🎛️ Honoring selected model {Model} after {ElapsedMs}ms", model, sw.ElapsedMilliseconds);
+            LogRouter(logger, new RouterResolveEvent(
+                DirectTaskType,
+                0,
+                1,
+                selectedClient.GetType().Name,
+                sw.ElapsedMilliseconds));
             return selectedClient;
         }
 
         var unavailableModel = availabilityRegistry.FindModel(model, includeUnavailable: true);
-        logger?.LogInformation("🔍 FindModel completed in {ElapsedMs}ms", sw.ElapsedMilliseconds);
-        
         if (unavailableModel is { Enabled: false })
         {
             throw new InvalidOperationException(
@@ -425,8 +437,21 @@ public static class ChatCompletionsEndpoint
                     : $"Model '{model}' is currently unavailable: {unavailableModel.ErrorMessage}");
         }
 
-        logger?.LogInformation("🧭 No direct client match for model {Model}; using routed default client after {ElapsedMs}ms", model, sw.ElapsedMilliseconds);
+        LogRouter(logger, new RouterResolveEvent(
+            DirectTaskType,
+            0,
+            1,
+            defaultClient.GetType().Name,
+            sw.ElapsedMilliseconds));
         return defaultClient;
+    }
+
+    private static void LogRouter(ILogger? logger, object routerEvent, LogLevel? level = null)
+    {
+        if (logger is not null)
+        {
+            RouterLog.Write(logger, routerEvent, level);
+        }
     }
 
     /// <summary>

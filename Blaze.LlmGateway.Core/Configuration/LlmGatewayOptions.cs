@@ -4,8 +4,15 @@ public class LlmGatewayOptions
 {
     public const string SectionName = "LlmGateway";
 
+    /// <summary>
+    /// When true, model selection bypasses provider discovery/routing and sends all requests
+    /// to the local LLamaSharp-backed provider.
+    /// </summary>
+    public bool OfflineOnly { get; set; }
+
     public ProvidersOptions Providers { get; set; } = new();
     public RoutingOptions Routing { get; set; } = new();
+    public LocalInferenceOptions LocalInference { get; set; } = new();
     public CodebrewRouterOptions CodebrewRouter { get; set; } = new();
     public ModelAvailabilityOptions Availability { get; set; } = new();
     public PromptCleanupOptions PromptCleanup { get; set; } = new();

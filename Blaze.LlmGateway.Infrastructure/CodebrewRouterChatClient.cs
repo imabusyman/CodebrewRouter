@@ -29,31 +29,8 @@ public sealed class CodebrewRouterChatClient(
     private CodebrewRouterOptions Options => options.Value;
     private LlmGatewayOptions GatewayOptions => gatewayOptions.Value;
 
-    private void Log<T>(T @event, LogLevel level = LogLevel.Information)
-    {
-        if (!logger.IsEnabled(level))
-            return;
-
-        var tag = @event switch
-        {
-            RouterStartEvent          => "[ROUTER-START]",
-            RouterCleanEvent          => "[ROUTER-CLEAN]",
-            RouterResolveEvent        => "[ROUTER-RESOLVE]",
-            RouterContextBudgetEvent  => "[ROUTER-CONTEXT]",
-            RouterCompactEvent        => "[ROUTER-COMPACT]",
-            RouterSkipEvent           => "[ROUTER-SKIP]",
-            RouterTryEvent            => "[ROUTER-TRY]",
-            RouterProbeEvent          => "[ROUTER-PROBE]",
-            RouterSuccessEvent        => "[ROUTER-SUCCESS]",
-            RouterFailEvent           => "[ROUTER-FAIL]",
-            RouterExhaustedEvent      => "[ROUTER-EXHAUSTED]",
-            RouterMidstreamFailEvent  => "[ROUTER-MIDSTREAM-FAIL]",
-            RouterStreamCompleteEvent => "[ROUTER-STREAM-COMPLETE]",
-            _ => "[ROUTER-UNKNOWN]"
-        };
-
-        logger.Log(level, "{Tag} {@Event}", tag, @event);
-    }
+    private void Log(object @event, LogLevel? level = null)
+        => RouterLog.Write(logger, @event, level);
 
     private static string ResolveModelName(string providerKey, LlmGatewayOptions gatewayOptions)
     {
@@ -88,12 +65,18 @@ public sealed class CodebrewRouterChatClient(
         var cleanSw = System.Diagnostics.Stopwatch.StartNew();
         var cleanedMessages = await CleanMessagesAsync(messageList, cancellationToken);
         cleanSw.Stop();
+        Log(new RouterCleanEvent(
+            messageList.LastOrDefault(m => m.Role == ChatRole.User)?.Text?.Length ?? 0,
+            cleanedMessages.LastOrDefault(m => m.Role == ChatRole.User)?.Text?.Length ?? 0,
+            cleanSw.ElapsedMilliseconds));
 
+        var resolveSw = System.Diagnostics.Stopwatch.StartNew();
         var (taskType, providers, tokenCount) = await ResolveAsync(cleanedMessages, cancellationToken);
+        resolveSw.Stop();
         var chain = string.Join(", ", providers.Select(ModelName));
 
         Log(new RouterResolveEvent(
-            taskType.ToString(), tokenCount, providers.Length, chain, sw.ElapsedMilliseconds));
+            taskType.ToString(), tokenCount, providers.Length, chain, resolveSw.ElapsedMilliseconds));
 
         for (var i = 0; i < providers.Length; i++)
         {
@@ -102,14 +85,13 @@ public sealed class CodebrewRouterChatClient(
             var client = serviceProvider.GetKeyedService<IChatClient>(key);
             if (client is null)
             {
-                logger.LogDebug("[ROUTER-SKIP] provider '{Key}' not registered", key);
+                Log(new RouterSkipEvent(i + 1, key, model, 0, 0, "not_registered"));
                 continue;
             }
 
-            var providerMessages = await PrepareMessagesForProviderAsync(key, cleanedMessages, options, cancellationToken);
+            var providerMessages = await PrepareMessagesForProviderAsync(i + 1, key, cleanedMessages, options, cancellationToken);
             if (providerMessages is null)
             {
-                logger.LogDebug("[ROUTER-SKIP] PrepareMessagesForProvider({Key}) returned null", key);
                 continue;
             }
 
@@ -138,7 +120,7 @@ public sealed class CodebrewRouterChatClient(
 
         Log(new RouterExhaustedEvent(providers.Length, taskType.ToString(), "LmStudio"), LogLevel.Warning);
 
-        var innerMessages = await PrepareMessagesForProviderAsync("LmStudio", cleanedMessages, options, cancellationToken)
+        var innerMessages = await PrepareMessagesForProviderAsync(providers.Length + 1, "LmStudio", cleanedMessages, options, cancellationToken)
             ?? cleanedMessages;
         return await InnerClient.GetResponseAsync(innerMessages, options, cancellationToken);
     }
@@ -179,14 +161,13 @@ public sealed class CodebrewRouterChatClient(
             var client = serviceProvider.GetKeyedService<IChatClient>(key);
             if (client is null)
             {
-                logger.LogDebug("[ROUTER-SKIP] provider '{Key}' not registered", key);
+                Log(new RouterSkipEvent(i + 1, key, model, 0, 0, "not_registered"));
                 continue;
             }
 
-            var providerMessages = await PrepareMessagesForProviderAsync(key, cleanedMessages, options, cancellationToken);
+            var providerMessages = await PrepareMessagesForProviderAsync(i + 1, key, cleanedMessages, options, cancellationToken);
             if (providerMessages is null)
             {
-                logger.LogDebug("[ROUTER-SKIP] PrepareMessagesForProvider({Key}) returned null", key);
                 continue;
             }
 
@@ -242,7 +223,7 @@ public sealed class CodebrewRouterChatClient(
 
         Log(new RouterExhaustedEvent(providers.Length, taskType.ToString(), "LmStudio"), LogLevel.Warning);
 
-        var innerMessages = await PrepareMessagesForProviderAsync("LmStudio", cleanedMessages, options, cancellationToken)
+        var innerMessages = await PrepareMessagesForProviderAsync(providers.Length + 1, "LmStudio", cleanedMessages, options, cancellationToken)
             ?? cleanedMessages;
         var innerResult = await TryGetFirstChunkAsync(InnerClient, innerMessages, options, cancellationToken);
         if (!innerResult.Success)
@@ -358,6 +339,7 @@ public sealed class CodebrewRouterChatClient(
     }
 
     private async Task<IList<ChatMessage>?> PrepareMessagesForProviderAsync(
+        int attempt,
         string providerKey,
         IList<ChatMessage> messages,
         ChatOptions? options,
@@ -371,29 +353,27 @@ public sealed class CodebrewRouterChatClient(
         var currentTokenCount = tokenCounter.CountTokens(messages, contextBudget.ModelId);
         var inputBudget = CalculateInputBudget(contextBudget, options);
 
+        Log(new RouterContextBudgetEvent(
+            attempt, providerKey, ModelName(providerKey), currentTokenCount, inputBudget, contextBudget.MaxContextTokens));
+
         if (currentTokenCount <= inputBudget)
         {
-            logger.LogDebug("[ROUTER-CONTEXT] {Key} fits: {Current}/{Budget} of {Max} tokens",
-                providerKey, currentTokenCount, inputBudget, contextBudget.MaxContextTokens);
             return messages;
         }
-
-        Log(new RouterContextBudgetEvent(
-            0, providerKey, ModelName(providerKey), currentTokenCount, inputBudget, contextBudget.MaxContextTokens),
-            LogLevel.Debug);
 
         var compactionRatio = Math.Clamp(Options.ContextCompaction.TargetBudgetRatio, 0.1d, 1.0d);
         var compactionTarget = Math.Max(1, (int)Math.Floor(inputBudget * compactionRatio));
         var compactionResult = await contextCompactor.CompactAsync(messages, compactionTarget, contextBudget.ModelId, cancellationToken);
         if (compactionResult.WasCompacted && compactionResult.CompactedTokenCount <= inputBudget)
         {
-            Log(new RouterCompactEvent(0, providerKey, compactionResult.OriginalTokenCount, compactionResult.CompactedTokenCount));
+            Log(new RouterCompactEvent(attempt, providerKey, compactionResult.OriginalTokenCount, compactionResult.CompactedTokenCount));
             return compactionResult.Messages;
         }
 
-        Log(new RouterSkipEvent(0, providerKey, ModelName(providerKey),
+        Log(new RouterSkipEvent(attempt, providerKey, ModelName(providerKey),
             compactionResult.WasCompacted ? compactionResult.CompactedTokenCount : currentTokenCount,
-            inputBudget), LogLevel.Warning);
+            inputBudget,
+            "context_too_large"));
 
         return null;
     }

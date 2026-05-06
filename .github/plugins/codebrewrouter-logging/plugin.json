@@ -1,0 +1,17 @@
+{
+  "name": "codebrewrouter-logging",
+  "description": "Project-level CodebrewRouter logging guardian command and agent for [ROUTER-*] and [AGENT-*] contract checks.",
+  "version": "1.0.0",
+  "author": {
+    "name": "CodebrewRouter"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "codebrewrouter",
+    "logging",
+    "router",
+    "agent"
+  ],
+  "agents": "agents/",
+  "commands": "commands/"
+}

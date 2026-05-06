@@ -76,3 +76,14 @@ Create a BenchmarkDotNet project (`Blaze.LlmGateway.Benchmarks`) to benchmark th
 - **Dependencies:** Always update NuGet packages to the latest versions to help protect against vulnerabilities.
 - Primary constructors, collection expressions (`[]`).
 - Keep `Program.cs` clean; extract complex DI into extension methods.
+
+## Logging Contract
+
+- Router request telemetry must use the exact `[ROUTER-*]` tags documented in `Docs/engineering/logging-contract.md`.
+- Agent lifecycle telemetry must use `[AGENT-*]` tags from the same contract.
+- Logging guardian agents and skills are project-level only; keep them under `.agents/skills/`, `.github/agents/`, and `.opencode/agents/` in this repo.
+- Project command name is `/codebrewrouter-logging`.
+- OpenCode command: `.opencode/commands/codebrewrouter-logging.md`.
+- Copilot CLI project command: `.claude/commands/codebrewrouter-logging.md`; optional plugin package: `.github/plugins/codebrewrouter-logging/`.
+- Codex project skill: `.agents/skills/codebrewrouter-logging-contract/`; optional repo-local command package: `plugins/codebrewrouter-logging/`.
+- Prefer `RouterLog.Write(...)` for C# router telemetry and update `Blaze.LlmGateway.Tests/RouterLoggingContractTests.cs` when the contract changes.

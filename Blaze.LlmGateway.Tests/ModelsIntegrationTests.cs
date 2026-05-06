@@ -287,7 +287,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
         // Assert
         Assert.True(json.RootElement.TryGetProperty("data", out var data));
 
-        var validProviders = new[] { "AzureFoundry", "FoundryLocal", "GithubModels", "OllamaLocal", "LmStudio", "CodebrewRouter" };
+        var validProviders = new[] { "AzureFoundry", "FoundryLocal", "GithubModels", "OllamaLocal", "LmStudio", "LocalGemma", "CodebrewRouter" };
 
         foreach (var model in data.EnumerateArray())
         {
@@ -356,8 +356,9 @@ public class ModelsIntegrationTests : IAsyncLifetime
             .Select(provider => provider.GetString())
             .ToArray();
 
-        Assert.Contains("OpenCodeGo_Qwen3_5Plus", providers);
-        Assert.Contains("LmStudio", providers);
+        Assert.Contains("LocalGemma", providers);
+        Assert.DoesNotContain("LmStudio", providers);
+        Assert.DoesNotContain("OpenCodeGo_Qwen3_5Plus", providers);
         Assert.DoesNotContain("AzureFoundry", providers);
         Assert.DoesNotContain("FoundryLocal", providers);
         Assert.DoesNotContain("OllamaRouter", providers);
@@ -371,16 +372,15 @@ public class ModelsIntegrationTests : IAsyncLifetime
         using var json = JsonDocument.Parse(body);
 
         var backingModels = json.RootElement.GetProperty("backingModels");
-        // At least LmStudio should be available
+        // At least the local LLamaSharp provider should be available
         Assert.True(backingModels.GetArrayLength() > 0);
 
         var providers = backingModels.EnumerateArray()
             .Select(model => model.GetProperty("provider").GetString())
             .ToHashSet();
 
-        // LmStudio (.56) should always be available
-        Assert.Contains("LmStudio", providers);
-        // OllamaRouter may or may not be available depending on test environment
+        Assert.Contains("LocalGemma", providers);
+        Assert.DoesNotContain("LmStudio", providers);
         Assert.DoesNotContain("AzureFoundry", providers);
         Assert.DoesNotContain("FoundryLocal", providers);
     }
@@ -437,7 +437,8 @@ public class ModelsIntegrationTests : IAsyncLifetime
                 new AvailableModel("gpt-4o", "AzureFoundry", "openai", "configured"),
                 new AvailableModel("Phi-4-mini-instruct-cuda-gpu:5", "FoundryLocal", "openai", "configured"),
                 new AvailableModel("gemma4:e4b", "OllamaLocal", "ollama", "live"),
-                new AvailableModel("local-model", "LmStudio", "lmstudio", "configured")
+                new AvailableModel("local-model", "LmStudio", "lmstudio", "configured"),
+                new AvailableModel("local-gemma", "LocalGemma", "llamasharp", "configured")
             ]);
 
         public Task<AvailableModel?> FindByIdAsync(string modelId, CancellationToken cancellationToken = default)

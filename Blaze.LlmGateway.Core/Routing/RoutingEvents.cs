@@ -60,7 +60,8 @@ public readonly record struct RouterSkipEvent(
     string Key,
     string Model,
     int CurrentTokens,
-    int Budget);
+    int Budget,
+    string Reason);
 
 public readonly record struct RouterExhaustedEvent(
     int TotalAttempted,

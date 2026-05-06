@@ -5,6 +5,7 @@ using Blaze.LlmGateway.Infrastructure.Provider;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -72,8 +73,10 @@ public static class ServiceCollectionExtensions
         // Register LocalGemmaChatClient as keyed service "LocalGemma"
         services.AddKeyedSingleton<Microsoft.Extensions.AI.IChatClient>("LocalGemma", (sp, _) =>
         {
-            return new LocalGemmaChatClient();
+            var opts = sp.GetRequiredService<IOptions<LocalInferenceOptions>>().Value;
+            return new LocalGemmaChatClient(opts);
         });
+        services.AddHostedService<LocalGemmaWarmupService>();
 
         // Register hybrid routing strategy factory
         services.AddSingleton<HybridRoutingStrategyFactory>(sp =>
@@ -102,4 +105,32 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+}
+
+internal sealed class LocalGemmaWarmupService(
+    IServiceProvider serviceProvider,
+    IOptions<LocalInferenceOptions> options,
+    ILogger<LocalGemmaWarmupService> logger) : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        if (!options.Value.Enabled)
+        {
+            logger.LogInformation("Local LLamaSharp inference is disabled; skipping warmup.");
+            return Task.CompletedTask;
+        }
+
+        var client = serviceProvider.GetKeyedService<Microsoft.Extensions.AI.IChatClient>("LocalGemma");
+        if (client is LocalGemmaChatClient localClient)
+        {
+            logger.LogInformation(
+                "Local LLamaSharp provider warmup complete. ModelPath={ModelPath}, Loaded={Loaded}",
+                localClient.ModelPath,
+                localClient.IsModelLoaded);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

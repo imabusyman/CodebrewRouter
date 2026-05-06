@@ -105,6 +105,29 @@ public class LocalInferenceIntegrationTests
     }
 
     [Fact]
+    public void AddLocalInferenceServices_ConfiguresLocalGemmaWithModelPath()
+    {
+        // Arrange
+        var services = CreateServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "LlmGateway:LocalInference:ModelPath", "E:/models/gemma-local.gguf" }
+            })
+            .Build();
+
+        services.AddLocalInferenceServices(configuration);
+        var sp = services.BuildServiceProvider();
+
+        // Act
+        var client = sp.GetRequiredKeyedService<Microsoft.Extensions.AI.IChatClient>("LocalGemma");
+
+        // Assert
+        var localClient = Assert.IsType<LocalGemmaChatClient>(client);
+        Assert.Equal("E:/models/gemma-local.gguf", localClient.ModelPath);
+    }
+
+    [Fact]
     public void AddLocalInferenceServices_ModelProviderReturnsSameInstanceOnMultipleResolves()
     {
         // Arrange

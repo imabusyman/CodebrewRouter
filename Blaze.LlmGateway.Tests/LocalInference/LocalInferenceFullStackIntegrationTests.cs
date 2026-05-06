@@ -386,9 +386,9 @@ public class LocalInferenceFullStackIntegrationTests
             mockRemoteDiscovery.Object,
             mockLogger.Object);
 
-        // Initial check - all unavailable
+        // Initial check - graceful startup begins degraded until availability events arrive.
         var result1 = await healthManager.CheckHealthAsync(default, CancellationToken.None);
-        Assert.Equal(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, result1.Status);
+        Assert.Equal(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded, result1.Status);
 
         // Make local available
         var localAvailable = new ModelAvailabilityChanged
