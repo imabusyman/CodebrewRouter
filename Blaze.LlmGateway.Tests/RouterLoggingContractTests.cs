@@ -9,6 +9,7 @@ using Blaze.LlmGateway.Infrastructure.ContextHandling;
 using Blaze.LlmGateway.Infrastructure.PromptCleaning;
 using Blaze.LlmGateway.Infrastructure.TaskClassification;
 using Blaze.LlmGateway.Infrastructure.TokenCounting;
+using Blaze.LlmGateway.LocalInference;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
@@ -38,6 +39,17 @@ public sealed class RouterLoggingContractTests
             { new RouterStreamCompleteEvent(3, "LocalGemma", "local-gemma", "General", 100), "[ROUTER-STREAM-COMPLETE]", LogLevel.Information },
         };
 
+    public static TheoryData<string> LocalWarmupTags =>
+        new()
+        {
+            LocalWarmupLog.StartTag,
+            LocalWarmupLog.LoadTag,
+            LocalWarmupLog.PrimeTag,
+            LocalWarmupLog.ReadyTag,
+            LocalWarmupLog.SkipTag,
+            LocalWarmupLog.FailTag
+        };
+
     [Theory]
     [MemberData(nameof(RouterEvents))]
     public void Write_FormatsRouterEventWithExactTagAndDefaultLevel(
@@ -53,6 +65,36 @@ public sealed class RouterLoggingContractTests
         entry.Level.Should().Be(expectedLevel);
         entry.Message.Should().StartWith(expectedTag);
         entry.Message.Should().Contain(routerEvent.GetType().Name);
+    }
+
+    [Theory]
+    [MemberData(nameof(LocalWarmupTags))]
+    public void LocalWarmupTags_DoNotUseRouterNamespace(string tag)
+    {
+        tag.Should().StartWith("[LOCAL-WARMUP-");
+        tag.Should().NotStartWith("[ROUTER-");
+    }
+
+    [Fact]
+    public void LocalWarmupTags_AreDocumentedInLoggingContract()
+    {
+        var root = FindRepositoryRoot();
+        var contract = File.ReadAllText(Path.Combine(root, "Docs", "engineering", "logging-contract.md"));
+
+        var tags = new[]
+        {
+            LocalWarmupLog.StartTag,
+            LocalWarmupLog.LoadTag,
+            LocalWarmupLog.PrimeTag,
+            LocalWarmupLog.ReadyTag,
+            LocalWarmupLog.SkipTag,
+            LocalWarmupLog.FailTag
+        };
+
+        foreach (var tag in tags)
+        {
+            contract.Should().Contain(tag);
+        }
     }
 
     [Fact]

@@ -53,10 +53,8 @@ builder.Services.AddSingleton<IModelAvailabilityRegistry>(sp => sp.GetRequiredSe
 builder.Services.AddHostedService<ModelAvailabilityHeartbeatService>();
 builder.Services.AddSingleton<IModelCatalog, ModelCatalogService>();
 
-// Phase 1: Local inference - availability tracking, remote discovery, and health management
-#pragma warning disable CS0618
-builder.Services.AddLocalInferenceServices(builder.Configuration);
-#pragma warning restore CS0618
+// Phase 1: Provider-backed local inference for offline-first codebrewRouter flow.
+builder.Services.AddCodebrewRouterLocalProvider(builder.Configuration);
 
 // ============================================================================
 // EXAMPLE: Three ways to register CodebrewRouterProvider

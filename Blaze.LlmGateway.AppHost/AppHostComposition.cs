@@ -34,6 +34,17 @@ public static class AppHostComposition
             "local-model");
         var openCodeGoApiKey = builder.Configuration.GetValue<string>(
             "LlmGateway:Providers:OpenCodeGo:ApiKey") ?? "";
+        var localInferenceModelPath = builder.Configuration.GetValue<string>(
+            "LlmGateway:LocalInference:ModelPath") ?? "";
+        var localInferenceWarmupEnabled = builder.Configuration.GetValue(
+            "LlmGateway:LocalInference:WarmupEnabled",
+            true);
+        var localInferenceBlockStartupUntilWarm = builder.Configuration.GetValue(
+            "LlmGateway:LocalInference:BlockStartupUntilWarm",
+            true);
+        var localInferenceWarmupTimeoutSeconds = builder.Configuration.GetValue(
+            "LlmGateway:LocalInference:WarmupTimeoutSeconds",
+            120);
 
         // Gateway API listen URLs — controls which interfaces/ports Kestrel binds to.
         // Leave empty to use Kestrel defaults (localhost only from launchSettings.json).
@@ -48,11 +59,20 @@ public static class AppHostComposition
             .WithEnvironment("LlmGateway__Providers__OllamaLocal__Model", ollamaLocalModel)
             .WithEnvironment("LlmGateway__Providers__LmStudio__Endpoint", lmStudioEndpoint)
             .WithEnvironment("LlmGateway__Providers__LmStudio__Model", lmStudioModel)
-            .WithEnvironment("LlmGateway__Providers__OpenCodeGo__ApiKey", openCodeGoApiKey);
+            .WithEnvironment("LlmGateway__Providers__OpenCodeGo__ApiKey", openCodeGoApiKey)
+            .WithEnvironment("LlmGateway__LocalInference__ModelPath", localInferenceModelPath)
+            .WithEnvironment("LlmGateway__LocalInference__WarmupEnabled", localInferenceWarmupEnabled.ToString())
+            .WithEnvironment("LlmGateway__LocalInference__BlockStartupUntilWarm", localInferenceBlockStartupUntilWarm.ToString())
+            .WithEnvironment("LlmGateway__LocalInference__WarmupTimeoutSeconds", localInferenceWarmupTimeoutSeconds.ToString());
 
         aspireLogger.LogDebug("  ├─ API environment configuration:");
         aspireLogger.LogDebug("  │  ├─ OllamaLocal: {Url} ({Model})", ollamaLocalBaseUrl, ollamaLocalModel);
         aspireLogger.LogDebug("  │  ├─ LmStudio: {Endpoint} ({Model})", lmStudioEndpoint, lmStudioModel);
+        aspireLogger.LogDebug(
+            "  │  ├─ LocalInference warmup: Enabled={WarmupEnabled}, BlockStartupUntilWarm={BlockStartupUntilWarm}, TimeoutSeconds={TimeoutSeconds}",
+            localInferenceWarmupEnabled,
+            localInferenceBlockStartupUntilWarm,
+            localInferenceWarmupTimeoutSeconds);
 
         if (!string.IsNullOrWhiteSpace(gatewayListenUrls))
         {

@@ -46,6 +46,19 @@ All request routing telemetry must start with one of these exact tags:
 
 Use `RouterLog.Write(...)` instead of hand-written router log messages. Add or update tests in `Blaze.LlmGateway.Tests/RouterLoggingContractTests.cs` whenever a router event changes.
 
+## Local Warmup Tags
+
+Local model startup and Aspire readiness telemetry must use `[LOCAL-WARMUP-*]` tags, not `[ROUTER-*]`, because warmup is process lifecycle work rather than request routing.
+
+| Tag | Level | Meaning |
+|---|---|---|
+| `[LOCAL-WARMUP-START]` | Information | Local Gemma warmup started and startup-blocking mode was recorded. |
+| `[LOCAL-WARMUP-LOAD]` | Information | Local Gemma model load state was resolved. |
+| `[LOCAL-WARMUP-PRIME]` | Information | One-token warmup inference began. |
+| `[LOCAL-WARMUP-READY]` | Information | Local Gemma model loaded, primed, and ready for first chat. |
+| `[LOCAL-WARMUP-SKIP]` | Information | Warmup was intentionally skipped because local inference or warmup was disabled, or startup was allowed without a model path. |
+| `[LOCAL-WARMUP-FAIL]` | Warning | Warmup failed, including missing model path when startup must block. |
+
 ## Agent Tags
 
 Agent lifecycle telemetry must use `[AGENT-*]` tags so it does not collide with gateway request routing.

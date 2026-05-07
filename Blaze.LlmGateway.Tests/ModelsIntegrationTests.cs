@@ -28,6 +28,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
                 builder.ConfigureServices(services =>
                 {
                     RemoveServicesByType(services, typeof(IChatClient));
+                    DisableLocalGemmaWarmup(services);
 
                     var mockChatClient = new Mock<IChatClient>();
                     mockChatClient
@@ -422,6 +423,22 @@ public class ModelsIntegrationTests : IAsyncLifetime
         {
             services.Remove(descriptor);
         }
+    }
+
+    private static void DisableLocalGemmaWarmup(IServiceCollection services)
+    {
+        RemoveServicesByType(services, typeof(LocalInferenceOptions));
+        RemoveServicesByType(services, typeof(IOptions<LocalInferenceOptions>));
+
+        var options = new LocalInferenceOptions
+        {
+            Enabled = false,
+            WarmupEnabled = false,
+            BlockStartupUntilWarm = false
+        };
+
+        services.AddSingleton(options);
+        services.AddSingleton(Options.Create(options));
     }
 
     private static async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponse()

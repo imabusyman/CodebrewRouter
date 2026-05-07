@@ -13,7 +13,38 @@ namespace Blaze.LlmGateway.Tests;
 public sealed class ModelSelectionResolverTests
 {
     [Fact]
-    public async Task ResolveAsync_WhenOfflineOnly_ReturnsLocalGemmaWithoutCatalogLookup()
+    public async Task ResolveAsync_WhenOfflineOnlyAndCodebrewRouterRequested_ReturnsCodebrewRouterWithoutCatalogLookup()
+    {
+        var services = new ServiceCollection();
+        var localGemma = new StubChatClient();
+        var codebrewRouter = new StubChatClient();
+        services.AddKeyedSingleton<IChatClient>("LocalGemma", localGemma);
+        services.AddKeyedSingleton<IChatClient>("CodebrewRouter", codebrewRouter);
+        var provider = services.BuildServiceProvider();
+
+        var catalog = new ThrowingModelCatalog();
+        var resolver = new ModelSelectionResolver(
+            provider,
+            catalog,
+            Options.Create(new LlmGatewayOptions
+            {
+                OfflineOnly = true,
+                CodebrewRouter = new CodebrewRouterOptions { ModelId = "codebrewRouter" }
+            }),
+            new StubTokenCounter(),
+            new NoopContextCompactor(),
+            Options.Create(new ContextSizingOptions()),
+            NullLogger<ModelSelectionResolver>.Instance,
+            NullLogger<ContextSizingChatClient>.Instance);
+
+        var resolved = await resolver.ResolveAsync("codebrewRouter");
+
+        Assert.Same(codebrewRouter, resolved);
+        Assert.False(catalog.WasCalled);
+    }
+
+    [Fact]
+    public async Task ResolveAsync_WhenOfflineOnlyAndDirectModelRequested_ReturnsLocalGemmaWithoutCatalogLookup()
     {
         var services = new ServiceCollection();
         var localGemma = new StubChatClient();
@@ -24,14 +55,18 @@ public sealed class ModelSelectionResolverTests
         var resolver = new ModelSelectionResolver(
             provider,
             catalog,
-            Options.Create(new LlmGatewayOptions { OfflineOnly = true }),
+            Options.Create(new LlmGatewayOptions
+            {
+                OfflineOnly = true,
+                CodebrewRouter = new CodebrewRouterOptions { ModelId = "codebrewRouter" }
+            }),
             new StubTokenCounter(),
             new NoopContextCompactor(),
             Options.Create(new ContextSizingOptions()),
             NullLogger<ModelSelectionResolver>.Instance,
             NullLogger<ContextSizingChatClient>.Instance);
 
-        var resolved = await resolver.ResolveAsync("codebrewRouter");
+        var resolved = await resolver.ResolveAsync("local-gemma");
 
         Assert.Same(localGemma, resolved);
         Assert.False(catalog.WasCalled);

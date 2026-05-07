@@ -1,6 +1,8 @@
 using System.Net;
 using Blaze.LlmGateway.Core.Configuration;
+using Blaze.LlmGateway.Core.Provider;
 using Blaze.LlmGateway.LocalInference;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -56,6 +58,35 @@ public class LocalInferenceIntegrationTests
 
         var localGemmaChatClient = sp.GetKeyedService<Microsoft.Extensions.AI.IChatClient>("LocalGemma");
         Assert.NotNull(localGemmaChatClient);
+    }
+
+    [Fact]
+    public void AddCodebrewRouterLocalProvider_RegistersLocalGemmaAndProviderOptions()
+    {
+        var services = CreateServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["LlmGateway:LocalInference:Enabled"] = "true",
+                ["LlmGateway:LocalInference:ModelPath"] = @"C:\models\gemma-4-e4b-it-q4_k_m.gguf",
+                ["LlmGateway:LocalInference:CacheDirectory"] = ".llm-cache",
+                ["LlmGateway:LocalInference:MaxContextTokens"] = "8192",
+                ["LlmGateway:LocalInference:ThreadCount"] = "4",
+                ["LlmGateway:Providers:OllamaRouter:PrimaryEndpoint"] = "http://127.0.0.1:11434"
+            })
+            .Build();
+
+        services.AddCodebrewRouterLocalProvider(configuration);
+        var sp = services.BuildServiceProvider();
+
+        var providerOptions = sp.GetRequiredService<CodebrewRouterProviderOptions>();
+        Assert.Equal(@"C:\models\gemma-4-e4b-it-q4_k_m.gguf", providerOptions.LocalModelPath);
+        Assert.Equal(".llm-cache", providerOptions.CacheDirectory);
+        Assert.Equal(8192, providerOptions.LocalMaxContextTokens);
+        Assert.Equal(4, providerOptions.LocalThreadCount);
+
+        var localGemma = sp.GetKeyedService<IChatClient>("LocalGemma");
+        Assert.IsType<LocalGemmaChatClient>(localGemma);
     }
 
     [Fact]
@@ -217,7 +248,12 @@ public class LocalInferenceIntegrationTests
                 { "LlmGateway:LocalInference:MaxContextTokens", "4096" },
                 { "LlmGateway:LocalInference:Temperature", "0.5" },
                 { "LlmGateway:LocalInference:TopP", "0.8" },
-                { "LlmGateway:LocalInference:SystemPrompt", "Custom system prompt" }
+                { "LlmGateway:LocalInference:SystemPrompt", "Custom system prompt" },
+                { "LlmGateway:LocalInference:WarmupEnabled", "true" },
+                { "LlmGateway:LocalInference:WarmupPrompt", "ready" },
+                { "LlmGateway:LocalInference:WarmupMaxOutputTokens", "1" },
+                { "LlmGateway:LocalInference:WarmupTimeoutSeconds", "120" },
+                { "LlmGateway:LocalInference:BlockStartupUntilWarm", "true" }
             })
             .Build();
 
@@ -239,6 +275,11 @@ public class LocalInferenceIntegrationTests
         Assert.Equal(0.5f, options.Temperature);
         Assert.Equal(0.8f, options.TopP);
         Assert.Equal("Custom system prompt", options.SystemPrompt);
+        Assert.True(options.WarmupEnabled);
+        Assert.Equal("ready", options.WarmupPrompt);
+        Assert.Equal(1, options.WarmupMaxOutputTokens);
+        Assert.Equal(120, options.WarmupTimeoutSeconds);
+        Assert.True(options.BlockStartupUntilWarm);
     }
 
     [Fact]

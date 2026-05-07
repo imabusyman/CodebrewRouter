@@ -1,9 +1,11 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Blaze.LlmGateway.Core.Configuration;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -26,6 +28,8 @@ public class OllamaLocalIntegrationTests : IAsyncLifetime
             {
                 builder.ConfigureServices(services =>
                 {
+                    DisableLocalGemmaWarmup(services);
+
                     var descriptorsToRemove = services
                         .Where(d => d.ServiceType == typeof(IChatClient))
                         .ToList();
@@ -291,6 +295,31 @@ public class OllamaLocalIntegrationTests : IAsyncLifetime
         {
             yield return new ChatResponseUpdate(ChatRole.Assistant, chunk);
             await Task.Delay(5);
+        }
+    }
+
+    private static void DisableLocalGemmaWarmup(IServiceCollection services)
+    {
+        RemoveServicesByType(services, typeof(LocalInferenceOptions));
+        RemoveServicesByType(services, typeof(IOptions<LocalInferenceOptions>));
+
+        var options = new LocalInferenceOptions
+        {
+            Enabled = false,
+            WarmupEnabled = false,
+            BlockStartupUntilWarm = false
+        };
+
+        services.AddSingleton(options);
+        services.AddSingleton(Options.Create(options));
+    }
+
+    private static void RemoveServicesByType(IServiceCollection services, Type serviceType)
+    {
+        var descriptors = services.Where(d => d.ServiceType == serviceType).ToList();
+        foreach (var descriptor in descriptors)
+        {
+            services.Remove(descriptor);
         }
     }
 }

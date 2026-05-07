@@ -11,7 +11,7 @@ namespace Blaze.LlmGateway.LocalInference;
 /// Implements <see cref="DelegatingChatClient"/> to integrate with the MEAI pipeline.
 /// Implements <see cref="IAsyncDisposable"/> for proper cleanup of native LLamaSharp resources.
 /// </summary>
-public sealed class LocalGemmaChatClient : DelegatingChatClient, IAsyncDisposable
+public sealed class LocalGemmaChatClient : DelegatingChatClient, ILocalGemmaModelState, IAsyncDisposable
 {
     private readonly LLamaWeights? _weights;
     private readonly LLamaContext? _context;
