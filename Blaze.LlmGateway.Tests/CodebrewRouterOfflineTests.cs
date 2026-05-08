@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Blaze.LlmGateway.Api;
 using Blaze.LlmGateway.Core.Configuration;
 using Blaze.LlmGateway.Core.ModelCatalog;
@@ -9,6 +10,7 @@ using Blaze.LlmGateway.Infrastructure.PromptCleaning;
 using Blaze.LlmGateway.Infrastructure.TaskClassification;
 using Blaze.LlmGateway.Infrastructure.TokenCounting;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -112,6 +114,125 @@ public sealed class CodebrewRouterOfflineTests
         codebrewRouter.ErrorMessage.Should().Contain("ModelPath");
     }
 
+    [Fact]
+    public async Task ModelsEndpoint_WhenOfflineLocalGemmaUnavailable_ReturnsConfiguredModelsWithError()
+    {
+        var registry = CreateOfflineUnavailableRegistry();
+        var result = await ModelsEndpoint.HandleAsync(
+            new EmptyModelCatalog(),
+            registry,
+            Options.Create(CreateOfflineOptions()),
+            CancellationToken.None);
+
+        using var json = await ExecuteJsonAsync(result);
+        var data = json.RootElement.GetProperty("data").EnumerateArray().ToArray();
+
+        data.Should().NotBeEmpty();
+        var codebrewRouter = data.Should()
+            .Contain(model => model.GetProperty("id").GetString() == "codebrewRouter")
+            .Subject;
+        codebrewRouter.GetProperty("enabled").GetBoolean().Should().BeFalse();
+        codebrewRouter.GetProperty("errorMessage").GetString().Should().Contain("LocalGemma");
+
+        var localGemma = data.Should()
+            .Contain(model => model.GetProperty("id").GetString() == "local-gemma")
+            .Subject;
+        localGemma.GetProperty("enabled").GetBoolean().Should().BeFalse();
+        localGemma.GetProperty("errorMessage").GetString().Should().Contain("ModelPath");
+    }
+
+    [Fact]
+    public async Task CodebrewRouterDetails_WhenLocalGemmaUnavailable_ReturnsConfiguredFallbackRule()
+    {
+        var registry = CreateOfflineUnavailableRegistry();
+        var result = await ModelsEndpoint.HandleCodebrewRouterAsync(
+            new EmptyModelCatalog(),
+            registry,
+            Options.Create(CreateOfflineOptions()),
+            CancellationToken.None);
+
+        using var json = await ExecuteJsonAsync(result);
+
+        json.RootElement.GetProperty("enabled").GetBoolean().Should().BeFalse();
+        json.RootElement.GetProperty("errorMessage").GetString().Should().Contain("LocalGemma");
+
+        var generalRule = json.RootElement.GetProperty("fallbackRules")
+            .EnumerateArray()
+            .Single(rule => rule.GetProperty("taskType").GetString() == "General");
+        generalRule.GetProperty("providers")
+            .EnumerateArray()
+            .Select(provider => provider.GetString())
+            .Should()
+            .Contain("LocalGemma");
+    }
+
+    private static LlmGatewayOptions CreateOfflineOptions()
+        => new()
+        {
+            OfflineOnly = true,
+            CodebrewRouter = new CodebrewRouterOptions
+            {
+                Enabled = true,
+                ModelId = "codebrewRouter",
+                FallbackRules = new Dictionary<string, string[]>
+                {
+                    ["General"] = ["LocalGemma"]
+                }
+            }
+        };
+
+    private static ModelAvailabilityRegistry CreateOfflineUnavailableRegistry()
+    {
+        var registry = new ModelAvailabilityRegistry();
+        var checkedAt = DateTimeOffset.UtcNow;
+        const string localGemmaError = "LocalGemma is not loaded because LlmGateway:LocalInference:ModelPath is not configured. Set it to a local Gemma GGUF file.";
+        const string codebrewRouterError = $"No backing provider is currently available. LocalGemma: {localGemmaError}";
+
+        registry.UpdateSnapshot(
+            [
+                new AvailableModel(
+                    "local-gemma",
+                    "LocalGemma",
+                    "llamasharp",
+                    "configured",
+                    Enabled: false,
+                    ErrorMessage: localGemmaError,
+                    LastCheckedUtc: checkedAt),
+                new AvailableModel(
+                    "codebrewRouter",
+                    "CodebrewRouter",
+                    "codebrew",
+                    "virtual",
+                    Enabled: false,
+                    ErrorMessage: codebrewRouterError,
+                    LastCheckedUtc: checkedAt)
+            ],
+            [
+                new ProviderAvailabilitySnapshot("LocalGemma", false, localGemmaError, checkedAt),
+                new ProviderAvailabilitySnapshot("CodebrewRouter", false, codebrewRouterError, checkedAt)
+            ]);
+
+        return registry;
+    }
+
+    private static async Task<JsonDocument> ExecuteJsonAsync(IResult result)
+    {
+        var httpContext = new DefaultHttpContext
+        {
+            RequestServices = new ServiceCollection()
+                .AddLogging()
+                .Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(_ => { })
+                .BuildServiceProvider()
+        };
+        await using var body = new MemoryStream();
+        httpContext.Response.Body = body;
+
+        await result.ExecuteAsync(httpContext);
+
+        body.Position = 0;
+        return await JsonDocument.ParseAsync(body);
+    }
+
     private sealed class ThrowingChatClient(string message) : IChatClient
     {
         public Task<ChatResponse> GetResponseAsync(
@@ -161,5 +282,14 @@ public sealed class CodebrewRouterOfflineTests
         public bool IsProviderAvailable(string provider) => true;
 
         public string? GetProviderError(string provider) => null;
+    }
+
+    private sealed class EmptyModelCatalog : IModelCatalog
+    {
+        public Task<IReadOnlyList<AvailableModel>> GetAvailableModelsAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<AvailableModel>>([]);
+
+        public Task<AvailableModel?> FindByIdAsync(string modelId, CancellationToken cancellationToken = default)
+            => Task.FromResult<AvailableModel?>(null);
     }
 }

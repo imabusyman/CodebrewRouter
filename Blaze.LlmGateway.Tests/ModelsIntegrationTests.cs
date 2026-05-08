@@ -155,7 +155,7 @@ public class ModelsIntegrationTests : IAsyncLifetime
             }
         }
 
-        var knownProviders = new[] { "AzureFoundry", "FoundryLocal", "GithubModels", "OllamaLocal", "LmStudio" };
+        var knownProviders = new[] { "AzureFoundry", "FoundryLocal", "GithubModels", "OllamaLocal", "LmStudio", "LocalGemma", "CodebrewRouter" };
         var hasKnownProvider = providers.Any(p => knownProviders.Contains(p));
         Assert.True(hasKnownProvider, $"No known providers found. Found: {string.Join(", ", providers)}");
     }

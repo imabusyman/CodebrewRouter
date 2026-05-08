@@ -26,6 +26,25 @@ public class AppHostCompositionTests
     }
 
     [Fact]
+    public void AppHostComposition_DelaysDevUiResourcesUntilApiIsReady()
+    {
+        var root = FindRepositoryRoot();
+        var source = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.AppHost", "AppHostComposition.cs"));
+
+        Assert.Contains(".WaitFor(api)", source);
+    }
+
+    [Fact]
+    public void ServiceDefaults_ReadinessEndpointTreatsDegradedAsNotReady()
+    {
+        var root = FindRepositoryRoot();
+        var source = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.ServiceDefaults", "Extensions.cs"));
+
+        Assert.Contains("ResultStatusCodes", source);
+        Assert.Contains("[HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable", source);
+    }
+
+    [Fact]
     public void AppHostDefaultLocalInferenceConfig_DoesNotBlockStartupWhenModelPathIsEmpty()
     {
         var root = FindRepositoryRoot();

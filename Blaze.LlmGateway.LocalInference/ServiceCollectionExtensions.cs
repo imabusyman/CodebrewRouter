@@ -243,8 +243,7 @@ public sealed class LocalGemmaWarmupService(
                 throw new InvalidOperationException(reason);
             }
 
-            state.Update(LocalGemmaWarmupStatus.Skipped, opts.ModelPath, reason, stopwatch.Elapsed);
-            LocalWarmupLog.Skip(logger, reason, opts.ModelPath);
+            Fail(stopwatch, opts.ModelPath, reason, null);
             return;
         }
 

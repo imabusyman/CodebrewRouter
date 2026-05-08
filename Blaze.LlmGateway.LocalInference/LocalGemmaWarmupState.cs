@@ -67,8 +67,9 @@ public sealed class LocalGemmaWarmupState : IHealthCheck
         var healthStatus = snapshot.Status switch
         {
             LocalGemmaWarmupStatus.Ready => AspNetHealthStatus.Healthy,
+            LocalGemmaWarmupStatus.Skipped => AspNetHealthStatus.Healthy,
             LocalGemmaWarmupStatus.Failed => AspNetHealthStatus.Unhealthy,
-            _ => AspNetHealthStatus.Degraded
+            _ => AspNetHealthStatus.Unhealthy
         };
 
         var data = new Dictionary<string, object>

@@ -34,7 +34,7 @@ public sealed class LocalGemmaWarmupServiceTests
     }
 
     [Fact]
-    public async Task StartAsync_WhenModelPathMissingAndStartupDoesNotBlock_SkipsWarmup()
+    public async Task StartAsync_WhenModelPathMissingAndStartupDoesNotBlock_MarksFailedForReadiness()
     {
         var state = new LocalGemmaWarmupState();
         var logger = new CapturingLogger<LocalGemmaWarmupService>();
@@ -51,8 +51,8 @@ public sealed class LocalGemmaWarmupServiceTests
 
         await service.StartAsync(CancellationToken.None);
 
-        state.Snapshot.Status.Should().Be(LocalGemmaWarmupStatus.Skipped);
-        logger.Messages.Should().Contain(message => message.StartsWith(LocalWarmupLog.SkipTag, StringComparison.Ordinal));
+        state.Snapshot.Status.Should().Be(LocalGemmaWarmupStatus.Failed);
+        logger.Messages.Should().Contain(message => message.StartsWith(LocalWarmupLog.FailTag, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -168,13 +168,25 @@ public sealed class LocalGemmaWarmupServiceTests
         var state = new LocalGemmaWarmupState();
 
         var initial = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
-        initial.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
+        initial.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
         initial.Data["status"].Should().Be(LocalGemmaWarmupStatus.NotStarted.ToString());
+
+        state.Update(LocalGemmaWarmupStatus.Loading, "C:/models/gemma4.gguf", "loading", TimeSpan.FromMilliseconds(1));
+        var loading = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+        loading.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
+
+        state.Update(LocalGemmaWarmupStatus.Priming, "C:/models/gemma4.gguf", "priming", TimeSpan.FromMilliseconds(2));
+        var priming = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+        priming.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
 
         state.Update(LocalGemmaWarmupStatus.Ready, "C:/models/gemma4.gguf", "ready", TimeSpan.FromMilliseconds(12));
         var ready = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
         ready.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy);
         ready.Data["status"].Should().Be(LocalGemmaWarmupStatus.Ready.ToString());
+
+        state.Update(LocalGemmaWarmupStatus.Skipped, "C:/models/gemma4.gguf", "disabled", TimeSpan.FromMilliseconds(2));
+        var skipped = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+        skipped.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy);
 
         state.Update(LocalGemmaWarmupStatus.Failed, "C:/models/gemma4.gguf", "failed", TimeSpan.FromMilliseconds(3));
         var failed = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);

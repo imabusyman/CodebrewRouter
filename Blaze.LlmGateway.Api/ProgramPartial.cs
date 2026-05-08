@@ -60,12 +60,16 @@ public static class LiteLlmEndpoints
         .WithMetadata(new EndpointNameMetadata("text-completions"));
 
         // Models endpoint
-        app.MapGet("/v1/models", (IModelCatalog modelCatalog, CancellationToken ct) =>
-            ModelsEndpoint.HandleAsync(modelCatalog, ct))
+        app.MapGet("/v1/models", (
+            IModelCatalog modelCatalog,
+            IModelAvailabilityRegistry availabilityRegistry,
+            IOptions<LlmGatewayOptions> options,
+            CancellationToken ct) =>
+            ModelsEndpoint.HandleAsync(modelCatalog, availabilityRegistry, options, ct))
         .WithName("ListModels")
         .WithTags(DiscoveryTag)
         .WithSummary("List available models")
-        .WithDescription("Returns the currently available model catalog exposed by the gateway, including the provider backing each model identifier.")
+        .WithDescription("Returns the current model catalog exposed by the gateway, including unavailable configured offline models with error details.")
         .Produces<ModelsResponse>(StatusCodes.Status200OK, "application/json")
         .Produces(StatusCodes.Status500InternalServerError)
         .WithMetadata(new EndpointNameMetadata("list-models"));

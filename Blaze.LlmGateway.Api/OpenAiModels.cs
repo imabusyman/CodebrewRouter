@@ -172,7 +172,9 @@ public record CodebrewRouterBackingModel(
     string Object,
     string Provider,
     string? OwnedBy = null,
-    string? Source = null);
+    string? Source = null,
+    bool Enabled = true,
+    string? ErrorMessage = null);
 
 /// <summary>Ordered provider chain used by CodebrewRouter for a classified task type.</summary>
 public record CodebrewRouterFallbackRule(
