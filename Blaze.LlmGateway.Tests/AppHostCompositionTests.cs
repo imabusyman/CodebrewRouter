@@ -20,6 +20,8 @@ public class AppHostCompositionTests
         var source = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.AppHost", "AppHostComposition.cs"));
 
         Assert.Contains("LlmGateway__LocalInference__ModelPath", source);
+        Assert.Contains("LlmGateway__LocalInference__CacheDirectory", source);
+        Assert.Contains("LlmGateway__LocalInference__DownloadTimeoutSeconds", source);
         Assert.Contains("LlmGateway__LocalInference__WarmupEnabled", source);
         Assert.Contains("LlmGateway__LocalInference__BlockStartupUntilWarm", source);
         Assert.Contains("LlmGateway__LocalInference__WarmupTimeoutSeconds", source);
@@ -30,8 +32,14 @@ public class AppHostCompositionTests
     {
         var root = FindRepositoryRoot();
         var source = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.AppHost", "AppHostComposition.cs"));
+        var normalizedSource = source.Replace("\r\n", "\n");
 
-        Assert.Contains(".WaitFor(api)", source);
+        Assert.Contains(
+            "builder.AddScalarApiReference()\n            .WithApiReference(api)\n            .WaitFor(api)",
+            normalizedSource);
+        Assert.True(
+            CountOccurrences(source, ".WaitFor(api)") >= 3,
+            "Scalar, OpenWebUI, and Agent DevUI should all wait for API readiness.");
     }
 
     [Fact]
@@ -68,5 +76,18 @@ public class AppHostCompositionTests
         }
 
         throw new InvalidOperationException("Could not locate repository root.");
+    }
+
+    private static int CountOccurrences(string value, string pattern)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = value.IndexOf(pattern, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += pattern.Length;
+        }
+
+        return count;
     }
 }

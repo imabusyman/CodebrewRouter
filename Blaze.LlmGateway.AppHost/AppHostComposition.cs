@@ -36,6 +36,11 @@ public static class AppHostComposition
             "LlmGateway:Providers:OpenCodeGo:ApiKey") ?? "";
         var localInferenceModelPath = builder.Configuration.GetValue<string>(
             "LlmGateway:LocalInference:ModelPath") ?? "";
+        var localInferenceCacheDirectory = builder.Configuration.GetValue<string>(
+            "LlmGateway:LocalInference:CacheDirectory") ?? ".llm-cache";
+        var localInferenceDownloadTimeoutSeconds = builder.Configuration.GetValue(
+            "LlmGateway:LocalInference:DownloadTimeoutSeconds",
+            3600);
         var localInferenceWarmupEnabled = builder.Configuration.GetValue(
             "LlmGateway:LocalInference:WarmupEnabled",
             true);
@@ -61,6 +66,8 @@ public static class AppHostComposition
             .WithEnvironment("LlmGateway__Providers__LmStudio__Model", lmStudioModel)
             .WithEnvironment("LlmGateway__Providers__OpenCodeGo__ApiKey", openCodeGoApiKey)
             .WithEnvironment("LlmGateway__LocalInference__ModelPath", localInferenceModelPath)
+            .WithEnvironment("LlmGateway__LocalInference__CacheDirectory", localInferenceCacheDirectory)
+            .WithEnvironment("LlmGateway__LocalInference__DownloadTimeoutSeconds", localInferenceDownloadTimeoutSeconds.ToString())
             .WithEnvironment("LlmGateway__LocalInference__WarmupEnabled", localInferenceWarmupEnabled.ToString())
             .WithEnvironment("LlmGateway__LocalInference__BlockStartupUntilWarm", localInferenceBlockStartupUntilWarm.ToString())
             .WithEnvironment("LlmGateway__LocalInference__WarmupTimeoutSeconds", localInferenceWarmupTimeoutSeconds.ToString());
@@ -143,7 +150,8 @@ public static class AppHostComposition
         }
 
         builder.AddScalarApiReference()
-            .WithApiReference(api);
+            .WithApiReference(api)
+            .WaitFor(api);
 
         aspireLogger.LogDebug("  ├─ Dev UI playground(s) resolved (see flags above)");
         aspireLogger.LogDebug("  └─ Scalar API Reference configured for dashboard");
