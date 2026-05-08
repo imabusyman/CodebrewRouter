@@ -75,7 +75,9 @@ public static class ServiceCollectionExtensions
         services.AddKeyedSingleton<IChatClient>("LocalGemma", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LocalInferenceOptions>>().Value;
-            return new LocalGemmaChatClient(opts);
+            var provider = sp.GetRequiredService<IModelDistributionProvider>();
+            var logger = sp.GetService<ILogger<LocalGemmaChatClient>>();
+            return new LocalGemmaChatClient(opts, provider, logger);
         });
         services.AddHostedService<LocalGemmaWarmupService>();
 
@@ -167,7 +169,9 @@ public static class ServiceCollectionExtensions
         services.AddKeyedSingleton<Microsoft.Extensions.AI.IChatClient>("LocalGemma", (sp, _) =>
         {
             var opts = sp.GetRequiredService<IOptions<LocalInferenceOptions>>().Value;
-            return new LocalGemmaChatClient(opts);
+            var provider = sp.GetRequiredService<IModelDistributionProvider>();
+            var logger = sp.GetService<ILogger<LocalGemmaChatClient>>();
+            return new LocalGemmaChatClient(opts, provider, logger);
         });
         services.AddHostedService<LocalGemmaWarmupService>();
 
@@ -249,20 +253,22 @@ public sealed class LocalGemmaWarmupService(
 
         try
         {
-            state.Update(LocalGemmaWarmupStatus.Loading, opts.ModelPath, "Loading local Gemma model.", stopwatch.Elapsed);
-
             var client = serviceProvider.GetKeyedService<IChatClient>("LocalGemma")
                 ?? throw new InvalidOperationException("Keyed LocalGemma chat client is not registered.");
             var modelState = ResolveModelState(client)
                 ?? throw new InvalidOperationException("LocalGemma chat client does not expose local model load state.");
 
-            LocalWarmupLog.Load(logger, modelState.ModelPath, modelState.IsModelLoaded, stopwatch.ElapsedMilliseconds);
+            // Transition to Downloading: covers both download (if URL) and LLamaSharp load
+            state.Update(LocalGemmaWarmupStatus.Downloading, opts.ModelPath, "Resolving local Gemma model source.", stopwatch.Elapsed);
 
-            if (!modelState.IsModelLoaded)
+            // EnsureLoadedAsync handles download (if URL) then LLamaSharp load.
+            // The callback fires when the file is local and LLamaSharp is about to load.
+            await modelState.EnsureLoadedAsync(cancellationToken, () =>
             {
-                throw new InvalidOperationException(
-                    $"Local Gemma model was not loaded from '{modelState.ModelPath ?? opts.ModelPath}'.");
-            }
+                state.Update(LocalGemmaWarmupStatus.Loading, modelState.ModelPath, "Loading local Gemma model into LLamaSharp.", stopwatch.Elapsed);
+            });
+
+            LocalWarmupLog.Load(logger, modelState.ModelPath, modelState.IsModelLoaded, stopwatch.ElapsedMilliseconds);
 
             state.Update(LocalGemmaWarmupStatus.Priming, modelState.ModelPath, "Priming local Gemma model.", stopwatch.Elapsed);
 

@@ -7,11 +7,12 @@ using AspNetHealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthS
 public enum LocalGemmaWarmupStatus
 {
     NotStarted = 0,
-    Loading = 1,
-    Priming = 2,
-    Ready = 3,
-    Skipped = 4,
-    Failed = 5
+    Downloading = 1,
+    Loading = 2,
+    Priming = 3,
+    Ready = 4,
+    Skipped = 5,
+    Failed = 6
 }
 
 public sealed record LocalGemmaWarmupSnapshot(

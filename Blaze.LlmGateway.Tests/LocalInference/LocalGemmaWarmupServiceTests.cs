@@ -171,6 +171,11 @@ public sealed class LocalGemmaWarmupServiceTests
         initial.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
         initial.Data["status"].Should().Be(LocalGemmaWarmupStatus.NotStarted.ToString());
 
+        state.Update(LocalGemmaWarmupStatus.Downloading, "https://hf.co/model.gguf", "downloading", TimeSpan.FromMilliseconds(1));
+        var downloading = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+        downloading.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
+        downloading.Data["status"].Should().Be(LocalGemmaWarmupStatus.Downloading.ToString());
+
         state.Update(LocalGemmaWarmupStatus.Loading, "C:/models/gemma4.gguf", "loading", TimeSpan.FromMilliseconds(1));
         var loading = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
         loading.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
@@ -192,6 +197,87 @@ public sealed class LocalGemmaWarmupServiceTests
         var failed = await state.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
         failed.Status.Should().Be(Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
         failed.Data["status"].Should().Be(LocalGemmaWarmupStatus.Failed.ToString());
+    }
+
+    [Fact]
+    public async Task StartAsync_WhenModelLoaded_CallsEnsureLoadedAsyncBeforePrime()
+    {
+        var fakeClient = new FakeWarmupChatClient();
+        var state = new LocalGemmaWarmupState();
+        var logger = new CapturingLogger<LocalGemmaWarmupService>();
+        var service = CreateService(
+            new LocalInferenceOptions
+            {
+                Enabled = true,
+                WarmupEnabled = true,
+                ModelPath = fakeClient.ModelPath!,
+                WarmupPrompt = "ready",
+                WarmupMaxOutputTokens = 1,
+                WarmupTimeoutSeconds = 5,
+                BlockStartupUntilWarm = true
+            },
+            state,
+            logger,
+            fakeClient);
+
+        await service.StartAsync(CancellationToken.None);
+
+        fakeClient.EnsureLoadedCalls.Should().Be(1);
+        state.Snapshot.Status.Should().Be(LocalGemmaWarmupStatus.Ready);
+    }
+
+    [Fact]
+    public async Task StartAsync_WhenEnsureLoadedAsyncFailsAndStartupDoesNotBlock_MarksFailedWithoutThrowing()
+    {
+        var fakeClient = new FakeWarmupChatClient
+        {
+            EnsureLoadedAsyncException = new InvalidOperationException("download failed")
+        };
+        var state = new LocalGemmaWarmupState();
+        var logger = new CapturingLogger<LocalGemmaWarmupService>();
+        var service = CreateService(
+            new LocalInferenceOptions
+            {
+                Enabled = true,
+                WarmupEnabled = true,
+                ModelPath = fakeClient.ModelPath!,
+                BlockStartupUntilWarm = false
+            },
+            state,
+            logger,
+            fakeClient);
+
+        await service.StartAsync(CancellationToken.None);
+
+        state.Snapshot.Status.Should().Be(LocalGemmaWarmupStatus.Failed);
+        logger.Messages.Should().Contain(message => message.StartsWith(LocalWarmupLog.FailTag, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task StartAsync_WhenEnsureLoadedAsyncFailsAndStartupBlocks_Throws()
+    {
+        var fakeClient = new FakeWarmupChatClient
+        {
+            EnsureLoadedAsyncException = new InvalidOperationException("download failed")
+        };
+        var state = new LocalGemmaWarmupState();
+        var logger = new CapturingLogger<LocalGemmaWarmupService>();
+        var service = CreateService(
+            new LocalInferenceOptions
+            {
+                Enabled = true,
+                WarmupEnabled = true,
+                ModelPath = fakeClient.ModelPath!,
+                BlockStartupUntilWarm = true
+            },
+            state,
+            logger,
+            fakeClient);
+
+        var act = () => service.StartAsync(CancellationToken.None);
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*download failed*");
+        state.Snapshot.Status.Should().Be(LocalGemmaWarmupStatus.Failed);
     }
 
     private static LocalGemmaWarmupService CreateService(
@@ -225,6 +311,20 @@ public sealed class LocalGemmaWarmupServiceTests
         public bool HangUntilCancelled { get; init; }
 
         public Exception? StreamingException { get; init; }
+
+        public Exception? EnsureLoadedAsyncException { get; init; }
+
+        public int EnsureLoadedCalls { get; private set; }
+
+        public Task EnsureLoadedAsync(
+            CancellationToken cancellationToken = default,
+            Action? onModelFileReady = null)
+        {
+            EnsureLoadedCalls++;
+            if (EnsureLoadedAsyncException is not null) throw EnsureLoadedAsyncException;
+            onModelFileReady?.Invoke();
+            return Task.CompletedTask;
+        }
 
         public Task<ChatResponse> GetResponseAsync(
             IEnumerable<ChatMessage> chatMessages,
