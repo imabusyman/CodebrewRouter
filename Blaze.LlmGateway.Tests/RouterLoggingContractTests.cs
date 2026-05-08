@@ -50,6 +50,16 @@ public sealed class RouterLoggingContractTests
             LocalWarmupLog.FailTag
         };
 
+    public static TheoryData<string> LocalModelTags =>
+        new()
+        {
+            LocalModelLog.ResolveTag,
+            LocalModelLog.CacheHitTag,
+            LocalModelLog.DownloadStartTag,
+            LocalModelLog.DownloadReadyTag,
+            LocalModelLog.DownloadFailTag
+        };
+
     [Theory]
     [MemberData(nameof(RouterEvents))]
     public void Write_FormatsRouterEventWithExactTagAndDefaultLevel(
@@ -75,6 +85,14 @@ public sealed class RouterLoggingContractTests
         tag.Should().NotStartWith("[ROUTER-");
     }
 
+    [Theory]
+    [MemberData(nameof(LocalModelTags))]
+    public void LocalModelTags_DoNotUseRouterNamespace(string tag)
+    {
+        tag.Should().StartWith("[LOCAL-MODEL-");
+        tag.Should().NotStartWith("[ROUTER-");
+    }
+
     [Fact]
     public void LocalWarmupTags_AreDocumentedInLoggingContract()
     {
@@ -89,6 +107,27 @@ public sealed class RouterLoggingContractTests
             LocalWarmupLog.ReadyTag,
             LocalWarmupLog.SkipTag,
             LocalWarmupLog.FailTag
+        };
+
+        foreach (var tag in tags)
+        {
+            contract.Should().Contain(tag);
+        }
+    }
+
+    [Fact]
+    public void LocalModelTags_AreDocumentedInLoggingContract()
+    {
+        var root = FindRepositoryRoot();
+        var contract = File.ReadAllText(Path.Combine(root, "Docs", "engineering", "logging-contract.md"));
+
+        var tags = new[]
+        {
+            LocalModelLog.ResolveTag,
+            LocalModelLog.CacheHitTag,
+            LocalModelLog.DownloadStartTag,
+            LocalModelLog.DownloadReadyTag,
+            LocalModelLog.DownloadFailTag
         };
 
         foreach (var tag in tags)

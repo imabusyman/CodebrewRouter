@@ -59,6 +59,18 @@ Local model startup and Aspire readiness telemetry must use `[LOCAL-WARMUP-*]` t
 | `[LOCAL-WARMUP-SKIP]` | Information | Warmup was intentionally skipped because local inference or warmup was disabled, or startup was allowed without a model path. |
 | `[LOCAL-WARMUP-FAIL]` | Warning | Warmup failed, including missing model path when startup must block. |
 
+## Local Model Materialization Tags
+
+Provider-level local model source and cache events must use `[LOCAL-MODEL-*]` tags, not `[ROUTER-*]`, because model materialization is process lifecycle work rather than request routing. Do not emit these events through `RouterLog.Write(...)`.
+
+| Tag | Level | Meaning |
+|---|---|---|
+| `[LOCAL-MODEL-RESOLVE]` | Information | Local path or model source resolved to an absolute GGUF path. |
+| `[LOCAL-MODEL-CACHE-HIT]` | Information | Remote model URL was already cached locally. |
+| `[LOCAL-MODEL-DOWNLOAD-START]` | Information | Remote model download started. |
+| `[LOCAL-MODEL-DOWNLOAD-READY]` | Information | Remote model download completed and cached path is ready. |
+| `[LOCAL-MODEL-DOWNLOAD-FAIL]` | Error | Remote model download failed. |
+
 ## Agent Tags
 
 Agent lifecycle telemetry must use `[AGENT-*]` tags so it does not collide with gateway request routing.
