@@ -115,6 +115,56 @@ public sealed class CodebrewRouterOfflineTests
     }
 
     [Fact]
+    public async Task AvailabilitySeed_WhenLocalGemmaModelPathIsRemoteUrl_EnablesLocalGemmaAndCodebrewRouter()
+    {
+        const string gemma4Url =
+            "https://huggingface.co/ggml-org/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf";
+        var services = new ServiceCollection();
+        var serviceProvider = services.BuildServiceProvider();
+        var registry = new ModelAvailabilityRegistry();
+        var options = Options.Create(new LlmGatewayOptions
+        {
+            OfflineOnly = true,
+            LocalInference = new LocalInferenceOptions
+            {
+                Enabled = true,
+                ModelPath = gemma4Url
+            },
+            Availability = new ModelAvailabilityOptions
+            {
+                Enabled = false
+            },
+            CodebrewRouter = new CodebrewRouterOptions
+            {
+                Enabled = true,
+                ModelId = "codebrewRouter",
+                FallbackRules = new Dictionary<string, string[]>
+                {
+                    ["General"] = ["LocalGemma"]
+                }
+            }
+        });
+        var heartbeat = new ModelAvailabilityHeartbeatService(
+            serviceProvider.GetRequiredService<IServiceScopeFactory>(),
+            options,
+            new LmStudioModelDiscovery(new HttpClient(), NullLogger<LmStudioModelDiscovery>.Instance),
+            registry,
+            NullLogger<ModelAvailabilityHeartbeatService>.Instance);
+
+        await heartbeat.StartAsync(CancellationToken.None);
+
+        var localGemma = registry.FindModel("local-gemma", includeUnavailable: true);
+        localGemma.Should().NotBeNull();
+        localGemma!.Enabled.Should().BeTrue();
+        localGemma.ErrorMessage.Should().BeNull();
+
+        var codebrewRouter = registry.FindModel("codebrewRouter", includeUnavailable: true);
+        codebrewRouter.Should().NotBeNull();
+        codebrewRouter!.Enabled.Should().BeTrue();
+        codebrewRouter.ErrorMessage.Should().BeNull();
+    }
+
+    [Fact]
     public async Task ModelsEndpoint_WhenOfflineLocalGemmaUnavailable_ReturnsConfiguredModelsWithError()
     {
         var registry = CreateOfflineUnavailableRegistry();

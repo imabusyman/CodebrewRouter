@@ -540,14 +540,14 @@ public sealed class ModelAvailabilityHeartbeatService(
 
         if (string.IsNullOrWhiteSpace(options.ModelPath))
         {
-            return "LocalGemma is not loaded because LlmGateway:LocalInference:ModelPath is not configured. Set it to a local Gemma GGUF file.";
+            return "LocalGemma is not loaded because LlmGateway:LocalInference:ModelPath is not configured. Set it to a local Gemma GGUF file or a Hugging Face GGUF URL.";
         }
 
         if (Uri.TryCreate(options.ModelPath, UriKind.Absolute, out var uri) &&
             (string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
              string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)))
         {
-            return "LocalGemma is not loaded because LlmGateway:LocalInference:ModelPath must be a local Gemma GGUF file path for offline startup.";
+            return null;
         }
 
         if (!File.Exists(options.ModelPath))

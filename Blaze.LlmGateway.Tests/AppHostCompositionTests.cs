@@ -53,13 +53,23 @@ public class AppHostCompositionTests
     }
 
     [Fact]
-    public void AppHostDefaultLocalInferenceConfig_DoesNotBlockStartupWhenModelPathIsEmpty()
+    public void DefaultLocalInferenceConfig_UsesGemma4RemoteBootstrap()
     {
         var root = FindRepositoryRoot();
-        var source = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.AppHost", "appsettings.json"));
+        var appHostConfig = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.AppHost", "appsettings.json"));
+        var apiConfig = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.Api", "appsettings.json"));
+        const string gemma4Url =
+            "https://huggingface.co/ggml-org/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf";
 
-        Assert.Contains("\"ModelPath\": \"\"", source);
-        Assert.Contains("\"BlockStartupUntilWarm\": false", source);
+        Assert.Contains($"\"ModelPath\": \"{gemma4Url}\"", appHostConfig);
+        Assert.Contains("\"CacheDirectory\": \".llm-cache\"", appHostConfig);
+        Assert.Contains("\"DownloadTimeoutSeconds\": 3600", appHostConfig);
+        Assert.Contains("\"BlockStartupUntilWarm\": true", appHostConfig);
+
+        Assert.Contains($"\"ModelPath\": \"{gemma4Url}\"", apiConfig);
+        Assert.Contains("\"CacheDirectory\": \".llm-cache\"", apiConfig);
+        Assert.Contains("\"DownloadTimeoutSeconds\": 3600", apiConfig);
+        Assert.Contains("\"BlockStartupUntilWarm\": true", apiConfig);
     }
 
     private static string FindRepositoryRoot()

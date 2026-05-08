@@ -300,8 +300,11 @@ public class LocalInferenceIntegrationTests
     }
 
     [Fact]
-    public void ApiDefaultLocalInferenceConfig_DoesNotBlockStartupWhenModelPathIsEmpty()
+    public void ApiDefaultLocalInferenceConfig_UsesGemma4RemoteBootstrap()
     {
+        const string expectedModelPath =
+            "https://huggingface.co/ggml-org/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf";
+
         var root = FindRepositoryRoot();
         var configuration = new ConfigurationBuilder()
             .AddJsonFile(Path.Combine(root, "Blaze.LlmGateway.Api", "appsettings.json"))
@@ -312,8 +315,10 @@ public class LocalInferenceIntegrationTests
             .Get<LocalInferenceOptions>() ?? new LocalInferenceOptions();
 
         Assert.True(options.WarmupEnabled);
-        Assert.True(string.IsNullOrWhiteSpace(options.ModelPath));
-        Assert.False(options.BlockStartupUntilWarm);
+        Assert.Equal(expectedModelPath, options.ModelPath);
+        Assert.Equal(".llm-cache", options.CacheDirectory);
+        Assert.Equal(3600, options.DownloadTimeoutSeconds);
+        Assert.True(options.BlockStartupUntilWarm);
     }
 
     [Fact]
