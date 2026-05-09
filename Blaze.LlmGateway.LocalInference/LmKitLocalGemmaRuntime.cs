@@ -8,6 +8,7 @@ using LMKit.TextGeneration.Events;
 using LMKit.TextGeneration.Sampling;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Blaze.LlmGateway.LocalInference;
 
@@ -78,12 +79,16 @@ internal sealed class LmKitLocalGemmaRuntime : ILocalGemmaRuntime
                 SingleReader = true,
                 SingleWriter = true
             });
+            var streamFilter = new ChannelTextFilter();
 
             void HandleAfterTokenSampling(object? _, AfterTokenSamplingEventArgs eventArgs)
             {
                 if (!string.IsNullOrWhiteSpace(eventArgs.TextChunk))
                 {
-                    updates.Writer.TryWrite(new ChatResponseUpdate(ChatRole.Assistant, eventArgs.TextChunk));
+                    foreach (var visibleChunk in streamFilter.Append(eventArgs.TextChunk))
+                    {
+                        updates.Writer.TryWrite(new ChatResponseUpdate(ChatRole.Assistant, visibleChunk));
+                    }
                 }
             }
 
@@ -94,6 +99,10 @@ internal sealed class LmKitLocalGemmaRuntime : ILocalGemmaRuntime
                 try
                 {
                     await conversation.SubmitAsync(prompt, cancellationToken);
+                    foreach (var visibleChunk in streamFilter.Complete())
+                    {
+                        updates.Writer.TryWrite(new ChatResponseUpdate(ChatRole.Assistant, visibleChunk));
+                    }
                     updates.Writer.TryComplete();
                 }
                 catch (Exception ex)
@@ -220,5 +229,249 @@ internal sealed class LmKitLocalGemmaRuntime : ILocalGemmaRuntime
 
         var tensor = tensorMatch.Success ? $"Tensor '{tensorMatch.Groups["tensor"].Value}' " : "A tensor ";
         return $"{tensor}uses unsupported GGML type {typeMatch.Groups["type"].Value}.";
+    }
+
+    private sealed class ChannelTextFilter
+    {
+        private const string ChannelMarker = "<|channel>";
+        private static readonly string[] KnownChannels = ["thought", "analysis", "reasoning", "scratchpad", "final", "assistant", "answer", "response", "output"];
+        private static readonly HashSet<string> VisibleChannels = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "final",
+            "assistant",
+            "answer",
+            "response",
+            "output"
+        };
+        private readonly StringBuilder _buffer = new();
+        private readonly StringBuilder _suppressed = new();
+        private string? _activeChannel;
+        private bool _sawExplicitChannel;
+        private bool _emittedVisibleText;
+
+        public IEnumerable<string> Append(string chunk)
+        {
+            if (string.IsNullOrEmpty(chunk))
+            {
+                yield break;
+            }
+
+            _buffer.Append(chunk);
+
+            while (true)
+            {
+                var markerIndex = IndexOf(_buffer, ChannelMarker);
+                if (markerIndex < 0)
+                {
+                    foreach (var text in FlushWithoutMarker())
+                    {
+                        yield return text;
+                    }
+
+                    yield break;
+                }
+
+                if (markerIndex > 0)
+                {
+                    var prefix = _buffer.ToString(0, markerIndex);
+                    if (ShouldEmitCurrentChannelText(prefix))
+                    {
+                        _emittedVisibleText = true;
+                        yield return prefix;
+                    }
+                    else
+                    {
+                        RememberSuppressed(prefix);
+                    }
+
+                    _buffer.Remove(0, markerIndex);
+                }
+
+                if (!TryConsumeMarker())
+                {
+                    yield break;
+                }
+            }
+        }
+
+        private IEnumerable<string> FlushWithoutMarker()
+        {
+            var trailingMarkerLength = LongestMarkerPrefixAtEnd();
+            var flushLength = _buffer.Length - trailingMarkerLength;
+            if (flushLength <= 0)
+            {
+                yield break;
+            }
+
+            var text = _buffer.ToString(0, flushLength);
+            _buffer.Remove(0, flushLength);
+
+            if (ShouldEmitCurrentChannelText(text))
+            {
+                _emittedVisibleText = true;
+                yield return text;
+            }
+            else
+            {
+                RememberSuppressed(text);
+            }
+        }
+
+        public IEnumerable<string> Complete()
+        {
+            foreach (var text in FlushWithoutMarker())
+            {
+                yield return text;
+            }
+
+            if (_buffer.Length == 0)
+            {
+                if (!_emittedVisibleText && _suppressed.Length > 0)
+                {
+                    yield return _suppressed.ToString();
+                }
+                yield break;
+            }
+
+            var remaining = _buffer.ToString();
+            _buffer.Clear();
+
+            if (ShouldEmitCurrentChannelText(remaining))
+            {
+                _emittedVisibleText = true;
+                yield return remaining;
+                yield break;
+            }
+
+            if (!_emittedVisibleText)
+            {
+                RememberSuppressed(remaining);
+                if (_suppressed.Length > 0)
+                {
+                    yield return _suppressed.ToString();
+                }
+                yield break;
+            }
+        }
+
+        private bool TryConsumeMarker()
+        {
+            if (_buffer.Length <= ChannelMarker.Length)
+            {
+                return false;
+            }
+
+            var remainder = _buffer.ToString(ChannelMarker.Length, _buffer.Length - ChannelMarker.Length);
+            foreach (var knownChannel in KnownChannels)
+            {
+                if (!remainder.StartsWith(knownChannel, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var consumedLength = ChannelMarker.Length + knownChannel.Length;
+                if (_buffer.Length < consumedLength)
+                {
+                    return false;
+                }
+
+                if (_buffer.Length > consumedLength)
+                {
+                    var delimiter = _buffer[consumedLength];
+                    if (delimiter is '\r' or '\n')
+                    {
+                        consumedLength++;
+                        if (delimiter == '\r' && _buffer.Length > consumedLength && _buffer[consumedLength] == '\n')
+                        {
+                            consumedLength++;
+                        }
+                    }
+                }
+
+                _buffer.Remove(0, consumedLength);
+                _activeChannel = knownChannel;
+                _sawExplicitChannel = true;
+                return true;
+            }
+
+            var newlineIndex = IndexOfNewline(_buffer, ChannelMarker.Length);
+            if (newlineIndex < 0)
+            {
+                return false;
+            }
+
+            var channelValue = _buffer.ToString(ChannelMarker.Length, newlineIndex - ChannelMarker.Length).Trim();
+            _buffer.Remove(0, newlineIndex + 1);
+            _activeChannel = string.IsNullOrWhiteSpace(channelValue) ? null : channelValue;
+            _sawExplicitChannel = true;
+            return true;
+        }
+
+        private bool ShouldEmitCurrentChannelText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return false;
+            }
+
+            if (!_sawExplicitChannel)
+            {
+                return true;
+            }
+
+            return _activeChannel is not null && VisibleChannels.Contains(_activeChannel);
+        }
+
+        private void RememberSuppressed(string text)
+        {
+            if (string.IsNullOrEmpty(text) || _emittedVisibleText)
+            {
+                return;
+            }
+
+            _suppressed.Append(text);
+        }
+
+        private int LongestMarkerPrefixAtEnd()
+        {
+            var max = Math.Min(_buffer.Length, ChannelMarker.Length - 1);
+            for (var length = max; length > 0; length--)
+            {
+                var suffix = _buffer.ToString(_buffer.Length - length, length);
+                if (ChannelMarker.StartsWith(suffix, StringComparison.Ordinal))
+                {
+                    return length;
+                }
+            }
+
+            return 0;
+        }
+
+        private static int IndexOf(StringBuilder builder, string value)
+            => builder.ToString().IndexOf(value, StringComparison.Ordinal);
+
+        private static int IndexOfNewline(StringBuilder builder, int startIndex)
+        {
+            for (var i = startIndex; i < builder.Length; i++)
+            {
+                var ch = builder[i];
+                if (ch == '\n')
+                {
+                    return i;
+                }
+
+                if (ch == '\r')
+                {
+                    if (i + 1 < builder.Length && builder[i + 1] == '\n')
+                    {
+                        return i + 1;
+                    }
+
+                    return i;
+                }
+            }
+
+            return -1;
+        }
     }
 }

@@ -1,10 +1,83 @@
 using Blaze.LlmGateway.LocalInference;
 using FluentAssertions;
+using Microsoft.Extensions.AI;
 
 namespace Blaze.LlmGateway.Tests.LocalInference;
 
 public sealed class LmKitLocalGemmaRuntimeTests
 {
+    [Fact]
+    public async Task GetStreamingResponseAsync_StripsThoughtChannelContent()
+    {
+        var messages = new[] { new ChatMessage(ChatRole.User, "help me stop procrastinating") };
+        var runtime = new FakeLmKitRuntime([
+            "<|channel>thought\n",
+            "internal reasoning here",
+            "<|channel>final\n",
+            "What time or kind of task do you procrastinate on most?"
+        ]);
+
+        var chunks = new List<string>();
+        await foreach (var update in runtime.GetStreamingResponseAsync(messages))
+        {
+            chunks.Add(update.Text ?? string.Empty);
+        }
+
+        string.Concat(chunks).Should().Be("What time or kind of task do you procrastinate on most?");
+    }
+
+    [Fact]
+    public async Task GetStreamingResponseAsync_StripsThoughtChannelContent_WhenChannelHasNoNewlineDelimiter()
+    {
+        var messages = new[] { new ChatMessage(ChatRole.User, "help me stop procrastinating") };
+        var runtime = new FakeLmKitRuntime([
+            "<|channel>thoughtHere's a thinking process to construct the response.",
+            "<|channel>finalWhat time or kind of task do you procrastinate on most?"
+        ]);
+
+        var chunks = new List<string>();
+        await foreach (var update in runtime.GetStreamingResponseAsync(messages))
+        {
+            chunks.Add(update.Text ?? string.Empty);
+        }
+
+        string.Concat(chunks).Should().Be("What time or kind of task do you procrastinate on most?");
+    }
+
+    [Fact]
+    public async Task GetStreamingResponseAsync_EmitsAssistantChannelContent_WhenModelUsesAssistantChannel()
+    {
+        var messages = new[] { new ChatMessage(ChatRole.User, "write a helper method") };
+        var runtime = new FakeLmKitRuntime([
+            "<|channel>assistantHere's the helper method you asked for."
+        ]);
+
+        var chunks = new List<string>();
+        await foreach (var update in runtime.GetStreamingResponseAsync(messages))
+        {
+            chunks.Add(update.Text ?? string.Empty);
+        }
+
+        string.Concat(chunks).Should().Be("Here's the helper method you asked for.");
+    }
+
+    [Fact]
+    public async Task GetStreamingResponseAsync_FallsBackToResidualText_WhenNoVisibleChannelWasEmitted()
+    {
+        var messages = new[] { new ChatMessage(ChatRole.User, "explain the bug") };
+        var runtime = new FakeLmKitRuntime([
+            "<|channel>thoughtThis is the only text the model produced."
+        ]);
+
+        var chunks = new List<string>();
+        await foreach (var update in runtime.GetStreamingResponseAsync(messages))
+        {
+            chunks.Add(update.Text ?? string.Empty);
+        }
+
+        string.Concat(chunks).Should().Be("This is the only text the model produced.");
+    }
+
     [Fact]
     public void BuildLoadFailureMessage_WhenNativeBackendRejectsTensorType_ErrorIsActionable()
     {
@@ -27,5 +100,53 @@ public sealed class LmKitLocalGemmaRuntimeTests
         var message = LmKitLocalGemmaRuntime.BuildLoadFailureMessage("E:\\models\\gemma4.lmk", exception);
 
         message.Should().Be("Failed to load local Gemma model from 'E:\\models\\gemma4.lmk' via LM-Kit.");
+    }
+
+    private sealed class FakeLmKitRuntime : ILocalGemmaRuntime
+    {
+        private readonly string[] _chunks;
+
+        public FakeLmKitRuntime(string[] chunks)
+        {
+            _chunks = chunks;
+        }
+
+        public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
+            IEnumerable<ChatMessage> chatMessages,
+            ChatOptions? options = null,
+            [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            var filterType = typeof(LmKitLocalGemmaRuntime).GetNestedType("ChannelTextFilter", System.Reflection.BindingFlags.NonPublic)
+                ?? throw new InvalidOperationException("ChannelTextFilter not found.");
+            var filter = Activator.CreateInstance(filterType)
+                ?? throw new InvalidOperationException("Could not create ChannelTextFilter.");
+            var append = filterType.GetMethod("Append")
+                ?? throw new InvalidOperationException("Append method not found.");
+
+            foreach (var chunk in _chunks)
+            {
+                var visibleChunks = (IEnumerable<string>?)append.Invoke(filter, [chunk])
+                    ?? [];
+
+                foreach (var visibleChunk in visibleChunks)
+                {
+                    await Task.Yield();
+                    yield return new ChatResponseUpdate(ChatRole.Assistant, visibleChunk);
+                }
+            }
+
+            var complete = filterType.GetMethod("Complete")
+                ?? throw new InvalidOperationException("Complete method not found.");
+            var finalChunks = (IEnumerable<string>?)complete.Invoke(filter, null)
+                ?? [];
+
+            foreach (var finalChunk in finalChunks)
+            {
+                await Task.Yield();
+                yield return new ChatResponseUpdate(ChatRole.Assistant, finalChunk);
+            }
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }
