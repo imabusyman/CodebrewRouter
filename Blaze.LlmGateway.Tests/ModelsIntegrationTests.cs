@@ -362,6 +362,26 @@ public class ModelsIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Models_ContainsPlannerAndCouncilVirtualModelsWithCapabilities()
+    {
+        var response = await _client!.GetAsync("/v1/models");
+        var body = await response.Content.ReadAsStringAsync();
+        using var json = JsonDocument.Parse(body);
+
+        var models = json.RootElement.GetProperty("data").EnumerateArray().ToArray();
+        var planner = models.Single(model => string.Equals(model.GetProperty("id").GetString(), "codebrewPlanner", StringComparison.OrdinalIgnoreCase));
+        var council = models.Single(model => string.Equals(model.GetProperty("id").GetString(), "codebrewCouncil", StringComparison.OrdinalIgnoreCase));
+
+        Assert.True(planner.GetProperty("toolSupport").GetBoolean());
+        Assert.False(planner.GetProperty("cloudRequired").GetBoolean());
+        Assert.Contains("planning", planner.GetProperty("capabilities").EnumerateArray().Select(item => item.GetString()));
+
+        Assert.Equal("concurrent", council.GetProperty("workflow").GetString());
+        Assert.True(council.GetProperty("cloudRequired").GetBoolean());
+        Assert.Contains("council", council.GetProperty("capabilities").EnumerateArray().Select(item => item.GetString()));
+    }
+
+    [Fact]
     public async Task CodebrewRouterModelDetails_ReturnsVirtualModelMetadata()
     {
         var response = await _client!.GetAsync("/v1/models/codebrewRouter");
@@ -496,6 +516,16 @@ public class ModelsIntegrationTests : IAsyncLifetime
 
         Assert.False(lmStudio.GetProperty("enabled").GetBoolean());
         Assert.Equal("Connection refused", lmStudio.GetProperty("errorMessage").GetString());
+    }
+
+    [Fact]
+    public async Task DevUi_IsMountedInDevelopmentHost()
+    {
+        var response = await _client!.GetAsync("/devui");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.True(response.IsSuccessStatusCode, body);
+        Assert.Contains("html", body, StringComparison.OrdinalIgnoreCase);
     }
 
     private static void RemoveServicesByType(IServiceCollection services, Type serviceType)

@@ -26,11 +26,52 @@ public class VirtualModelOptions
     /// <summary>Optional system prompt prepended to every request for this virtual model.</summary>
     public string? SystemPrompt { get; set; }
 
+    /// <summary>Agent runtime mode used to expose this model internally.</summary>
+    public string AgentMode { get; set; } = "chat-client-agent";
+
+    /// <summary>Workflow shape used by this virtual model, for example single, sequential, or concurrent.</summary>
+    public string Workflow { get; set; } = "single";
+
+    /// <summary>Portable capability tags advertised in model discovery.</summary>
+    public string[] Capabilities { get; set; } = ["chat"];
+
+    /// <summary>Whether this profile can accept OpenAI-compatible tool definitions.</summary>
+    public bool ToolSupport { get; set; }
+
+    /// <summary>Whether this profile can accept image/content-part inputs.</summary>
+    public bool VisionSupport { get; set; }
+
+    /// <summary>Whether this profile requires cloud egress by default.</summary>
+    public bool CloudRequired { get; set; }
+
+    /// <summary>Advertised context window for this profile when known.</summary>
+    public int? ContextWindow { get; set; }
+
+    /// <summary>MCP server IDs enabled for this profile.</summary>
+    public string[] McpServers { get; set; } = [];
+
+    /// <summary>Skill pack IDs enabled for this profile.</summary>
+    public string[] Skills { get; set; } = [];
+
+    /// <summary>Memory behavior for this profile.</summary>
+    public VirtualModelMemoryOptions? Memory { get; set; }
+
     /// <summary>Task-type fallback chains used by the CodebrewRouter backing client.</summary>
     public Dictionary<string, string[]> FallbackRules { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Context compaction behavior for this virtual model.</summary>
     public ContextCompactionOptions? ContextCompaction { get; set; }
+}
+
+public class VirtualModelMemoryOptions
+{
+    public bool Enabled { get; set; }
+
+    public string Scope { get; set; } = "developer+repo";
+
+    public string? Provider { get; set; }
+
+    public string[] Collections { get; set; } = [];
 }
 
 public static class VirtualModelOptionsExtensions
@@ -78,6 +119,16 @@ public static class VirtualModelOptionsExtensions
             OwnedBy = "codebrew",
             Source = "virtual",
             Extends = null,
+            AgentMode = "chat-client-agent",
+            Workflow = "single",
+            Capabilities = ["chat", "routing", "tools"],
+            ToolSupport = true,
+            VisionSupport = false,
+            CloudRequired = false,
+            ContextWindow = null,
+            McpServers = [],
+            Skills = [],
+            Memory = new VirtualModelMemoryOptions { Enabled = false, Scope = "developer+repo" },
             FallbackRules = CloneFallbackRules(options.FallbackRules),
             ContextCompaction = options.ContextCompaction
         };
@@ -104,6 +155,16 @@ public static class VirtualModelOptionsExtensions
             Source = string.IsNullOrWhiteSpace(profile.Source) ? "virtual" : profile.Source,
             Extends = NormalizeExtends(profile.Extends, defaults),
             SystemPrompt = profile.SystemPrompt,
+            AgentMode = string.IsNullOrWhiteSpace(profile.AgentMode) ? "chat-client-agent" : profile.AgentMode,
+            Workflow = string.IsNullOrWhiteSpace(profile.Workflow) ? "single" : profile.Workflow,
+            Capabilities = profile.Capabilities.Length > 0 ? profile.Capabilities.ToArray() : ["chat"],
+            ToolSupport = profile.ToolSupport,
+            VisionSupport = profile.VisionSupport,
+            CloudRequired = profile.CloudRequired,
+            ContextWindow = profile.ContextWindow,
+            McpServers = profile.McpServers.ToArray(),
+            Skills = profile.Skills.ToArray(),
+            Memory = CloneMemory(profile.Memory),
             FallbackRules = profile.FallbackRules.Count > 0
                 ? CloneFallbackRules(profile.FallbackRules)
                 : CloneFallbackRules(defaults.FallbackRules),
@@ -127,4 +188,15 @@ public static class VirtualModelOptionsExtensions
             static pair => pair.Key,
             static pair => pair.Value.ToArray(),
             StringComparer.OrdinalIgnoreCase);
+
+    private static VirtualModelMemoryOptions? CloneMemory(VirtualModelMemoryOptions? options)
+        => options is null
+            ? null
+            : new VirtualModelMemoryOptions
+            {
+                Enabled = options.Enabled,
+                Scope = options.Scope,
+                Provider = options.Provider,
+                Collections = options.Collections.ToArray()
+            };
 }

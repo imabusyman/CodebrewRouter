@@ -45,4 +45,58 @@ public sealed class VirtualModelOptionsTests
         codebrewSharpClient.ContextCompaction!.TargetBudgetRatio.Should().Be(0.72d);
         codebrewSharpClient.ContextCompaction.PreserveMostRecentMessages.Should().Be(8);
     }
+
+    [Fact]
+    public void FindVirtualModel_ExposesAgenticCapabilitiesForToolsSkillsMcpAndMemory()
+    {
+        var options = new LlmGatewayOptions
+        {
+            CodebrewRouter = new CodebrewRouterOptions
+            {
+                ModelId = "codebrewRouter",
+                FallbackRules =
+                {
+                    ["General"] = ["LocalGemma"]
+                }
+            },
+            VirtualModels =
+            {
+                ["codebrewSharpClient"] = new VirtualModelOptions
+                {
+                    ModelId = "codebrewSharpClient",
+                    Extends = "codebrewRouter",
+                    AgentMode = "chat-client-agent",
+                    Workflow = "single",
+                    Capabilities = ["chat", "tools", "mcp", "skills", "memory"],
+                    ToolSupport = true,
+                    VisionSupport = false,
+                    CloudRequired = false,
+                    ContextWindow = 32768,
+                    McpServers = ["microsoft-learn"],
+                    Skills = ["awesome-copilot", "superpowers"],
+                    Memory = new VirtualModelMemoryOptions
+                    {
+                        Enabled = true,
+                        Scope = "developer+repo"
+                    }
+                }
+            }
+        };
+
+        var model = options.FindVirtualModel("codebrewSharpClient");
+
+        model.Should().NotBeNull();
+        model!.AgentMode.Should().Be("chat-client-agent");
+        model.Workflow.Should().Be("single");
+        model.Capabilities.Should().Contain(["chat", "tools", "mcp", "skills", "memory"]);
+        model.ToolSupport.Should().BeTrue();
+        model.VisionSupport.Should().BeFalse();
+        model.CloudRequired.Should().BeFalse();
+        model.ContextWindow.Should().Be(32768);
+        model.McpServers.Should().Equal("microsoft-learn");
+        model.Skills.Should().Equal("awesome-copilot", "superpowers");
+        model.Memory.Should().NotBeNull();
+        model.Memory!.Enabled.Should().BeTrue();
+        model.Memory.Scope.Should().Be("developer+repo");
+    }
 }

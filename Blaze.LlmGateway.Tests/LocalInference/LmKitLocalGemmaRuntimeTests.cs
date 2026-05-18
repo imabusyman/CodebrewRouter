@@ -188,6 +188,25 @@ public sealed class LmKitLocalGemmaRuntimeTests
     }
 
     [Fact]
+    public void BuildPromptWithHistory_FoldsPriorTurnsIntoPromptWithoutMutatingLmKitChatHistory()
+    {
+        var messages = new[]
+        {
+            new ChatMessage(ChatRole.System, "be concise"),
+            new ChatMessage(ChatRole.User, "first user turn"),
+            new ChatMessage(ChatRole.Assistant, "first assistant answer"),
+            new ChatMessage(ChatRole.User, "current user turn")
+        };
+
+        var prompt = LmKitLocalGemmaRuntime.BuildPromptWithHistory(messages);
+
+        prompt.Should().Contain("Conversation so far:");
+        prompt.Should().Contain("User: first user turn");
+        prompt.Should().Contain("Assistant: first assistant answer");
+        prompt.Should().EndWith("current user turn");
+    }
+
+    [Fact]
     public void BuildLoadFailureMessage_WhenNativeBackendRejectsTensorType_ErrorIsActionable()
     {
         var exception = new InvalidOperationException(

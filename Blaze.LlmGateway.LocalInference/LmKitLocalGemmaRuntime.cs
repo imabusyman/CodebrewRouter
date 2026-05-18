@@ -73,7 +73,7 @@ internal sealed class LmKitLocalGemmaRuntime : ILocalGemmaRuntime
             using var conversation = CreateConversation(messages);
             ConfigureConversation(conversation, messages, options);
 
-            var prompt = nonSystemMessages[^1].Text ?? string.Empty;
+            var prompt = BuildPromptWithHistory(messages);
             var updates = Channel.CreateUnbounded<ChatResponseUpdate>(new UnboundedChannelOptions
             {
                 SingleReader = true,
@@ -181,24 +181,41 @@ internal sealed class LmKitLocalGemmaRuntime : ILocalGemmaRuntime
     }
 
     private MultiTurnConversation CreateConversation(IReadOnlyList<ChatMessage> messages)
+        => new(_model, ResolveContextSize());
+
+    internal static string BuildPromptWithHistory(IReadOnlyList<ChatMessage> messages)
     {
+        var nonSystemMessages = messages.Where(message => message.Role != ChatRole.System).ToArray();
+        if (nonSystemMessages.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var currentPrompt = nonSystemMessages[^1].Text ?? string.Empty;
         var historyEntries = BuildSeededHistoryEntries(messages);
         if (historyEntries.Count == 0)
         {
-            return new MultiTurnConversation(_model, ResolveContextSize());
+            return currentPrompt;
         }
 
-        var chatHistory = new ChatHistory(_model);
+        var builder = new StringBuilder();
+        builder.AppendLine("Conversation so far:");
         foreach (var (role, content) in historyEntries)
         {
-            chatHistory.AddMessage(role, content);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                continue;
+            }
+
+            builder.Append(MapRoleLabel(role));
+            builder.Append(": ");
+            builder.AppendLine(content);
         }
 
-        return new MultiTurnConversation(
-            _model,
-            chatHistory,
-            ResolveContextSize(),
-            textGenerationSettings: null!);
+        builder.AppendLine();
+        builder.AppendLine("Current request:");
+        builder.Append(currentPrompt);
+        return builder.ToString();
     }
 
     internal static IReadOnlyList<(AuthorRole Role, string Content)> BuildSeededHistoryEntries(
@@ -218,6 +235,13 @@ internal sealed class LmKitLocalGemmaRuntime : ILocalGemmaRuntime
             : role == ChatRole.Tool
                 ? AuthorRole.Tool
                 : AuthorRole.User;
+
+    private static string MapRoleLabel(AuthorRole role)
+        => role == AuthorRole.Assistant
+            ? "Assistant"
+            : role == AuthorRole.Tool
+                ? "Tool"
+                : "User";
 
     internal static string BuildLoadFailureMessage(string modelPath, Exception ex)
     {

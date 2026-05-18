@@ -57,6 +57,21 @@ public class AppHostCompositionTests
     }
 
     [Fact]
+    public void OpenWebUi_UsesCurrentReleaseTagFromConfiguration()
+    {
+        var root = FindRepositoryRoot();
+        var source = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.AppHost", "AppHostComposition.cs"));
+        var appHostConfig = File.ReadAllText(Path.Combine(root, "Blaze.LlmGateway.AppHost", "appsettings.json"));
+        var readme = File.ReadAllText(Path.Combine(root, "README.md"));
+
+        const string openWebUiRelease = "v0.9.5";
+
+        Assert.Contains("DevUI:OpenWebUIImageTag", source);
+        Assert.Contains($"\"OpenWebUIImageTag\": \"{openWebUiRelease}\"", appHostConfig);
+        Assert.Contains($"ghcr.io/open-webui/open-webui:{openWebUiRelease}", readme);
+    }
+
+    [Fact]
     public void ServiceDefaults_ReadinessEndpointTreatsDegradedAsNotReady()
     {
         var root = FindRepositoryRoot();

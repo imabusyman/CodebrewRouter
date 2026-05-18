@@ -227,7 +227,8 @@ public static class ChatCompletionsEndpoint
                 await enumerator.DisposeAsync();
             }
 
-            if (httpContext.Response.HasStarted)
+            if (httpContext.Response.HasStarted ||
+                string.Equals(httpContext.Response.ContentType, "text/event-stream", StringComparison.OrdinalIgnoreCase))
             {
                 await httpContext.Response.WriteAsync("data: [DONE]\n\n", ct);
                 await httpContext.Response.Body.FlushAsync(ct);
@@ -361,7 +362,32 @@ public static class ChatCompletionsEndpoint
         ChatResponseUpdate update,
         CancellationToken cancellationToken)
     {
-        var choice = new { index = 0, delta = new { content = update.Text }, finish_reason = (string?)null };
+        var finishReason = update.FinishReason is null
+            ? null
+            : TranslateFinishReason(update.FinishReason);
+        var toolCalls = update.Contents
+            .OfType<FunctionCallContent>()
+            .Select((toolCall, index) => new
+            {
+                index,
+                id = string.IsNullOrWhiteSpace(toolCall.CallId) ? $"call_{index}" : toolCall.CallId,
+                type = "function",
+                function = new
+                {
+                    name = toolCall.Name,
+                    arguments = JsonSerializer.Serialize(toolCall.Arguments)
+                }
+            })
+            .ToArray();
+
+        object delta = toolCalls.Length > 0
+            ? new
+            {
+                content = string.IsNullOrEmpty(update.Text) ? null : update.Text,
+                tool_calls = toolCalls
+            }
+            : new { content = update.Text };
+        var choice = new { index = 0, delta, finish_reason = finishReason };
         var chunk = new { id, @object = "chat.completion.chunk", created, model, choices = new[] { choice } };
         var contentJson = JsonSerializer.Serialize(chunk);
         await httpContext.Response.WriteAsync($"data: {contentJson}\n\n", cancellationToken);
@@ -386,14 +412,24 @@ public static class ChatCompletionsEndpoint
 
         if (message.ToolCalls is not { Count: > 0 } && string.IsNullOrWhiteSpace(message.ToolCallId))
         {
-            return new ChatMessage(role, content)
-            {
-                AuthorName = message.Name
-            };
+            var simpleContents = ToAiContents(message);
+            return simpleContents.Count > 0
+                ? new ChatMessage(role, simpleContents)
+                {
+                    AuthorName = message.Name
+                }
+                : new ChatMessage(role, content)
+                {
+                    AuthorName = message.Name
+                };
         }
 
         var contents = new List<AIContent>();
-        if (!string.IsNullOrEmpty(content) && role != ChatRole.Tool)
+        if (role != ChatRole.Tool)
+        {
+            contents.AddRange(ToAiContents(message));
+        }
+        else if (!string.IsNullOrWhiteSpace(content) && string.IsNullOrWhiteSpace(message.ToolCallId))
         {
             contents.Add(new TextContent(content));
         }
@@ -422,6 +458,66 @@ public static class ChatCompletionsEndpoint
         return new ChatMessage(role, contents)
         {
             AuthorName = message.Name
+        };
+    }
+
+    private static List<AIContent> ToAiContents(ChatMessageDto message)
+    {
+        var contents = new List<AIContent>();
+
+        if (message.ContentParts is { Count: > 0 })
+        {
+            foreach (var part in message.ContentParts)
+            {
+                if (!string.IsNullOrEmpty(part.Text))
+                {
+                    contents.Add(new TextContent(part.Text));
+                }
+
+                if (!string.IsNullOrWhiteSpace(part.ImageUrl))
+                {
+                    contents.Add(ToImageContent(part.ImageUrl, part.MediaType));
+                }
+            }
+        }
+        else if (!string.IsNullOrEmpty(message.Content))
+        {
+            contents.Add(new TextContent(message.Content));
+        }
+
+        return contents;
+    }
+
+    private static AIContent ToImageContent(string imageUrl, string? mediaType)
+    {
+        var resolvedMediaType = string.IsNullOrWhiteSpace(mediaType)
+            ? InferMediaType(imageUrl)
+            : mediaType;
+
+        return imageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+            ? new DataContent(new Uri(imageUrl), resolvedMediaType)
+            : new UriContent(new Uri(imageUrl), resolvedMediaType);
+    }
+
+    private static string InferMediaType(string uri)
+    {
+        if (uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+        {
+            var separator = uri.IndexOf(';');
+            return separator > "data:".Length
+                ? uri["data:".Length..separator]
+                : "application/octet-stream";
+        }
+
+        var withoutQuery = uri.Split('?', '#')[0];
+        return Path.GetExtension(withoutQuery).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".bmp" => "image/bmp",
+            _ => "image/*"
         };
     }
 

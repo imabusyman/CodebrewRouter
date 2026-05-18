@@ -22,15 +22,29 @@ public static class ModelsEndpoint
             : await modelCatalog.GetAvailableModelsAsync(cancellationToken);
 
         var models = sourceModels
-            .Select(model => new ModelInfo(
-                Id: model.Id,
-                Object: "model",
-                Provider: model.Provider,
-                OwnedBy: model.OwnedBy,
-                Source: model.Source,
-                Extends: options.Value.FindVirtualModel(model.Id)?.Extends,
-                Enabled: model.Enabled,
-                ErrorMessage: model.ErrorMessage))
+            .Select(model =>
+            {
+                var virtualModel = options.Value.FindVirtualModel(model.Id);
+                return new ModelInfo(
+                    Id: model.Id,
+                    Object: "model",
+                    Provider: model.Provider,
+                    OwnedBy: model.OwnedBy,
+                    Source: model.Source,
+                    Extends: virtualModel?.Extends,
+                    Enabled: model.Enabled,
+                    ErrorMessage: model.ErrorMessage,
+                    AgentMode: virtualModel?.AgentMode,
+                    Workflow: virtualModel?.Workflow,
+                    Capabilities: virtualModel?.Capabilities,
+                    ToolSupport: virtualModel?.ToolSupport ?? false,
+                    VisionSupport: virtualModel?.VisionSupport ?? false,
+                    CloudRequired: virtualModel?.CloudRequired ?? false,
+                    ContextWindow: virtualModel?.ContextWindow,
+                    McpServers: virtualModel?.McpServers,
+                    Skills: virtualModel?.Skills,
+                    Memory: ToMemoryInfo(virtualModel?.Memory));
+            })
             .ToList();
 
         var response = new ModelsResponse(
@@ -117,7 +131,17 @@ public static class ModelsEndpoint
             Enabled: availability?.Enabled ?? false,
             ErrorMessage: availability?.ErrorMessage,
             BackingModels: backingModels,
-            FallbackRules: fallbackRules);
+            FallbackRules: fallbackRules,
+            AgentMode: virtualModel.AgentMode,
+            Workflow: virtualModel.Workflow,
+            Capabilities: virtualModel.Capabilities,
+            ToolSupport: virtualModel.ToolSupport,
+            VisionSupport: virtualModel.VisionSupport,
+            CloudRequired: virtualModel.CloudRequired,
+            ContextWindow: virtualModel.ContextWindow,
+            McpServers: virtualModel.McpServers,
+            Skills: virtualModel.Skills,
+            Memory: ToMemoryInfo(virtualModel.Memory));
 
         return Results.Json(response);
     }
@@ -131,6 +155,15 @@ public static class ModelsEndpoint
             ? effectiveProviders.Where(provider => string.Equals(provider, "LocalGemma", StringComparison.OrdinalIgnoreCase))
             : effectiveProviders;
     }
+
+    private static VirtualModelMemoryInfo? ToMemoryInfo(VirtualModelMemoryOptions? memory)
+        => memory is null
+            ? null
+            : new VirtualModelMemoryInfo(
+                Enabled: memory.Enabled,
+                Scope: memory.Scope,
+                Provider: memory.Provider,
+                Collections: memory.Collections);
 
     /// <summary>Handle full model/provider diagnostics requests.</summary>
     public static IResult HandleDiagnosticsAsync(ModelAvailabilityRegistry registry)

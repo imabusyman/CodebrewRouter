@@ -85,7 +85,11 @@ public record ChatCompletionRequest(
     [property: JsonPropertyName("parallel_tool_calls")]
     bool? ParallelToolCalls = null,
     [property: JsonPropertyName("reasoning_effort")]
-    string? ReasoningEffort = null);
+    string? ReasoningEffort = null,
+    [property: JsonPropertyName("metadata")]
+    IDictionary<string, string>? Metadata = null,
+    [property: JsonPropertyName("store")]
+    bool? Store = null);
 
 /// <summary>Chat message DTO for requests</summary>
 [JsonConverter(typeof(ChatMessageContentConverter))]
@@ -99,7 +103,19 @@ public record ChatMessageDto(
     [property: JsonPropertyName("tool_call_id")]
     string? ToolCallId = null,
     [property: JsonPropertyName("tool_calls")]
-    IList<ToolCallDto>? ToolCalls = null);
+    IList<ToolCallDto>? ToolCalls = null,
+    [property: JsonIgnore]
+    IList<ChatContentPart>? ContentParts = null);
+
+/// <summary>OpenAI-compatible multimodal content part preserved from message content arrays.</summary>
+public record ChatContentPart(
+    string Type,
+    string? Text = null,
+    string? ImageUrl = null,
+    string? Detail = null,
+    string? MediaType = null,
+    string? FileId = null,
+    string? FileName = null);
 
 /// <summary>Tool call emitted by an assistant message.</summary>
 public record ToolCallDto(
@@ -234,7 +250,23 @@ public record ModelInfo(
     string? Source = null,
     string? Extends = null,
     bool Enabled = true,
-    string? ErrorMessage = null);
+    string? ErrorMessage = null,
+    string? AgentMode = null,
+    string? Workflow = null,
+    IList<string>? Capabilities = null,
+    bool ToolSupport = false,
+    bool VisionSupport = false,
+    bool CloudRequired = false,
+    int? ContextWindow = null,
+    IList<string>? McpServers = null,
+    IList<string>? Skills = null,
+    VirtualModelMemoryInfo? Memory = null);
+
+public record VirtualModelMemoryInfo(
+    bool Enabled,
+    string Scope,
+    string? Provider = null,
+    IList<string>? Collections = null);
 
 /// <summary>Full diagnostics for configured model/provider connectivity.</summary>
 public record ModelDiagnosticsResponse(
@@ -272,7 +304,17 @@ public record CodebrewRouterModelsResponse(
     bool Enabled,
     string? ErrorMessage,
     IList<CodebrewRouterBackingModel> BackingModels,
-    IList<CodebrewRouterFallbackRule> FallbackRules);
+    IList<CodebrewRouterFallbackRule> FallbackRules,
+    string? AgentMode = null,
+    string? Workflow = null,
+    IList<string>? Capabilities = null,
+    bool ToolSupport = false,
+    bool VisionSupport = false,
+    bool CloudRequired = false,
+    int? ContextWindow = null,
+    IList<string>? McpServers = null,
+    IList<string>? Skills = null,
+    VirtualModelMemoryInfo? Memory = null);
 
 /// <summary>Concrete provider model that can back the CodebrewRouter virtual model.</summary>
 public record CodebrewRouterBackingModel(

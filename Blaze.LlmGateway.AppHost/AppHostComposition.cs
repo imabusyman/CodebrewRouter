@@ -103,12 +103,13 @@ public static class AppHostComposition
 
 
         var enableOpenWebUi = builder.Configuration.GetValue("DevUI:OpenWebUI", defaultValue: true);
+        var openWebUiImageTag = builder.Configuration.GetValue("DevUI:OpenWebUIImageTag", "v0.9.5");
 
         if (enableOpenWebUi)
         {
-            aspireLogger.LogInformation("  ├─ Open WebUI: enabled (requires Docker Desktop)");
+            aspireLogger.LogInformation("  ├─ Open WebUI: enabled (requires Docker Desktop), image tag {ImageTag}", openWebUiImageTag);
 
-            _ = builder.AddContainer("openwebui", "ghcr.io/open-webui/open-webui", "v0.9.2")
+            _ = builder.AddContainer("openwebui", "ghcr.io/open-webui/open-webui", openWebUiImageTag)
                 .WithHttpEndpoint(port: 8080, targetPort: 8080, name: "http")
                 .WithVolume("blaze-openwebui-data", "/app/backend/data")
                 .WithEnvironment("WEBUI_AUTH", "False")
