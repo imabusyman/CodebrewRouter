@@ -194,7 +194,7 @@ public sealed class CodebrewRouterChatClient(
             Log(new RouterTryEvent(i + 1, providers.Length, key, model, taskType.ToString()));
 
             var chunkSw = System.Diagnostics.Stopwatch.StartNew();
-            var result = await TryGetFirstChunkAsync(client, providerMessages, options, cancellationToken);
+            var result = await TryGetFirstChunkWithVisibleRecoveryAsync(client, providerMessages, options, cancellationToken);
             chunkSw.Stop();
 
             Log(new RouterProbeEvent(i + 1, key, model, chunkSw.ElapsedMilliseconds, result.Success));
@@ -270,7 +270,7 @@ public sealed class CodebrewRouterChatClient(
 
         var innerMessages = await PrepareMessagesForProviderAsync(providers.Length + 1, "LmStudio", cleanedMessages, activeOptions, options, cancellationToken)
             ?? cleanedMessages;
-        var innerResult = await TryGetFirstChunkAsync(InnerClient, innerMessages, options, cancellationToken);
+        var innerResult = await TryGetFirstChunkWithVisibleRecoveryAsync(InnerClient, innerMessages, options, cancellationToken);
         if (!innerResult.Success)
         {
             var innerReason = innerResult.FailureReason ?? "InnerClient probe failed";
@@ -520,6 +520,47 @@ public sealed class CodebrewRouterChatClient(
             await enumerator.DisposeAsync();
             return FirstChunkResult.Failed(ex.GetBaseException().Message);
         }
+    }
+
+    private static async Task<FirstChunkResult> TryGetFirstChunkWithVisibleRecoveryAsync(
+        IChatClient client,
+        IList<ChatMessage> messages,
+        ChatOptions? options,
+        CancellationToken ct)
+    {
+        var result = await TryGetFirstChunkAsync(client, messages, options, ct);
+        if (result.Success || !result.IsEmptyCompletion)
+        {
+            return result;
+        }
+
+        var retryMessages = BuildVisibleResponseRetryMessages(messages);
+        return await TryGetFirstChunkAsync(client, retryMessages, options, ct);
+    }
+
+    private static IList<ChatMessage> BuildVisibleResponseRetryMessages(IList<ChatMessage> messages)
+    {
+        const string instruction =
+            "Your previous generation produced no visible assistant text after hidden reasoning was removed. " +
+            "Produce only the final visible answer for the user's latest request. " +
+            "Do not include a thinking process, analysis, scratchpad, hidden reasoning, or channel markers.";
+
+        var retryMessages = new List<ChatMessage>(messages.Count + 1);
+        var index = 0;
+        while (index < messages.Count && messages[index].Role == ChatRole.System)
+        {
+            retryMessages.Add(messages[index]);
+            index++;
+        }
+
+        retryMessages.Add(new ChatMessage(ChatRole.System, instruction));
+
+        for (; index < messages.Count; index++)
+        {
+            retryMessages.Add(messages[index]);
+        }
+
+        return retryMessages;
     }
 
     private string BuildProviderUnavailableMessage(

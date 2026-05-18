@@ -105,6 +105,62 @@ public sealed class CodebrewRouterOfflineTests
     }
 
     [Fact]
+    public async Task Streaming_WhenPlannerProviderFirstEmitsNoVisibleChunks_RetriesWithFinalAnswerInstruction()
+    {
+        var provider = new EmptyThenVisibleStreamingChatClient("Planner result.");
+        var services = new ServiceCollection();
+        services.AddKeyedSingleton<IChatClient>("LocalGemma", provider);
+        var serviceProvider = services.BuildServiceProvider();
+
+        var routerOptions = new CodebrewRouterOptions
+        {
+            ModelId = "codebrewRouter",
+            FallbackRules = new Dictionary<string, string[]>
+            {
+                ["General"] = ["LocalGemma"]
+            }
+        };
+
+        var client = new CodebrewRouterChatClient(
+            new ThrowingChatClient("No currently available backing provider is available for codebrewRouter."),
+            new FixedTaskClassifier(TaskType.General),
+            new NoopPromptCleaner(),
+            new NoopContextCompactor(),
+            new FixedTokenCounter(),
+            Options.Create(routerOptions),
+            Options.Create(new LlmGatewayOptions
+            {
+                OfflineOnly = true,
+                CodebrewRouter = routerOptions,
+                VirtualModels =
+                {
+                    ["codebrewPlanner"] = new VirtualModelOptions
+                    {
+                        ModelId = "codebrewPlanner",
+                        Extends = "codebrewRouter",
+                        SystemPrompt = "Return only the final useful plan."
+                    }
+                }
+            }),
+            new AlwaysAvailableRegistry(),
+            serviceProvider,
+            NullLogger<CodebrewRouterChatClient>.Instance);
+
+        var chunks = new List<string>();
+        await foreach (var update in client.GetStreamingResponseAsync(
+                           [new ChatMessage(ChatRole.User, "make a plan")],
+                           new ChatOptions { ModelId = "codebrewPlanner" }))
+        {
+            chunks.Add(update.Text ?? string.Empty);
+        }
+
+        string.Concat(chunks).Should().Be("Planner result.");
+        provider.Requests.Should().HaveCount(2);
+        provider.Requests[1].Select(message => message.Text ?? string.Empty)
+            .Should().Contain(text => text.Contains("final visible answer", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task AvailabilitySeed_WhenLocalGemmaModelPathMissing_DisablesCodebrewRouterWithSpecificReason()
     {
         var services = new ServiceCollection();
@@ -367,6 +423,47 @@ public sealed class CodebrewRouterOfflineTests
         {
             await Task.Yield();
             yield break;
+        }
+
+        public object? GetService(Type serviceType, object? serviceKey = null) => null;
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class EmptyThenVisibleStreamingChatClient(string visibleText) : IChatClient
+    {
+        public List<IReadOnlyList<ChatMessage>> Requests { get; } = [];
+
+        public Task<ChatResponse> GetResponseAsync(
+            IEnumerable<ChatMessage> chatMessages,
+            ChatOptions? options = null,
+            CancellationToken cancellationToken = default)
+        {
+            Requests.Add(chatMessages.ToList());
+            var text = Requests.Count == 1 ? string.Empty : visibleText;
+            return Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, text))
+            {
+                FinishReason = ChatFinishReason.Stop
+            });
+        }
+
+        public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
+            IEnumerable<ChatMessage> chatMessages,
+            ChatOptions? options = null,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            Requests.Add(chatMessages.ToList());
+            await Task.Yield();
+
+            if (Requests.Count > 1)
+            {
+                yield return new ChatResponseUpdate(ChatRole.Assistant, visibleText)
+                {
+                    FinishReason = ChatFinishReason.Stop
+                };
+            }
         }
 
         public object? GetService(Type serviceType, object? serviceKey = null) => null;
